@@ -1,0 +1,34 @@
+### ===============================  Подключение ===============================
+
+
+### Auth - Авторизация, часть 1. Получение JWT по секрету.
+POST https://api.finam.ru/v1/sessions
+Content-Type: application/json
+Accept: application/json
+
+{
+  "secret": "{{secret}}"
+}
+
+> {% client.global.set("jwt", response.body.token); %}
+
+### Далее можно использовать JWT для авторизации
+
+### TokenDetails - Получение информации о токене сессии
+POST https://api.finam.ru/v1/sessions/details
+Content-Type: application/json
+Accept: application/json
+
+{
+  "token": "{{jwt}}"
+}
+
+### =================================  Счета ===================================
+
+### GetAccount - Получение информации по конкретному аккаунту
+GET https://api.finam.ru/v1/accounts/{{account_id}}
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+
