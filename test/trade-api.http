@@ -1,7 +1,7 @@
 ### ===============================  Подключение ===============================
 
-
 ### Auth - Авторизация, часть 1. Получение JWT по секрету.
+# @name auth
 POST https://api.finam.ru/v1/sessions
 Content-Type: application/json
 Accept: application/json
@@ -11,8 +11,6 @@ Accept: application/json
 }
 
 > {% client.global.set("jwt", response.body.token); %}
-
-### Далее можно использовать JWT для авторизации
 
 ### TokenDetails - Получение информации о токене сессии
 POST https://api.finam.ru/v1/sessions/details
@@ -25,10 +23,439 @@ Accept: application/json
 
 ### =================================  Счета ===================================
 
-### GetAccount - Получение информации по конкретному аккаунту
+### ❌  GetAccount - Получение информации по конкретному аккаунту
 GET https://api.finam.ru/v1/accounts/{{account_id}}
 Content-Type: application/json
 Accept: application/json
 Authorization: {{jwt}}
 
 
+### Trades - Получение истории по сделкам аккаунта
+GET https://api.finam.ru/v1/accounts/{{account_id}}/trades?interval.start_time=2025-01-01T00:00:00Z&interval.end_time=2025-03-15T00:00:00Z
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+
+### Transactions - Получение списка транзакций аккаунта
+GET https://api.finam.ru/v1/accounts/{{account_id}}/transactions?interval.start_time=2025-01-01T00:00:00Z&interval.end_time=2025-03-15T00:00:00Z
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+
+### ==============================  Инструменты ================================
+
+
+### Assets - Получение списка доступных инструментов, их описание
+GET https://api.finam.ru/v1/assets
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+
+### Clock - Получение времени на сервере
+GET https://api.finam.ru/v1/assets/clock
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+
+### Exchanges - Получение списка доступных бирж, названия и mic коды
+GET https://api.finam.ru/v1/exchanges
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+
+### GetAsset - Получение информации по конкретному инструменту
+GET https://api.finam.ru/v1/assets/{{symbol}}?account_id={{account_id}}
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+
+### GetAsset - Пример с конкретным инструментом SBER@MISX
+GET https://api.finam.ru/v1/assets/SBER@MISX?account_id={{account_id}}
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+
+### GetAssetParams - Получение торговых параметров по инструменту
+GET https://api.finam.ru/v1/assets/{{symbol}}/params?account_id={{account_id}}
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+
+### GetAssetParams - Пример с конкретным инструментом SBER@MISX
+GET https://api.finam.ru/v1/assets/SBER@MISX/params?account_id={{account_id}}
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+
+### OptionsChain - Получение цепочки опционов для базового актива
+GET https://api.finam.ru/v1/assets/{{symbol}}/options
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+
+### OptionsChain - Пример с конкретным инструментом YDEX@MISX
+GET https://api.finam.ru/v1/assets/YDEX@MISX/options
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+
+### Schedule - Получение расписания торгов для инструмента
+GET https://api.finam.ru/v1/assets/{{symbol}}/schedule
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+
+### Schedule - Пример с конкретным инструментом YDEX@MISX
+GET https://api.finam.ru/v1/assets/YDEX@MISX/schedule
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+
+### =================================  Заявки ==================================
+
+
+### ❌ PlaceOrder - Размещение заявки
+POST https://api.finam.ru/v1/accounts/{{account_id}}/orders
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+{
+  "symbol": "AFLT@MISX",
+  "quantity": {
+    "value": "1.0"
+  },
+  "side": "SIDE_BUY",
+  "type": "ORDER_TYPE_LIMIT",
+  "timeInForce": "TIME_IN_FORCE_DAY",
+  "limitPrice": {
+    "value": "60.0"
+  },
+  "stopCondition": "STOP_CONDITION_UNSPECIFIED",
+  "legs": [],
+  "clientOrderId": "test order 004"
+}
+
+> {%
+  if (response.body.order_id) {
+    client.global.set("order_id", response.body.order_id);
+  }
+%}
+
+
+### ❌ PlaceOrder - Пример заявки на продажу
+POST https://api.finam.ru/v1/accounts/{{account_id}}/orders
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+{
+  "symbol": "SBER@MISX",
+  "quantity": {
+    "value": "5.0"
+  },
+  "side": "SIDE_SELL",
+  "type": "ORDER_TYPE_LIMIT",
+  "timeInForce": "TIME_IN_FORCE_DAY",
+  "limitPrice": {
+    "value": "280.0"
+  },
+  "stopCondition": "STOP_CONDITION_UNSPECIFIED",
+  "legs": [],
+  "clientOrderId": "test sell 005"
+}
+
+
+### ❌ PlaceOrder - Рыночная заявка
+POST https://api.finam.ru/v1/accounts/{{account_id}}/orders
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+{
+  "symbol": "YDEX@MISX",
+  "quantity": {
+    "value": "1.0"
+  },
+  "side": "SIDE_BUY",
+  "type": "ORDER_TYPE_MARKET",
+  "timeInForce": "TIME_IN_FORCE_DAY",
+  "stopCondition": "STOP_CONDITION_UNSPECIFIED",
+  "legs": [],
+  "clientOrderId": "test market 003"
+}
+
+
+### ❌ PlaceOrder - Стоп-заявка
+POST https://api.finam.ru/v1/accounts/{{account_id}}/orders
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+{
+  "symbol": "GAZP@MISX",
+  "quantity": {
+    "value": "10.0"
+  },
+  "side": "SIDE_SELL",
+  "type": "ORDER_TYPE_STOP",
+  "timeInForce": "TIME_IN_FORCE_DAY",
+  "stopPrice": {
+    "value": "150.0"
+  },
+  "stopCondition": "STOP_CONDITION_UNSPECIFIED",
+  "legs": [],
+  "clientOrderId": "test_stop_001"
+}
+
+
+### ❌ PlaceOrder - Стоп-лимит заявка
+POST https://api.finam.ru/v1/accounts/{{account_id}}/orders
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+{
+  "symbol": "LKOH@MISX",
+  "quantity": {
+    "value": "2.0"
+  },
+  "side": "SIDE_BUY",
+  "type": "ORDER_TYPE_STOP_LIMIT",
+  "timeInForce": "TIME_IN_FORCE_DAY",
+  "limitPrice": {
+    "value": "7000.0"
+  },
+  "stopPrice": {
+    "value": "6950.0"
+  },
+  "stopCondition": "STOP_CONDITION_LESS_OR_EQUAL",
+  "legs": [],
+  "clientOrderId": "test_stop_limit_001"
+}
+
+
+### GetOrders - Получение списка заявок
+GET https://api.finam.ru/v1/accounts/{{account_id}}/orders
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+
+### GetOrder - Получение информации по конкретной заявке
+GET https://api.finam.ru/v1/accounts/{{account_id}}/orders/{{order_id}}
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+
+### CancelOrder - Отмена заявки
+DELETE https://api.finam.ru/v1/accounts/{{account_id}}/orders/{{order_id}}
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+
+### ============================  Рыночные данные ==============================
+
+
+### Bars - Получение исторических данных (свечи)
+GET https://api.finam.ru/v1/instruments/{{symbol}}/bars?interval.start_time=2025-03-01T00:00:00Z&interval.end_time=2025-03-15T00:00:00Z&timeframe=TIME_FRAME_D
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+
+### Bars - Пример для YDEX@MISX с дневными свечами
+GET https://api.finam.ru/v1/instruments/YDEX@MISX/bars?interval.start_time=2025-03-01T00:00:00Z&interval.end_time=2025-03-15T00:00:00Z&timeframe=TIME_FRAME_D
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+
+### Bars - Пример с часовыми свечами
+GET https://api.finam.ru/v1/instruments/SBER@MISX/bars?interval.start_time=2025-03-14T09:00:00Z&interval.end_time=2025-03-14T18:00:00Z&timeframe=TIME_FRAME_H1
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+
+### Bars - Пример с минутными свечами
+GET https://api.finam.ru/v1/instruments/GAZP@MISX/bars?interval.start_time=2025-03-14T10:00:00Z&interval.end_time=2025-03-14T11:00:00Z&timeframe=TIME_FRAME_M1
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+
+### Bars - Пример с 5-минутными свечами
+GET https://api.finam.ru/v1/instruments/LKOH@MISX/bars?interval.start_time=2025-03-14T12:00:00Z&interval.end_time=2025-03-14T15:00:00Z&timeframe=TIME_FRAME_M5
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+
+### Bars - Пример с 15-минутными свечами
+GET https://api.finam.ru/v1/instruments/ROSN@MISX/bars?interval.start_time=2025-03-14T09:00:00Z&interval.end_time=2025-03-14T18:00:00Z&timeframe=TIME_FRAME_M15
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+
+### LastQuote - Получение последней котировки
+GET https://api.finam.ru/v1/instruments/{{symbol}}/quotes/latest
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+
+### LastQuote - Пример для YDEX@MISX
+GET https://api.finam.ru/v1/instruments/YDEX@MISX/quotes/latest
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+
+### LastQuote - Пример для SBER@MISX
+GET https://api.finam.ru/v1/instruments/SBER@MISX/quotes/latest
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+
+### LatestTrades - Получение последних сделок
+GET https://api.finam.ru/v1/instruments/{{symbol}}/trades/latest
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+
+### LatestTrades - Пример для YDEX@MISX
+GET https://api.finam.ru/v1/instruments/YDEX@MISX/trades/latest
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+
+### LatestTrades - Пример для GAZP@MISX
+GET https://api.finam.ru/v1/instruments/GAZP@MISX/trades/latest
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+
+### OrderBook - Получение стакана заявок
+GET https://api.finam.ru/v1/instruments/{{symbol}}/orderbook
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+
+### OrderBook - Пример для YDEX@MISX
+GET https://api.finam.ru/v1/instruments/YDEX@MISX/orderbook
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+
+### OrderBook - Пример для SBER@MISX
+GET https://api.finam.ru/v1/instruments/SBER@MISX/orderbook
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+
+### OrderBook - Пример для LKOH@MISX
+GET https://api.finam.ru/v1/instruments/LKOH@MISX/orderbook
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+
+### ================================  Портфель =================================
+
+
+### GetPortfolio - Получение состояния портфеля
+GET https://api.finam.ru/v1/accounts/{{account_id}}/portfolio
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+
+### GetPositions - Получение открытых позиций
+GET https://api.finam.ru/v1/accounts/{{account_id}}/positions
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+
+### GetCash - Получение денежных средств
+GET https://api.finam.ru/v1/accounts/{{account_id}}/cash
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+
+### GetMarginInfo - Получение информации о марже
+GET https://api.finam.ru/v1/accounts/{{account_id}}/margin
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+
+### =======================================================================
+### Переменные для тестирования (настроить перед использованием)
+### =======================================================================
+### Переменные должны быть настроены в вашем HTTP-клиенте или в файле .env:
+### - secret: Ваш secret token от FINAM Trade API
+### - account_id: Ваш номер счета (без префикса КлФ)
+### - jwt: JWT токен (автоматически устанавливается после вызова Auth)
+### - order_id: ID заявки (автоматически устанавливается после размещения заявки)
+### - symbol: Символ инструмента в формате TICKER@MIC (например, SBER@MISX)
+###
+### Примеры символов:
+### - SBER@MISX - Сбербанк
+### - GAZP@MISX - Газпром
+### - LKOH@MISX - Лукойл
+### - YDEX@MISX - Яндекс
+### - AFLT@MISX - Аэрофлот
+### - ROSN@MISX - Роснефть
+###
+### Типы заявок:
+### - ORDER_TYPE_LIMIT - Лимитная заявка
+### - ORDER_TYPE_MARKET - Рыночная заявка
+### - ORDER_TYPE_STOP - Стоп-заявка
+### - ORDER_TYPE_STOP_LIMIT - Стоп-лимит заявка
+###
+### Направления сделки:
+### - SIDE_BUY - Покупка
+### - SIDE_SELL - Продажа
+###
+### Время действия заявки:
+### - TIME_IN_FORCE_DAY - До конца торгового дня
+### - TIME_IN_FORCE_GTC - До отмены (Good Till Cancelled)
+### - TIME_IN_FORCE_IOC - Немедленно или отменить (Immediate Or Cancel)
+### - TIME_IN_FORCE_FOK - Исполнить полностью или отменить (Fill Or Kill)
+###
+### Таймфреймы для свечей:
+### - TIME_FRAME_M1 - 1 минута
+### - TIME_FRAME_M5 - 5 минут
+### - TIME_FRAME_M15 - 15 минут
+### - TIME_FRAME_M30 - 30 минут
+### - TIME_FRAME_H1 - 1 час
+### - TIME_FRAME_H4 - 4 часа
+### - TIME_FRAME_D - День
+### - TIME_FRAME_W - Неделя
+### - TIME_FRAME_M - Месяц
