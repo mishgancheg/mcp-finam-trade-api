@@ -17,3 +17,4 @@ _tmp
 /test/data/
 /dist/
 *.private.*
+*.local.*
