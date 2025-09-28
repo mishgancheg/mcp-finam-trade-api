@@ -36,8 +36,7 @@
     "type": "git",
     "url": "https://github.com/mishgancheg/mcp-finam-trade-api.git"
   },
-  "dependencies": {},
   "devDependencies": {
-    "typescript": "^5.5.3"
+    "typescript": "^5.9.2"
   }
 }
