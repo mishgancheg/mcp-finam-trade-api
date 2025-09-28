@@ -13,6 +13,7 @@ yarn-error.log*
 /.idea
 
 .env
+_tmp
 /test/data/
 /dist/
 *.private.*

@@ -1,0 +1,753 @@
+{
+	"info": {
+		"_postman_id": "72183b1b-4f72-4893-be32-9a1d3cd2da14",
+		"name": "REST API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "2326031",
+		"_collection_link": "https://www.postman.com/emil-7238890/f-api-public-workspace/collection/fqyeval/rest-api?action=share&source=collection_link&creator=2326031"
+	},
+	"item": [
+		{
+			"name": "Подключение",
+			"item": [
+				{
+					"name": "Auth",
+					"protocolProfileBehavior": {
+						"protocolVersion": "http2"
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"secret\": \"secret token сгенерированный на нашем портале\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://api.finam.ru/v1/sessions",
+							"protocol": "https",
+							"host": [
+								"api",
+								"finam",
+								"ru"
+							],
+							"path": [
+								"v1",
+								"sessions"
+							]
+						},
+						"description": "**какие поля заполнить:**  \nв Body secret - токен сгенерированный на портале"
+					},
+					"response": []
+				},
+				{
+					"name": "TokenDetails",
+					"protocolProfileBehavior": {
+						"protocolVersion": "http2"
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"token\": \"jwt-token сгенерированный из Secret token методом Auth\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://api.finam.ru/v1/sessions/details/",
+							"protocol": "https",
+							"host": [
+								"api",
+								"finam",
+								"ru"
+							],
+							"path": [
+								"v1",
+								"sessions",
+								"details",
+								""
+							]
+						},
+						"description": "**какие поля заполнить:**  \nв Body \"token\" - jwt-token сгенерированный из Secret token методом Auth"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Счета",
+			"item": [
+				{
+					"name": "GetAccount",
+					"protocolProfileBehavior": {
+						"protocolVersion": "http2"
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "jwt-token",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.finam.ru/v1/accounts/account_id",
+							"protocol": "https",
+							"host": [
+								"api",
+								"finam",
+								"ru"
+							],
+							"path": [
+								"v1",
+								"accounts",
+								"account_id"
+							]
+						},
+						"description": "**какие поля заполнить:**  \nв запросе account_id - ваш номер счета  \nв Headers - ваш jwt-token"
+					},
+					"response": []
+				},
+				{
+					"name": "Trades",
+					"protocolProfileBehavior": {
+						"protocolVersion": "http2"
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "jwt-token",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.finam.ru/v1/accounts/account_id/trades?interval.start_time=2025-01-01T00:00:00Z&interval.end_time=2025-03-15T00:00:00Z",
+							"protocol": "https",
+							"host": [
+								"api",
+								"finam",
+								"ru"
+							],
+							"path": [
+								"v1",
+								"accounts",
+								"account_id",
+								"trades"
+							],
+							"query": [
+								{
+									"key": "interval.start_time",
+									"value": "2025-01-01T00:00:00Z"
+								},
+								{
+									"key": "interval.end_time",
+									"value": "2025-03-15T00:00:00Z"
+								}
+							]
+						},
+						"description": "**какие поля заполнить:**  \nв запросе account_id - ваш номер счета  \nв Headers - ваш jwt-token"
+					},
+					"response": []
+				},
+				{
+					"name": "Transactions",
+					"protocolProfileBehavior": {
+						"protocolVersion": "http2"
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "jwt-token",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.finam.ru/v1/accounts/account_id/transactions?interval.start_time=2025-01-01T00:00:00Z&interval.end_time=2025-03-15T00:00:00Z",
+							"protocol": "https",
+							"host": [
+								"api",
+								"finam",
+								"ru"
+							],
+							"path": [
+								"v1",
+								"accounts",
+								"account_id",
+								"transactions"
+							],
+							"query": [
+								{
+									"key": "interval.start_time",
+									"value": "2025-01-01T00:00:00Z"
+								},
+								{
+									"key": "interval.end_time",
+									"value": "2025-03-15T00:00:00Z"
+								}
+							]
+						},
+						"description": "**какие поля заполнить:**  \nв запросе account_id - ваш номер счета  \nв Headers - ваш jwt-token"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Инструменты",
+			"item": [
+				{
+					"name": "Assets",
+					"protocolProfileBehavior": {
+						"protocolVersion": "http2"
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "jwt-token",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.finam.ru/v1/assets",
+							"protocol": "https",
+							"host": [
+								"api",
+								"finam",
+								"ru"
+							],
+							"path": [
+								"v1",
+								"assets"
+							]
+						},
+						"description": "**какие поля заполнить:**  \nв Headers - ваш jwt-token"
+					},
+					"response": []
+				},
+				{
+					"name": "Clock",
+					"protocolProfileBehavior": {
+						"protocolVersion": "http2"
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "jwt_token",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.finam.ru/v1/assets/clock",
+							"protocol": "https",
+							"host": [
+								"api",
+								"finam",
+								"ru"
+							],
+							"path": [
+								"v1",
+								"assets",
+								"clock"
+							]
+						},
+						"description": "**какие поля заполнить:**  \nв Headers - ваш jwt-token"
+					},
+					"response": []
+				},
+				{
+					"name": "Exchanges",
+					"protocolProfileBehavior": {
+						"protocolVersion": "http2"
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "jwt-token",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.finam.ru/v1/exchanges",
+							"protocol": "https",
+							"host": [
+								"api",
+								"finam",
+								"ru"
+							],
+							"path": [
+								"v1",
+								"exchanges"
+							]
+						},
+						"description": "**какие поля заполнить:**  \nв Headers - ваш jwt-token"
+					},
+					"response": []
+				},
+				{
+					"name": "GetAsset",
+					"protocolProfileBehavior": {
+						"protocolVersion": "http2"
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "jwt-token",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.finam.ru/v1/assets/SBER@MISX/?account_id=account_id",
+							"protocol": "https",
+							"host": [
+								"api",
+								"finam",
+								"ru"
+							],
+							"path": [
+								"v1",
+								"assets",
+								"SBER@MISX",
+								""
+							],
+							"query": [
+								{
+									"key": "account_id",
+									"value": "account_id"
+								}
+							]
+						},
+						"description": "**какие поля заполнить:**  \nв запросе account_id - ваш номер счета  \nв Headers - ваш jwt-token"
+					},
+					"response": []
+				},
+				{
+					"name": "GetAssetParams",
+					"protocolProfileBehavior": {
+						"protocolVersion": "http2"
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "jwt-token",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.finam.ru/v1/assets/SBER@MISX/params?account_id=account_id",
+							"protocol": "https",
+							"host": [
+								"api",
+								"finam",
+								"ru"
+							],
+							"path": [
+								"v1",
+								"assets",
+								"SBER@MISX",
+								"params"
+							],
+							"query": [
+								{
+									"key": "account_id",
+									"value": "account_id"
+								}
+							]
+						},
+						"description": "**какие поля заполнить:**  \nв запросе account_id - ваш номер счета  \nв Headers - ваш jwt-token"
+					},
+					"response": []
+				},
+				{
+					"name": "OptionsChain",
+					"protocolProfileBehavior": {
+						"protocolVersion": "http2"
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "jwt-token",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.finam.ru/v1/assets/YDEX@MISX/options",
+							"protocol": "https",
+							"host": [
+								"api",
+								"finam",
+								"ru"
+							],
+							"path": [
+								"v1",
+								"assets",
+								"YDEX@MISX",
+								"options"
+							]
+						},
+						"description": "**какие поля заполнить:**  \nв Headers - ваш jwt-token"
+					},
+					"response": []
+				},
+				{
+					"name": "Schedule",
+					"protocolProfileBehavior": {
+						"protocolVersion": "http2"
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "jwt-token",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.finam.ru/v1/assets/YDEX@MISX/schedule",
+							"protocol": "https",
+							"host": [
+								"api",
+								"finam",
+								"ru"
+							],
+							"path": [
+								"v1",
+								"assets",
+								"YDEX@MISX",
+								"schedule"
+							]
+						},
+						"description": "**какие поля заполнить:**  \nв Headers - ваш jwt-token"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Заявки",
+			"item": [
+				{
+					"name": "PlaceOrder",
+					"protocolProfileBehavior": {
+						"protocolVersion": "http2"
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "jwt-token",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n                \"symbol\": \"AFLT@MISX\",\n                \"quantity\": {\n                    \"value\": \"10.0\"\n                },\n                \"side\": \"SIDE_SELL\",\n                \"type\": \"ORDER_TYPE_LIMIT\",\n                \"timeInForce\": \"TIME_IN_FORCE_DAY\",\n                \"limitPrice\": {\n                    \"value\": \"75.0\"\n                },\n                \"stopCondition\": \"STOP_CONDITION_UNSPECIFIED\",\n                \"legs\": [],\n                \"clientOrderId\": \"test005\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://api.finam.ru/v1/accounts/account_id/orders",
+							"protocol": "https",
+							"host": [
+								"api",
+								"finam",
+								"ru"
+							],
+							"path": [
+								"v1",
+								"accounts",
+								"account_id",
+								"orders"
+							]
+						},
+						"description": "**какие поля заполнить:**  \nв запросе account_id - ваш номер счета  \nв Headers - ваш jwt-token"
+					},
+					"response": []
+				},
+				{
+					"name": "CancelOrder",
+					"protocolProfileBehavior": {
+						"protocolVersion": "http2"
+					},
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "jwt-token",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.finam.ru/v1/accounts/{account_id}/orders/{order_id}",
+							"protocol": "https",
+							"host": [
+								"api",
+								"finam",
+								"ru"
+							],
+							"path": [
+								"v1",
+								"accounts",
+								"{account_id}",
+								"orders",
+								"{order_id}"
+							]
+						},
+						"description": "**какие поля заполнить:**  \nв запросе account_id - ваш номер счета  \nв запросе order_id - идентификатор заявки  \nв Headers - ваш jwt-token"
+					},
+					"response": []
+				},
+				{
+					"name": "GetOrders",
+					"protocolProfileBehavior": {
+						"protocolVersion": "http2"
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "jwt-token",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.finam.ru/v1/accounts/account_id/orders",
+							"protocol": "https",
+							"host": [
+								"api",
+								"finam",
+								"ru"
+							],
+							"path": [
+								"v1",
+								"accounts",
+								"account_id",
+								"orders"
+							]
+						},
+						"description": "**какие поля заполнить:**  \nв запросе account_id - ваш номер счета  \nв Headers - ваш jwt-token"
+					},
+					"response": []
+				},
+				{
+					"name": "GetOrder",
+					"protocolProfileBehavior": {
+						"protocolVersion": "http2"
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "jwt-token",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.finam.ru/v1/accounts/account_id/orders/order_id",
+							"protocol": "https",
+							"host": [
+								"api",
+								"finam",
+								"ru"
+							],
+							"path": [
+								"v1",
+								"accounts",
+								"account_id",
+								"orders",
+								"order_id"
+							]
+						},
+						"description": "**какие поля заполнить:**  \n\nв запросе account_id - ваш номер счета\n\nв запросе order_id - идентификатор заявки  \nв Headers - ваш jwt-token"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Рыночные данные",
+			"item": [
+				{
+					"name": "Bars",
+					"protocolProfileBehavior": {
+						"protocolVersion": "http2"
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "jwt-token",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.finam.ru/v1/instruments/YDEX@MISX/bars?interval.start_time=2025-03-01T00:00:00Z&interval.end_time=2025-03-15T00:00:00Z&timeframe=TIME_FRAME_D",
+							"protocol": "https",
+							"host": [
+								"api",
+								"finam",
+								"ru"
+							],
+							"path": [
+								"v1",
+								"instruments",
+								"YDEX@MISX",
+								"bars"
+							],
+							"query": [
+								{
+									"key": "interval.start_time",
+									"value": "2025-03-01T00:00:00Z"
+								},
+								{
+									"key": "interval.end_time",
+									"value": "2025-03-15T00:00:00Z"
+								},
+								{
+									"key": "timeframe",
+									"value": "TIME_FRAME_D"
+								}
+							]
+						},
+						"description": "**какие поля заполнить:**  \nв Headers - ваш jwt-token"
+					},
+					"response": []
+				},
+				{
+					"name": "LastQuote",
+					"protocolProfileBehavior": {
+						"protocolVersion": "http2"
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "jwt-token",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.finam.ru/v1/instruments/YDEX@MISX/quotes/latest",
+							"protocol": "https",
+							"host": [
+								"api",
+								"finam",
+								"ru"
+							],
+							"path": [
+								"v1",
+								"instruments",
+								"YDEX@MISX",
+								"quotes",
+								"latest"
+							]
+						},
+						"description": "**какие поля заполнить:**  \nв Headers - ваш jwt-token"
+					},
+					"response": []
+				},
+				{
+					"name": "LatestTrades",
+					"protocolProfileBehavior": {
+						"protocolVersion": "http2"
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "jwt-token",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.finam.ru/v1/instruments/YDEX@MISX/trades/latest",
+							"protocol": "https",
+							"host": [
+								"api",
+								"finam",
+								"ru"
+							],
+							"path": [
+								"v1",
+								"instruments",
+								"YDEX@MISX",
+								"trades",
+								"latest"
+							]
+						},
+						"description": "**какие поля заполнить:**  \nв Headers - ваш jwt-token"
+					},
+					"response": []
+				},
+				{
+					"name": "OrderBook",
+					"protocolProfileBehavior": {
+						"protocolVersion": "http2"
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "jwt-token",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://api.finam.ru/v1/instruments/YDEX@MISX/orderbook",
+							"protocol": "https",
+							"host": [
+								"api",
+								"finam",
+								"ru"
+							],
+							"path": [
+								"v1",
+								"instruments",
+								"YDEX@MISX",
+								"orderbook"
+							]
+						},
+						"description": "**какие поля заполнить:**  \nв Headers - ваш jwt-token"
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
