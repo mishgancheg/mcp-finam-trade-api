@@ -2,14 +2,14 @@
 // Скрипт для получения данных по списку инструментов
 // Использует JWT-аутентификацию и REST API FINAM Trade API
 
-import dotenv from 'dotenv';
+// noinspection ES6UnusedImports
+import * as _c from '../dist/src/init-config.js';
+
 import fs from 'node:fs';
 import path from 'node:path';
 import got from 'got';
 import { fileURLToPath } from 'url';
 import { getJwtToken } from '../dist/src/lib/jwt-auth.js';
-
-dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

@@ -1,0 +1,345 @@
+{
+  "created_at": "2025-09-29T17:48:03Z",
+  "expires_at": "2025-09-29T18:03:06Z",
+  "md_permissions": [
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "#RBRD"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "#RCBR"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "#WWCP"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "AMXO"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "ARCX"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "BATS"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "BVMF"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "EXPM"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "IEXG"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "IFEU"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "IFUS"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "MISX"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "OOTC"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "OPRA"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "OTCB"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "OTCM"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "OTCQ"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "PINC"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "PINI"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "PINL"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "PINX"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "PSGM"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "RTSX"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "RUSX"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "XAMS"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "XASE"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "XASX"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "XBOM"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "XBRU"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "XBUE"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "XCBF"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "XCBT"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "XCEC"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "XCME"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "XETR"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "XFRA"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "XGAT"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "XHKF"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "XHKG"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "XLDN"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "XLME"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "XLOM"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "XLON"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "XMAD"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "XNAS"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "XNCM"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "XNGS"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "XNMS"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "XNYM"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "XNYS"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "XPAR"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "XSHE"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "XSHG"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "XSWX"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "XTKS"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "_BNCC"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "_CBIR"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "_CMF"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "_CRYP"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "_EURB"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "_MMBZ"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "_NPRO"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "_SCI"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "_SP"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "_SPBZ"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "_SPd1"
+    },
+    {
+      "quote_level": "QUOTE_LEVEL_DEPTH_OF_MARKET",
+      "delay_minutes": 0,
+      "mic": "_TRES"
+    }
+  ],
+  "account_ids": [
+    "1234567"
+  ],
+  "readonly": false
+}

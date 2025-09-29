@@ -1,29 +1,16 @@
 // API Tester for FINAM Trade API
 // noinspection UnnecessaryLocalVariableJS
 
-import dotenv from 'dotenv';
+// noinspection ES6UnusedImports
+import * as _c from '../dist/src/init-config.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import got from 'got';
 import { FINAM_API_REGISTRY } from '../src/meta/finam-trade-api-registry.js';
-import { fileURLToPath } from 'url';
 import { getJwtToken } from '../dist/src/lib/jwt-auth.js';
+import { formatHttpError, isNonEmptyObject, ensureDir } from '../dist/src/lib/utils.js';
 
-dotenv.config();
-
-const isNonEmptyObject = (v) => {
-  return v && typeof v === 'object' && Object.keys(v).length;
-};
-
-function ensureDir (p) {
-  if (!fs.existsSync(p)) {
-    fs.mkdirSync(p, { recursive: true });
-  }
-}
-
-function nowIso () {
-  return new Date().toISOString();
-}
+const nowIso = () => (new Date().toISOString());
 
 function replacer (value, placeholders) {
   if (value == null) {
@@ -65,7 +52,7 @@ function validateByExpectedProps (ep, body) {
   return { ok: checkOk && propsOk, missingProps, checkOk };
 }
 
-function toMarkdownReport ({ ep, request, response, error, started, _finished }) {
+function toMarkdownReport ({ ep, request, response, error, started }) {
   const triQ = '```';
   const dataInfo = (data, title) => {
     if (!data || (typeof data === 'object' && !Object.keys(data).length)) {
@@ -141,7 +128,7 @@ async function main () {
     jwtToken = await getJwtToken(secretToken);
     console.log('✅ JWT token obtained successfully (using cache if available)');
   } catch (error) {
-    console.error('Auth failed:', error.message || error);
+    console.error(formatHttpError(error));
     process.exitCode = 1;
     return;
   }
@@ -235,13 +222,16 @@ async function main () {
     } catch (e) {
       err = e;
     }
-    const report = toMarkdownReport({ ep, request: req, response: resp, error: err, started, finished: nowIso() });
-    const filename = path.join('_test-data', `${ep.fullId}.md`);
-    fs.writeFileSync(filename, report, 'utf8');
+
+    if (!baseUrl.includes('localhost')) {
+      const report = toMarkdownReport({ ep, request: req, response: resp, error: err, started });
+      const filename = path.join('_test-data', `${ep.fullId}.md`);
+      fs.writeFileSync(filename, report, 'utf8');
+    }
 
     // Basic console output
     if (err) {
-      console.error(`[${ep.fullId}] ${ep.name}: ERROR:`, err.message || err);
+      console.error(`[${ep.fullId}] ${ep.name}: ${formatHttpError(err)}`);
     } else {
       if (resp.ok) {
         console.log(`[${ep.fullId}] ✅  ${ep.name}`);
@@ -275,10 +265,8 @@ async function main () {
   }
 }
 
-// Run if executed directly
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  main().catch((e) => {
-    console.error('Fatal error:', e);
-    process.exitCode = 1;
-  });
-}
+main().catch((e) => {
+  console.error('Fatal error:', formatHttpError(e));
+  process.exitCode = 1;
+});
+

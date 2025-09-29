@@ -1,0 +1,173 @@
+{
+  "symbol": "YDEX@MISX",
+  "sessions": [
+    {
+      "type": "CLOSED",
+      "interval": {
+        "start_time": "2025-09-28T21:00:00Z",
+        "end_time": "2025-09-29T03:50:00Z"
+      }
+    },
+    {
+      "type": "CLOSED",
+      "interval": {
+        "start_time": "2025-09-29T20:50:00Z",
+        "end_time": "2025-09-29T21:00:00Z"
+      }
+    },
+    {
+      "type": "CLOSED",
+      "interval": {
+        "start_time": "2025-09-29T21:00:00Z",
+        "end_time": "2025-09-30T03:50:00Z"
+      }
+    },
+    {
+      "type": "CLOSED",
+      "interval": {
+        "start_time": "2025-09-30T20:50:00Z",
+        "end_time": "2025-09-30T21:00:00Z"
+      }
+    },
+    {
+      "type": "CLOSED",
+      "interval": {
+        "start_time": "2025-09-30T21:00:00Z",
+        "end_time": "2025-10-01T03:50:00Z"
+      }
+    },
+    {
+      "type": "CLOSED",
+      "interval": {
+        "start_time": "2025-10-01T20:50:00Z",
+        "end_time": "2025-10-01T21:00:00Z"
+      }
+    },
+    {
+      "type": "EARLY_TRADING",
+      "interval": {
+        "start_time": "2025-09-29T04:00:00Z",
+        "end_time": "2025-09-29T06:50:00Z"
+      }
+    },
+    {
+      "type": "EARLY_TRADING",
+      "interval": {
+        "start_time": "2025-09-30T04:00:00Z",
+        "end_time": "2025-09-30T06:50:00Z"
+      }
+    },
+    {
+      "type": "EARLY_TRADING",
+      "interval": {
+        "start_time": "2025-10-01T04:00:00Z",
+        "end_time": "2025-10-01T06:50:00Z"
+      }
+    },
+    {
+      "type": "CORE_TRADING",
+      "interval": {
+        "start_time": "2025-09-29T06:50:00Z",
+        "end_time": "2025-09-29T15:40:00Z"
+      }
+    },
+    {
+      "type": "CORE_TRADING",
+      "interval": {
+        "start_time": "2025-09-30T06:50:00Z",
+        "end_time": "2025-09-30T15:40:00Z"
+      }
+    },
+    {
+      "type": "CORE_TRADING",
+      "interval": {
+        "start_time": "2025-10-01T06:50:00Z",
+        "end_time": "2025-10-01T15:40:00Z"
+      }
+    },
+    {
+      "type": "LATE_TRADING",
+      "interval": {
+        "start_time": "2025-09-29T16:00:00Z",
+        "end_time": "2025-09-29T20:50:00Z"
+      }
+    },
+    {
+      "type": "LATE_TRADING",
+      "interval": {
+        "start_time": "2025-09-30T16:00:00Z",
+        "end_time": "2025-09-30T20:50:00Z"
+      }
+    },
+    {
+      "type": "LATE_TRADING",
+      "interval": {
+        "start_time": "2025-10-01T16:00:00Z",
+        "end_time": "2025-10-01T20:50:00Z"
+      }
+    },
+    {
+      "type": "OPENING_AUCTION",
+      "interval": {
+        "start_time": "2025-09-29T03:50:00Z",
+        "end_time": "2025-09-29T04:00:00Z"
+      }
+    },
+    {
+      "type": "OPENING_AUCTION",
+      "interval": {
+        "start_time": "2025-09-30T03:50:00Z",
+        "end_time": "2025-09-30T04:00:00Z"
+      }
+    },
+    {
+      "type": "OPENING_AUCTION",
+      "interval": {
+        "start_time": "2025-10-01T03:50:00Z",
+        "end_time": "2025-10-01T04:00:00Z"
+      }
+    },
+    {
+      "type": "CLOSING_AUCTION",
+      "interval": {
+        "start_time": "2025-09-29T15:40:00Z",
+        "end_time": "2025-09-29T15:50:00Z"
+      }
+    },
+    {
+      "type": "CLOSING_AUCTION",
+      "interval": {
+        "start_time": "2025-09-30T15:40:00Z",
+        "end_time": "2025-09-30T15:50:00Z"
+      }
+    },
+    {
+      "type": "CLOSING_AUCTION",
+      "interval": {
+        "start_time": "2025-10-01T15:40:00Z",
+        "end_time": "2025-10-01T15:50:00Z"
+      }
+    },
+    {
+      "type": "CLEARING",
+      "interval": {
+        "start_time": "2025-09-29T15:50:00Z",
+        "end_time": "2025-09-29T16:00:00Z"
+      }
+    },
+    {
+      "type": "CLEARING",
+      "interval": {
+        "start_time": "2025-09-30T15:50:00Z",
+        "end_time": "2025-09-30T16:00:00Z"
+      }
+    },
+    {
+      "type": "CLEARING",
+      "interval": {
+        "start_time": "2025-10-01T15:50:00Z",
+        "end_time": "2025-10-01T16:00:00Z"
+      }
+    }
+  ]
+}

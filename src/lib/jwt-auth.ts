@@ -1,8 +1,8 @@
-import dotenv from 'dotenv';
+import '../init-config.js';
+
 import got from 'got';
 import { getJti } from './utils.js';
-
-dotenv.config();
+import { AuthResponse } from "../meta/finam-trade-api-interfaces";
 
 let baseUrl = process.env.API_BASE_URL;
 
@@ -13,10 +13,6 @@ if (!baseUrl) {
 interface CacheEntry {
   jwt: string;
   expire: number;
-}
-
-interface AuthResponse {
-  token: string;
 }
 
 // Create HTTP/2 client
@@ -136,15 +132,13 @@ export async function getJwtToken (secretToken: string): Promise<string> {
 /**
  * Clear JWT cache
  */
-export function clearJwtCache (): void {
-  jwtCache.clear();
-}
+export const clearJwtCache = (): void => jwtCache.clear();
 
 /**
  * Remove specific JWT from cache
  * @param secretToken - Secret token to remove from cache
  */
-export function invalidateJwtCache (secretToken: string): void {
+export const invalidateJwtCache = (secretToken: string): void => {
   let jti: string | null = null;
   try {
     jti = getJti(secretToken);
@@ -158,4 +152,4 @@ export function invalidateJwtCache (secretToken: string): void {
   }
 
   jwtCache.delete(jti);
-}
+};

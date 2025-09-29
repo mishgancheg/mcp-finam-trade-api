@@ -18,3 +18,6 @@
   - свойства responseExample в файле src/meta/finam-trade-api-registry.js
   - данные из файлов _test-data/good/<fullId>.md
   - ориентируйся на типы данных ответов из src/meta/finam-trade-api-interfaces.d.ts 
+
+- Создай в папке test/emulator файл data.js в который помести данные из файлов _test-data/good/ (блок response)
+  Используй их в эмуляторе.

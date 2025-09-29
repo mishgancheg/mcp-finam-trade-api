@@ -1,0 +1,5 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="EMULATOR" type="NodeJSConfigurationType" path-to-js-file="$PROJECT_DIR$/test/emulator/emulator.js" working-dir="$PROJECT_DIR$">
+    <method v="2" />
+  </configuration>
+</component>

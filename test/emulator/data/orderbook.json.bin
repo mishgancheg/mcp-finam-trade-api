@@ -1,0 +1,447 @@
+{
+  "symbol": "YDEX@MISX",
+  "orderbook": {
+    "rows": [
+      {
+        "price": {
+          "value": "4059.5"
+        },
+        "sell_size": {
+          "value": "514.0"
+        },
+        "action": "ACTION_ADD",
+        "mpid": "",
+        "timestamp": "2025-09-29T10:46:24.868532Z"
+      },
+      {
+        "price": {
+          "value": "4059.0"
+        },
+        "sell_size": {
+          "value": "1101.0"
+        },
+        "action": "ACTION_ADD",
+        "mpid": "",
+        "timestamp": "2025-09-29T10:46:24.868532Z"
+      },
+      {
+        "price": {
+          "value": "4058.5"
+        },
+        "sell_size": {
+          "value": "406.0"
+        },
+        "action": "ACTION_ADD",
+        "mpid": "",
+        "timestamp": "2025-09-29T10:46:24.868532Z"
+      },
+      {
+        "price": {
+          "value": "4058.0"
+        },
+        "sell_size": {
+          "value": "242.0"
+        },
+        "action": "ACTION_ADD",
+        "mpid": "",
+        "timestamp": "2025-09-29T10:46:24.868532Z"
+      },
+      {
+        "price": {
+          "value": "4057.0"
+        },
+        "sell_size": {
+          "value": "426.0"
+        },
+        "action": "ACTION_ADD",
+        "mpid": "",
+        "timestamp": "2025-09-29T10:46:24.868532Z"
+      },
+      {
+        "price": {
+          "value": "4056.5"
+        },
+        "sell_size": {
+          "value": "330.0"
+        },
+        "action": "ACTION_ADD",
+        "mpid": "",
+        "timestamp": "2025-09-29T10:46:24.868532Z"
+      },
+      {
+        "price": {
+          "value": "4056.0"
+        },
+        "sell_size": {
+          "value": "844.0"
+        },
+        "action": "ACTION_ADD",
+        "mpid": "",
+        "timestamp": "2025-09-29T10:46:24.868532Z"
+      },
+      {
+        "price": {
+          "value": "4055.5"
+        },
+        "sell_size": {
+          "value": "65.0"
+        },
+        "action": "ACTION_ADD",
+        "mpid": "",
+        "timestamp": "2025-09-29T10:46:24.868532Z"
+      },
+      {
+        "price": {
+          "value": "4055.0"
+        },
+        "sell_size": {
+          "value": "386.0"
+        },
+        "action": "ACTION_ADD",
+        "mpid": "",
+        "timestamp": "2025-09-29T10:46:24.868532Z"
+      },
+      {
+        "price": {
+          "value": "4054.5"
+        },
+        "sell_size": {
+          "value": "38.0"
+        },
+        "action": "ACTION_ADD",
+        "mpid": "",
+        "timestamp": "2025-09-29T10:46:24.868532Z"
+      },
+      {
+        "price": {
+          "value": "4054.0"
+        },
+        "sell_size": {
+          "value": "155.0"
+        },
+        "action": "ACTION_ADD",
+        "mpid": "",
+        "timestamp": "2025-09-29T10:46:24.868532Z"
+      },
+      {
+        "price": {
+          "value": "4053.5"
+        },
+        "sell_size": {
+          "value": "55.0"
+        },
+        "action": "ACTION_ADD",
+        "mpid": "",
+        "timestamp": "2025-09-29T10:46:24.868532Z"
+      },
+      {
+        "price": {
+          "value": "4053.0"
+        },
+        "sell_size": {
+          "value": "120.0"
+        },
+        "action": "ACTION_ADD",
+        "mpid": "",
+        "timestamp": "2025-09-29T10:46:24.868532Z"
+      },
+      {
+        "price": {
+          "value": "4052.5"
+        },
+        "sell_size": {
+          "value": "1717.0"
+        },
+        "action": "ACTION_ADD",
+        "mpid": "",
+        "timestamp": "2025-09-29T10:46:24.868532Z"
+      },
+      {
+        "price": {
+          "value": "4052.0"
+        },
+        "sell_size": {
+          "value": "273.0"
+        },
+        "action": "ACTION_ADD",
+        "mpid": "",
+        "timestamp": "2025-09-29T10:46:24.868532Z"
+      },
+      {
+        "price": {
+          "value": "4051.5"
+        },
+        "sell_size": {
+          "value": "393.0"
+        },
+        "action": "ACTION_ADD",
+        "mpid": "",
+        "timestamp": "2025-09-29T10:46:24.868532Z"
+      },
+      {
+        "price": {
+          "value": "4051.0"
+        },
+        "sell_size": {
+          "value": "224.0"
+        },
+        "action": "ACTION_ADD",
+        "mpid": "",
+        "timestamp": "2025-09-29T10:46:24.868532Z"
+      },
+      {
+        "price": {
+          "value": "4050.5"
+        },
+        "sell_size": {
+          "value": "120.0"
+        },
+        "action": "ACTION_ADD",
+        "mpid": "",
+        "timestamp": "2025-09-29T10:46:24.868532Z"
+      },
+      {
+        "price": {
+          "value": "4050.0"
+        },
+        "sell_size": {
+          "value": "40.0"
+        },
+        "action": "ACTION_ADD",
+        "mpid": "",
+        "timestamp": "2025-09-29T10:46:24.868532Z"
+      },
+      {
+        "price": {
+          "value": "4049.5"
+        },
+        "sell_size": {
+          "value": "205.0"
+        },
+        "action": "ACTION_ADD",
+        "mpid": "",
+        "timestamp": "2025-09-29T10:46:24.868532Z"
+      },
+      {
+        "price": {
+          "value": "4038.5"
+        },
+        "buy_size": {
+          "value": "404.0"
+        },
+        "action": "ACTION_ADD",
+        "mpid": "",
+        "timestamp": "2025-09-29T10:46:24.868532Z"
+      },
+      {
+        "price": {
+          "value": "4039.0"
+        },
+        "buy_size": {
+          "value": "785.0"
+        },
+        "action": "ACTION_ADD",
+        "mpid": "",
+        "timestamp": "2025-09-29T10:46:24.868532Z"
+      },
+      {
+        "price": {
+          "value": "4040.0"
+        },
+        "buy_size": {
+          "value": "2179.0"
+        },
+        "action": "ACTION_ADD",
+        "mpid": "",
+        "timestamp": "2025-09-29T10:46:24.868532Z"
+      },
+      {
+        "price": {
+          "value": "4040.5"
+        },
+        "buy_size": {
+          "value": "477.0"
+        },
+        "action": "ACTION_ADD",
+        "mpid": "",
+        "timestamp": "2025-09-29T10:46:24.868532Z"
+      },
+      {
+        "price": {
+          "value": "4041.0"
+        },
+        "buy_size": {
+          "value": "1010.0"
+        },
+        "action": "ACTION_ADD",
+        "mpid": "",
+        "timestamp": "2025-09-29T10:46:24.868532Z"
+      },
+      {
+        "price": {
+          "value": "4041.5"
+        },
+        "buy_size": {
+          "value": "418.0"
+        },
+        "action": "ACTION_ADD",
+        "mpid": "",
+        "timestamp": "2025-09-29T10:46:24.868532Z"
+      },
+      {
+        "price": {
+          "value": "4042.0"
+        },
+        "buy_size": {
+          "value": "2596.0"
+        },
+        "action": "ACTION_ADD",
+        "mpid": "",
+        "timestamp": "2025-09-29T10:46:24.868532Z"
+      },
+      {
+        "price": {
+          "value": "4042.5"
+        },
+        "buy_size": {
+          "value": "306.0"
+        },
+        "action": "ACTION_ADD",
+        "mpid": "",
+        "timestamp": "2025-09-29T10:46:24.868532Z"
+      },
+      {
+        "price": {
+          "value": "4043.0"
+        },
+        "buy_size": {
+          "value": "86.0"
+        },
+        "action": "ACTION_ADD",
+        "mpid": "",
+        "timestamp": "2025-09-29T10:46:24.868532Z"
+      },
+      {
+        "price": {
+          "value": "4043.5"
+        },
+        "buy_size": {
+          "value": "303.0"
+        },
+        "action": "ACTION_ADD",
+        "mpid": "",
+        "timestamp": "2025-09-29T10:46:24.868532Z"
+      },
+      {
+        "price": {
+          "value": "4044.0"
+        },
+        "buy_size": {
+          "value": "55.0"
+        },
+        "action": "ACTION_ADD",
+        "mpid": "",
+        "timestamp": "2025-09-29T10:46:24.868532Z"
+      },
+      {
+        "price": {
+          "value": "4044.5"
+        },
+        "buy_size": {
+          "value": "165.0"
+        },
+        "action": "ACTION_ADD",
+        "mpid": "",
+        "timestamp": "2025-09-29T10:46:24.868532Z"
+      },
+      {
+        "price": {
+          "value": "4045.0"
+        },
+        "buy_size": {
+          "value": "252.0"
+        },
+        "action": "ACTION_ADD",
+        "mpid": "",
+        "timestamp": "2025-09-29T10:46:24.868532Z"
+      },
+      {
+        "price": {
+          "value": "4045.5"
+        },
+        "buy_size": {
+          "value": "245.0"
+        },
+        "action": "ACTION_ADD",
+        "mpid": "",
+        "timestamp": "2025-09-29T10:46:24.868532Z"
+      },
+      {
+        "price": {
+          "value": "4046.0"
+        },
+        "buy_size": {
+          "value": "133.0"
+        },
+        "action": "ACTION_ADD",
+        "mpid": "",
+        "timestamp": "2025-09-29T10:46:24.868532Z"
+      },
+      {
+        "price": {
+          "value": "4046.5"
+        },
+        "buy_size": {
+          "value": "85.0"
+        },
+        "action": "ACTION_ADD",
+        "mpid": "",
+        "timestamp": "2025-09-29T10:46:24.868532Z"
+      },
+      {
+        "price": {
+          "value": "4047.0"
+        },
+        "buy_size": {
+          "value": "132.0"
+        },
+        "action": "ACTION_ADD",
+        "mpid": "",
+        "timestamp": "2025-09-29T10:46:24.868532Z"
+      },
+      {
+        "price": {
+          "value": "4047.5"
+        },
+        "buy_size": {
+          "value": "204.0"
+        },
+        "action": "ACTION_ADD",
+        "mpid": "",
+        "timestamp": "2025-09-29T10:46:24.868532Z"
+      },
+      {
+        "price": {
+          "value": "4048.0"
+        },
+        "buy_size": {
+          "value": "38.0"
+        },
+        "action": "ACTION_ADD",
+        "mpid": "",
+        "timestamp": "2025-09-29T10:46:24.868532Z"
+      },
+      {
+        "price": {
+          "value": "4048.5"
+        },
+        "buy_size": {
+          "value": "13.0"
+        },
+        "action": "ACTION_ADD",
+        "mpid": "",
+        "timestamp": "2025-09-29T10:46:24.868532Z"
+      }
+    ]
+  }
+}
