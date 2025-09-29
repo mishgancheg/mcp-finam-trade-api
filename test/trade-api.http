@@ -89,8 +89,8 @@ Accept: application/json
 Authorization: {{jwt}}
 
 
-### GetAssetParams - Пример с конкретным инструментом SBER@MISX
-GET https://api.finam.ru/v1/assets/SBER@MISX/params?account_id={{account_id}}
+### GetAssetParams - Пример с конкретным инструментом KUZB@MISX
+GET https://api.finam.ru/v1/assets/KUZB@MISX/params?account_id={{account_id}}
 Content-Type: application/json
 Accept: application/json
 Authorization: {{jwt}}
@@ -128,25 +128,29 @@ Authorization: {{jwt}}
 
 
 ### ❌ PlaceOrder - Размещение заявки
+< {%
+    const ts = String(Date.now());
+    client.global.set("ts", ts);
+%}
 POST https://api.finam.ru/v1/accounts/{{account_id}}/orders
 Content-Type: application/json
 Accept: application/json
 Authorization: {{jwt}}
 
 {
-  "symbol": "AFLT@MISX",
+  "symbol": "KUZB@MISX",
   "quantity": {
-    "value": "1.0"
+    "value": "10000.0"
   },
   "side": "SIDE_BUY",
   "type": "ORDER_TYPE_LIMIT",
   "timeInForce": "TIME_IN_FORCE_DAY",
   "limitPrice": {
-    "value": "60.0"
+    "value": "0.02"
   },
   "stopCondition": "STOP_CONDITION_UNSPECIFIED",
   "legs": [],
-  "clientOrderId": "test order 004"
+  "clientOrderId": "t{{ts}}"
 }
 
 > {%
