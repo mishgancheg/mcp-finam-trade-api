@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="api-tester" type="NodeJSConfigurationType" application-parameters="Transactions,Assets,GetAsset" path-to-js-file="test/api-tester.js" working-dir="$PROJECT_DIR$">
+  <configuration default="false" name="tester-endpoints" type="NodeJSConfigurationType" application-parameters="Transactions,Assets,GetAsset" path-to-js-file="test/tester-endpoints.js" working-dir="$PROJECT_DIR$">
     <method v="2" />
   </configuration>
 </component>
