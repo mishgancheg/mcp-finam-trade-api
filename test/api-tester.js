@@ -1,39 +1,19 @@
 // API Tester for FINAM Trade API
 // noinspection UnnecessaryLocalVariableJS
 
+import dotenv from 'dotenv';
 import fs from 'node:fs';
 import path from 'node:path';
 import got from 'got';
 import { FINAM_API_REGISTRY } from '../src/meta/finam-trade-api-registry.js';
 import { fileURLToPath } from 'url';
+import { getJwtToken } from '../dist/src/lib/jwt-auth.js';
+
+dotenv.config();
 
 const isNonEmptyObject = (v) => {
   return v && typeof v === 'object' && Object.keys(v).length;
 };
-
-// Simple .env loader (no external deps)
-function loadDotEnv (cwd = process.cwd()) {
-  const envPath = path.join(cwd, '.env');
-  const env = {};
-  if (fs.existsSync(envPath)) {
-    const text = fs.readFileSync(envPath, 'utf8');
-    for (const line of text.split(/\r?\n/)) {
-      const m = /^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)\s*$/.exec(line);
-      if (!m) {
-        continue;
-      }
-      let [, key, val] = m;
-      if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith('\'') && val.endsWith('\''))) {
-        val = val.slice(1, -1);
-      }
-      env[key] = val;
-      if (process.env[key] === undefined) {
-        process.env[key] = val;
-      }
-    }
-  }
-  return env;
-}
 
 function ensureDir (p) {
   if (!fs.existsSync(p)) {
@@ -130,8 +110,6 @@ const h2 = got.extend({
 });
 
 async function main () {
-  loadDotEnv();
-
   if (['API_BASE_URL', 'API_SECRET_TOKEN', 'ACCOUNT_ID'].some((v) => {
     if (!process.env[v]) {
       console.error(`${v} is required in .env`);
@@ -157,76 +135,13 @@ async function main () {
     symbol: symbol,
   };
 
-  // Step 1: Auth to get JWT
-  const authEp = FINAM_API_REGISTRY.find(e => e.name === 'Auth');
-  if (!authEp) {
-    throw new Error('Auth endpoint not found in registry');
-  }
-
-  const authBody = replacer(authEp.data || {}, { ...commonPlaceholders });
-  const authReqDesc = {
-    url: new URL(authEp.endpoint, baseUrl).toString(),
-    headers: {},
-    queryParams: authEp.queryParams || {},
-    body: authBody,
-  };
+  // Step 1: Auth to get JWT using the new jwt-auth module
   let jwtToken = '';
-  let authResponse;
-  let started = nowIso();
   try {
-    const url = new URL(authEp.endpoint, baseUrl).toString();
-    const options = {
-      method: authEp.method,
-      headers: { Accept: 'application/json' },
-      json: authBody,
-      responseType: 'json',
-    };
-    const t0 = Date.now();
-    const res = await h2(url, options);
-    const ms = Date.now() - t0;
-    authResponse = {
-      status: res.statusCode,
-      statusText: res.statusMessage || '',
-      headers: res.headers || {},
-      durationMs: ms,
-      body: res.body,
-      url,
-    };
-  } catch (e) {
-    const report = toMarkdownReport({ ep: authEp, request: authReqDesc, response: undefined, error: e, started, finished: nowIso() });
-    fs.writeFileSync(path.join('_test-data', `${authEp.fullId}.md`), report, 'utf8');
-    throw e;
-  }
-  // Validation for auth response
-  const expectedStatusAuth = authEp.expectedStatus ?? 200;
-  const statusMatchedAuth = authResponse.status === expectedStatusAuth;
-  let validationOkAuth = true;
-  let missingAuthProps = [];
-  let checkFieldsAuthOk = true;
-  if (statusMatchedAuth) {
-    const v = validateByExpectedProps(authEp, authResponse.body);
-    validationOkAuth = v.ok;
-    missingAuthProps = v.missingProps || [];
-    checkFieldsAuthOk = typeof v.checkOk === 'boolean' ? v.checkOk : true;
-  }
-  const authOk = statusMatchedAuth && validationOkAuth;
-  const authReport = toMarkdownReport({ ep: authEp, request: authReqDesc, response: { ...authResponse, ok: authOk }, started, finished: nowIso() });
-  fs.writeFileSync(path.join('_test-data', `${authEp.fullId}.md`), authReport, 'utf8');
-  if (!authOk) {
-    const missingMsg = statusMatchedAuth && missingAuthProps.length ? `; отсутствуют свойства: ${missingAuthProps.join(', ')}` : '';
-    const checkFailMsg = statusMatchedAuth && !checkFieldsAuthOk && (!missingAuthProps || missingAuthProps.length === 0) ? '; validation.checkFields() не пройдена' : '';
-    console.error('Auth failed with status', authResponse.status, authResponse.statusText || '', missingMsg + checkFailMsg);
-    process.exitCode = 1;
-    return;
-  }
-  // extract token (registry says response has { token: string })
-  try {
-    jwtToken = typeof authResponse.body === 'object' ? authResponse.body.token : JSON.parse(authResponse.body).token;
-  } catch {
-    jwtToken = '';
-  }
-  if (!jwtToken) {
-    console.error('Auth succeeded but token not found in response.');
+    jwtToken = await getJwtToken(secretToken);
+    console.log('✅ JWT token obtained successfully (using cache if available)');
+  } catch (error) {
+    console.error('Auth failed:', error.message || error);
     process.exitCode = 1;
     return;
   }
@@ -254,9 +169,9 @@ async function main () {
   }
 
   for (const ep of FINAM_API_REGISTRY) {
-    if (ep.fullId === authEp.fullId) {
-      continue;
-    } // already done
+    if (ep.name === 'Auth') {
+      continue; // already done
+    }
 
     // If a selection is provided, skip endpoints not in the selection
     if (selectionSet && !selectionSet.has(ep.name)) {
@@ -280,7 +195,7 @@ async function main () {
 
     let resp;
     let err;
-    started = nowIso();
+    const started = nowIso();
     try {
       const options = {
         method,
