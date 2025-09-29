@@ -144,29 +144,6 @@ function getTests(config) {
     // Group 4: Orders
     {
       fullId: '4-1',
-      name: 'CancelOrder',
-      testFn: () => api.CancelOrder({
-        secret_token: config.secretToken,
-        account_id: config.accountId,
-        order_id: 'test-order-id', // Replace with real order_id
-      }),
-    },
-    {
-      fullId: '4-2',
-      name: 'GetOrder',
-      testFn: () => api.GetOrder({
-        secret_token: config.secretToken,
-        account_id: config.accountId,
-        order_id: 'test-order-id', // Replace with real order_id
-      }),
-    },
-    {
-      fullId: '4-3',
-      name: 'GetOrders',
-      testFn: () => api.GetOrders({ secret_token: config.secretToken, account_id: config.accountId }),
-    },
-    {
-      fullId: '4-4',
       name: 'PlaceOrder',
       testFn: () => api.PlaceOrder({
         secret_token: config.secretToken,
@@ -179,7 +156,29 @@ function getTests(config) {
         limit_price: '1000',
       }),
     },
-
+    {
+      fullId: '4-2',
+      name: 'CancelOrder',
+      testFn: () => api.CancelOrder({
+        secret_token: config.secretToken,
+        account_id: config.accountId,
+        order_id: 'test-order-id', // Replace with real order_id
+      }),
+    },
+    {
+      fullId: '4-3',
+      name: 'GetOrders',
+      testFn: () => api.GetOrders({ secret_token: config.secretToken, account_id: config.accountId }),
+    },
+    {
+      fullId: '4-4',
+      name: 'GetOrder',
+      testFn: () => api.GetOrder({
+        secret_token: config.secretToken,
+        account_id: config.accountId,
+        order_id: 'test-order-id', // Replace with real order_id
+      }),
+    },
     // Group 5: Market Data
     {
       fullId: '5-1',

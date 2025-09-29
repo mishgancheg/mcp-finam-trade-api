@@ -16,7 +16,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "typecheck": "tsc --noEmit",
-    "test:api": "node test/api-tester.js",
+    "test:endpoints": "node test/tester-endpoints.js",
+    "test:api": "node test/tester-api.js",
     "clean:nul": "node scripts/remove-nul.js",
     "emulator": "node test/emulator/emulator.js"
   },
