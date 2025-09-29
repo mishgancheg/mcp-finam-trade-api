@@ -15,7 +15,8 @@
     "dev": "tsx watch src/index.ts",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:api": "node test/api-tester.js"
   },
   "keywords": [
     "mcp",
@@ -36,7 +37,29 @@
     "type": "git",
     "url": "https://github.com/mishgancheg/mcp-finam-trade-api.git"
   },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.18.2",
+    "axios": "^1.12.2",
+    "chalk": "^5.6.2",
+    "config": "^4.1.1",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "node-fetch": "^3.3.2"
+  },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@types/config": "^3.3.5",
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.5.2",
+    "@typescript-eslint/eslint-plugin": "^8.44.1",
+    "@typescript-eslint/parser": "^8.44.1",
+    "eslint": "^9.36.0",
+    "eslint-config-at-25": "^25.9.6",
+    "eslint-plugin-import": "^2.32.0",
+    "rimraf": "^6.0.1",
+    "tsx": "^4.20.6",
     "typescript": "^5.9.2"
   }
 }

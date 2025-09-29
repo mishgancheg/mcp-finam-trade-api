@@ -26,10 +26,13 @@ export default [
     },
     rules: {
       ...tsPlugin.configs.recommended.rules,
-      '@typescript-eslint/no-unused-vars': 'warn',
+      '@typescript-eslint/no-unused-vars': ['warn', { 'argsIgnorePattern': '^_', 'varsIgnorePattern': '^_' }],
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unsafe-member-access': 'off',
       'import/no-default-export': 'error',
+      'curly': ['error', 'all'],
+      'brace-style': ['error', '1tbs', { 'allowSingleLine': false }],
+      'object-curly-spacing': ['error', 'always'],
     },
   },
   {
@@ -50,6 +53,10 @@ export default [
     },
     rules: {
       'import/no-default-export': 'off',
+      'curly': ['error', 'all'],
+      'brace-style': ['error', '1tbs', { 'allowSingleLine': false }],
+      'object-curly-spacing': ['error', 'always'],
+      'no-unused-vars': ['warn', { 'argsIgnorePattern': '^_', 'varsIgnorePattern': '^_' }],
     },
   },
   {
@@ -77,6 +84,10 @@ export default [
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-unsafe-member-access': 'off',
       '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unused-vars': ['warn', { 'argsIgnorePattern': '^_', 'varsIgnorePattern': '^_' }],
+      'curly': ['error', 'all'],
+      'brace-style': ['error', '1tbs', { 'allowSingleLine': false }],
+      'object-curly-spacing': ['error', 'always'],
     },
   },
   {

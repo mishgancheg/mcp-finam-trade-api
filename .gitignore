@@ -18,3 +18,4 @@ _tmp
 /dist/
 *.private.*
 *.local.*
+/_test-data/
