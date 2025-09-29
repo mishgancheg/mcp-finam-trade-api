@@ -118,6 +118,15 @@ Provides tools for all API endpoints with:
    - Start emulator: `node dist/emulator/index.js` (or use real API)
    - Start MCP server: `node dist/mcp/index.js`
    - Run MCP tester to validate all tools
+   - **IMPORTANT**: Always stop emulator after testing: `scripts\kill-emulator.bat`
+
+## Utility Scripts
+
+### Port Management
+- `scripts\kill-port.bat [port]` - Kill process on specified port
+- `scripts\kill-emulator.bat` - Stop emulator on port 3000
+
+**IMPORTANT FOR AI ASSISTANT**: When testing with the emulator, always stop it after completion using `scripts\kill-emulator.bat` or `scripts\kill-port.bat 3000`.
 
 ## TypeScript Configuration
 

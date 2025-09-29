@@ -31,14 +31,14 @@ Authorization: {{jwt}}
 
 
 ### Trades - Получение истории по сделкам аккаунта
-GET https://api.finam.ru/v1/accounts/{{account_id}}/trades?interval.start_time=2025-01-01T00:00:00Z&interval.end_time=2025-03-15T00:00:00Z
+GET https://api.finam.ru/v1/accounts/{{account_id}}/trades?interval.start_time=2025-01-01T00:00:00Z&interval.end_time=2026-03-15T00:00:00Z
 Content-Type: application/json
 Accept: application/json
 Authorization: {{jwt}}
 
 
 ### Transactions - Получение списка транзакций аккаунта
-GET https://api.finam.ru/v1/accounts/{{account_id}}/transactions?interval.start_time=2025-01-01T00:00:00Z&interval.end_time=2025-03-15T00:00:00Z
+GET https://api.finam.ru/v1/accounts/{{account_id}}/transactions?interval.start_time=2025-01-01T00:00:00Z&interval.end_time=2026-03-15T00:00:00Z
 Content-Type: application/json
 Accept: application/json
 Authorization: {{jwt}}

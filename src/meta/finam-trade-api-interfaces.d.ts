@@ -27,7 +27,7 @@ export interface MoneyValue {
 /**
  * Временная метка
  */
-export interface Timestamp {
+export interface Date {
   year: number;
   month: number;
   day: number;
@@ -309,7 +309,6 @@ export interface Trade {
  */
 export interface TradesResponse {
   trades: Trade[];
-  total?: number;
 }
 
 /**
@@ -330,7 +329,6 @@ export interface Transaction {
  */
 export interface TransactionsResponse {
   transactions: Transaction[];
-  total?: number;
 }
 
 // ===================================
@@ -426,10 +424,10 @@ export interface Option {
   symbol: string;
   type: string; // OptionType as string
   contract_size: DecimalValue;
-  trade_last_day: Timestamp;
+  trade_last_day: Date;
   strike: DecimalValue;
-  expiration_first_day: Timestamp;
-  expiration_last_day: Timestamp;
+  expiration_first_day: Date;
+  expiration_last_day: Date;
 }
 
 /**

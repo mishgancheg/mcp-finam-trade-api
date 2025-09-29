@@ -10,6 +10,7 @@ import * as _c from '../../dist/src/init-config.js';
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
+import net from 'net';
 import { getMockResponse } from './data/data.js';
 
 // Configuration
@@ -577,32 +578,69 @@ app.use((err, req, res) => {
   });
 });
 
-// Запуск сервера
-app.listen(PORT, () => {
-  console.log(`\n✅ FINAM Trade API Emulator started`);
-  console.log(`🔗 Base URL: http://localhost:${PORT}`);
-  console.log(`🔑 JWT Secret: ${JWT_SECRET}`);
-  console.log(`📝 Default Account ID: ${DEFAULT_ACCOUNT_ID}`);
-  console.log('\n📍 Available endpoints:');
-  console.log('  POST   /v1/sessions                                     - Get JWT token');
-  console.log('  POST   /v1/sessions/details                             - Token details');
-  console.log('  GET    /v1/accounts/{account_id}                        - Account info');
-  console.log('  GET    /v1/accounts/{account_id}/trades                 - Trade history');
-  console.log('  GET    /v1/accounts/{account_id}/transactions           - Transactions');
-  console.log('  GET    /v1/assets                                       - List instruments');
-  console.log('  GET    /v1/assets/clock                                 - Server time');
-  console.log('  GET    /v1/exchanges                                    - List exchanges');
-  console.log('  GET    /v1/assets/{symbol}                              - Instrument info');
-  console.log('  GET    /v1/assets/{symbol}/params                       - Trading params');
-  console.log('  GET    /v1/assets/{symbol}/options                      - Options chain');
-  console.log('  GET    /v1/assets/{symbol}/schedule                     - Trading schedule');
-  console.log('  POST   /v1/accounts/{account_id}/orders                 - Place order');
-  console.log('  DELETE /v1/accounts/{account_id}/orders/{order_id}      - Cancel order');
-  console.log('  GET    /v1/accounts/{account_id}/orders                 - List orders');
-  console.log('  GET    /v1/accounts/{account_id}/orders/{order_id}      - Order info');
-  console.log('  GET    /v1/instruments/{symbol}/bars                    - Historical bars');
-  console.log('  GET    /v1/instruments/{symbol}/quotes/latest           - Latest quote');
-  console.log('  GET    /v1/instruments/{symbol}/trades/latest           - Latest trades');
-  console.log('  GET    /v1/instruments/{symbol}/orderbook               - Order book');
-  console.log('\n⚡ Ready to accept requests\n');
-});
+/**
+ * Check if port is available
+ */
+function checkPort (port) {
+  return new Promise((resolve, reject) => {
+    const tester = net.createServer()
+      .once('error', (err) => {
+        if (err.code === 'EADDRINUSE') {
+          resolve(false);
+        } else {
+          reject(err);
+        }
+      })
+      .once('listening', () => {
+        tester.once('close', () => {
+          resolve(true);
+        }).close();
+      })
+      .listen(port);
+  });
+}
+
+// Check port before starting
+checkPort(PORT)
+  .then((isAvailable) => {
+    if (!isAvailable) {
+      console.error(`\n❌ Error: Port ${PORT} is already in use`);
+      console.error(`\n💡 To free the port, run: scripts\\kill-port.bat ${PORT}`);
+      console.error(`   or: scripts\\kill-emulator.bat\n`);
+      process.exit(1);
+    }
+
+    // Start server if port is available
+    app.listen(PORT, () => {
+      console.log(`\n✅ FINAM Trade API Emulator started`);
+      console.log('\n📍 Available endpoints:');
+      console.log('  POST   /v1/sessions                                     - Get JWT token');
+      console.log('  POST   /v1/sessions/details                             - Token details');
+      console.log('  GET    /v1/accounts/{account_id}                        - Account info');
+      console.log('  GET    /v1/accounts/{account_id}/trades                 - Trade history');
+      console.log('  GET    /v1/accounts/{account_id}/transactions           - Transactions');
+      console.log('  GET    /v1/assets                                       - List instruments');
+      console.log('  GET    /v1/assets/clock                                 - Server time');
+      console.log('  GET    /v1/exchanges                                    - List exchanges');
+      console.log('  GET    /v1/assets/{symbol}                              - Instrument info');
+      console.log('  GET    /v1/assets/{symbol}/params                       - Trading params');
+      console.log('  GET    /v1/assets/{symbol}/options                      - Options chain');
+      console.log('  GET    /v1/assets/{symbol}/schedule                     - Trading schedule');
+      console.log('  POST   /v1/accounts/{account_id}/orders                 - Place order');
+      console.log('  DELETE /v1/accounts/{account_id}/orders/{order_id}      - Cancel order');
+      console.log('  GET    /v1/accounts/{account_id}/orders                 - List orders');
+      console.log('  GET    /v1/accounts/{account_id}/orders/{order_id}      - Order info');
+      console.log('  GET    /v1/instruments/{symbol}/bars                    - Historical bars');
+      console.log('  GET    /v1/instruments/{symbol}/quotes/latest           - Latest quote');
+      console.log('  GET    /v1/instruments/{symbol}/trades/latest           - Latest trades');
+      console.log('  GET    /v1/instruments/{symbol}/orderbook               - Order book');
+      console.log(`\n🔗 Base URL: http://localhost:${PORT}`);
+      console.log(`🔑 JWT Secret: ${JWT_SECRET}`);
+      console.log(`📝 Default Account ID: ${DEFAULT_ACCOUNT_ID}`);
+      console.log('\n⚡ Ready to accept requests\n');
+    });
+  })
+  .catch((err) => {
+    console.error(`\n❌ Error checking port ${PORT}:`, err.message);
+    process.exit(1);
+  });
