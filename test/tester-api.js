@@ -144,22 +144,17 @@ function getTests(config) {
     // Group 4: Orders
     {
       fullId: '4-1',
-      name: 'PlaceOrder',
-      testFn: () => api.PlaceOrder({
+      name: 'CancelOrder',
+      testFn: () => api.CancelOrder({
         secret_token: config.secretToken,
         account_id: config.accountId,
-        symbol: config.symbol,
-        quantity: '1',
-        side: 'SIDE_BUY',
-        type: 'ORDER_TYPE_LIMIT',
-        time_in_force: 'TIME_IN_FORCE_DAY',
-        limit_price: '1000',
+        order_id: 'test-order-id', // Replace with real order_id
       }),
     },
     {
       fullId: '4-2',
-      name: 'CancelOrder',
-      testFn: () => api.CancelOrder({
+      name: 'GetOrder',
+      testFn: () => api.GetOrder({
         secret_token: config.secretToken,
         account_id: config.accountId,
         order_id: 'test-order-id', // Replace with real order_id
@@ -172,13 +167,19 @@ function getTests(config) {
     },
     {
       fullId: '4-4',
-      name: 'GetOrder',
-      testFn: () => api.GetOrder({
+      name: 'PlaceOrder',
+      testFn: () => api.PlaceOrder({
         secret_token: config.secretToken,
         account_id: config.accountId,
-        order_id: 'test-order-id', // Replace with real order_id
+        symbol: config.symbol,
+        quantity: '1',
+        side: 'SIDE_BUY',
+        type: 'ORDER_TYPE_LIMIT',
+        time_in_force: 'TIME_IN_FORCE_DAY',
+        limit_price: '1000',
       }),
     },
+
     // Group 5: Market Data
     {
       fullId: '5-1',
