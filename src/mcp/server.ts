@@ -29,21 +29,7 @@ import express from 'express';
 import helmet from 'helmet';
 import * as api from '../api.js';
 import { formatResponse } from './formatters.js';
-import {
-  OrderType,
-  TimeInForce,
-  OrderStatus,
-  StopCondition,
-  QuoteLevel,
-  AccountType,
-  AccountStatus,
-  AssetType,
-  OptionType,
-  SessionType,
-  TimeFrame,
-  TransactionCategory,
-  OrderBookAction,
-} from '../meta/finam-trade-api-enums.js';
+import * as Enums from '../meta/finam-trade-api-enums.js';
 
 // Environment configuration
 const RETURN_AS = (process.env.RETURN_AS || 'json') as 'json' | 'string';
@@ -75,87 +61,36 @@ function extractCredentials (headers?: Record<string, string>): IHeaderCreds | n
   return { secret_token, account_id: accountIdHeader };
 }
 
+// Enum resources configuration
+const ENUM_RESOURCES = [
+  { name: 'OrderType', description: 'order type' },
+  { name: 'TimeInForce', description: 'time in force' },
+  { name: 'OrderStatus', description: 'order status' },
+  { name: 'StopCondition', description: 'stop condition' },
+  { name: 'QuoteLevel', description: 'quote level' },
+  { name: 'AccountType', description: 'account type' },
+  { name: 'AccountStatus', description: 'account status' },
+  { name: 'AssetType', description: 'asset type' },
+  { name: 'OptionType', description: 'option type' },
+  { name: 'SessionType', description: 'session type' },
+  { name: 'TimeFrame', description: 'timeframe' },
+  { name: 'TransactionCategory', description: 'transaction category' },
+  { name: 'OrderBookAction', description: 'order book action' },
+] as const;
+
 // Create resource definitions for enums
 function createResources (): Resource[] {
+  // Generate enum resources
+  const enumResources = ENUM_RESOURCES.map(({ name, description }) => ({
+    uri: `enum://${name}`,
+    name: `${name} enum values`,
+    description: `All possible ${description} values`,
+    mimeType: 'application/json',
+  }));
+
+  // Add exchange resource
   return [
-    {
-      uri: 'enum://OrderType',
-      name: 'OrderType enum values',
-      description: 'All possible order type values',
-      mimeType: 'application/json',
-    },
-    {
-      uri: 'enum://TimeInForce',
-      name: 'TimeInForce enum values',
-      description: 'All possible time in force values',
-      mimeType: 'application/json',
-    },
-    {
-      uri: 'enum://OrderStatus',
-      name: 'OrderStatus enum values',
-      description: 'All possible order status values',
-      mimeType: 'application/json',
-    },
-    {
-      uri: 'enum://StopCondition',
-      name: 'StopCondition enum values',
-      description: 'All possible stop condition values',
-      mimeType: 'application/json',
-    },
-    {
-      uri: 'enum://QuoteLevel',
-      name: 'QuoteLevel enum values',
-      description: 'All possible quote level values',
-      mimeType: 'application/json',
-    },
-    {
-      uri: 'enum://AccountType',
-      name: 'AccountType enum values',
-      description: 'All possible account type values',
-      mimeType: 'application/json',
-    },
-    {
-      uri: 'enum://AccountStatus',
-      name: 'AccountStatus enum values',
-      description: 'All possible account status values',
-      mimeType: 'application/json',
-    },
-    {
-      uri: 'enum://AssetType',
-      name: 'AssetType enum values',
-      description: 'All possible asset type values',
-      mimeType: 'application/json',
-    },
-    {
-      uri: 'enum://OptionType',
-      name: 'OptionType enum values',
-      description: 'All possible option type values',
-      mimeType: 'application/json',
-    },
-    {
-      uri: 'enum://SessionType',
-      name: 'SessionType enum values',
-      description: 'All possible session type values',
-      mimeType: 'application/json',
-    },
-    {
-      uri: 'enum://TimeFrame',
-      name: 'TimeFrame enum values',
-      description: 'All possible timeframe values',
-      mimeType: 'application/json',
-    },
-    {
-      uri: 'enum://TransactionCategory',
-      name: 'TransactionCategory enum values',
-      description: 'All possible transaction category values',
-      mimeType: 'application/json',
-    },
-    {
-      uri: 'enum://OrderBookAction',
-      name: 'OrderBookAction enum values',
-      description: 'All possible order book action values',
-      mimeType: 'application/json',
-    },
+    ...enumResources,
     {
       uri: 'exchange://list',
       name: 'Exchanges list',
@@ -168,26 +103,12 @@ function createResources (): Resource[] {
 // Handle resource read requests
 async function handleReadResource (uri: string): Promise<string> {
   // Handle enum resources
-  const enumMap: Record<string, Record<string, string>> = {
-    'enum://OrderType': OrderType,
-    'enum://TimeInForce': TimeInForce,
-    'enum://OrderStatus': OrderStatus,
-    'enum://StopCondition': StopCondition,
-    'enum://QuoteLevel': QuoteLevel,
-    'enum://AccountType': AccountType,
-    'enum://AccountStatus': AccountStatus,
-    'enum://AssetType': AssetType,
-    'enum://OptionType': OptionType,
-    'enum://SessionType': SessionType,
-    'enum://TimeFrame': TimeFrame,
-    'enum://TransactionCategory': TransactionCategory,
-    'enum://OrderBookAction': OrderBookAction,
-  };
-
-  const enumData = enumMap[uri];
-  if (enumData) {
+  const enumResource = ENUM_RESOURCES.find(({ name }) => uri === `enum://${name}`);
+  if (enumResource) {
+    // Get enum object dynamically by name
+    const enumObject = Enums[enumResource.name as keyof typeof Enums];
     // Return array of enum values only (without key duplication)
-    const values = Object.values(enumData);
+    const values = Object.values(enumObject);
     return JSON.stringify(values, null, 2);
   }
 
@@ -478,7 +399,7 @@ client_order_id  – uniq id for order
             description: 'Unique order ID (optional). Automatically generated if not sent. (maximum 20 characters)',
             minLength: 3,
             maxLength: 20,
-            pattern: "^[A-Za-z0-9 ]+$"
+            pattern: "^[A-Za-z0-9 ]+$",
           },
           legs: {
             type: 'array',
@@ -488,7 +409,7 @@ client_order_id  – uniq id for order
               properties: {
                 symbol: {
                   type: 'string',
-                  description: 'Instrument symbol in format: SYMBOL@MIC (e.g. SBER@MISX)'
+                  description: 'Instrument symbol in format: SYMBOL@MIC (e.g. SBER@MISX)',
                 },
                 quantity: {
                   type: 'number',
@@ -497,11 +418,11 @@ client_order_id  – uniq id for order
                 side: {
                   type: 'string',
                   enum: ['SIDE_BUY', 'SIDE_SELL'],
-                  description: 'Leg side'
-                }
+                  description: 'Leg side',
+                },
               },
               required: ['symbol', 'quantity', 'side'],
-            }
+            },
           },
         },
         required: addRequired(['symbol', 'quantity', 'side', 'type', 'time_in_force']),
@@ -692,7 +613,7 @@ export async function startHttpServer (port: number = HTTP_PORT) {
     res.json({
       status: 'ok',
       transports: ['stdio', 'sse', 'streamable-http'],
-      returnAs: RETURN_AS
+      returnAs: RETURN_AS,
     });
   });
 
@@ -791,7 +712,7 @@ export async function startHttpServer (port: number = HTTP_PORT) {
           const response = {
             jsonrpc: '2.0',
             id: request.id,
-            result
+            result,
           };
 
           console.error(`[Streamable HTTP] Response sent for request ${request.id}`);
