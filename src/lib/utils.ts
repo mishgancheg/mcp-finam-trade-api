@@ -225,7 +225,6 @@ export const toDecimalString = (quantity: number): string => {
   } else {
     // Negative exponent: shift decimal left
     const absExp = Math.abs(exponent);
-    const totalShift = absExp - mantissaDecimals;
 
     // Calculate position where decimal should go
     // For 1.2e-7: intPart=1, allDigits=12, absExp=7

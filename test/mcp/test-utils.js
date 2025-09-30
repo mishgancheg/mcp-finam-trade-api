@@ -66,7 +66,7 @@ export function saveTestResult (outputDir, type, name, request, response) {
   const res = { ...response };
 
   if (parsedContent !== null) {
-    res.result[where][0].text = '📝'
+    res.result[where][0].text = '📝';
   }
   let content = `# ${type.toUpperCase()}: ${name}
 

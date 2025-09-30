@@ -32,7 +32,6 @@ const invalid: any[] = [Infinity, -Infinity, NaN];
 for (const v of invalid) {
   let threw = false;
   try {
-    // @ts-ignore
     toDecimalString(v);
   } catch {
     threw = true;

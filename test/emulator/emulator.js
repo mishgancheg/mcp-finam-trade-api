@@ -316,7 +316,7 @@ app.get('/v1/assets/:symbol', authMiddleware, (req, res) => {
 
 // 3-5: GetAssetParams - Торговые параметры инструмента
 app.get('/v1/assets/:symbol/params', authMiddleware, (req, res) => {
-  const { symbol } = req.params;
+  // const { symbol } = req.params;
   const { account_id } = req.query;
   const { data } = getMockResponse('3-5');
   data.account_id = account_id || DEFAULT_ACCOUNT_ID;

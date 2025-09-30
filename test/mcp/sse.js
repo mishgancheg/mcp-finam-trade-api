@@ -32,7 +32,7 @@ const MESSAGE_ENDPOINT = `${testConfig.baseUrl}/message`;
  * SSE Client for MCP communication
  */
 class McpSseClient {
-  constructor() {
+  constructor () {
     this.eventSource = null;
     this.pendingRequests = new Map();
     this.requestIdCounter = 0;
@@ -41,7 +41,7 @@ class McpSseClient {
   /**
    * Connect to SSE endpoint
    */
-  async connect() {
+  async connect () {
     return new Promise((resolve, reject) => {
       this.eventSource = new EventSource(SSE_ENDPOINT, {
         headers: {
@@ -81,7 +81,7 @@ class McpSseClient {
   /**
    * Handle response from server
    */
-  handleResponse(response) {
+  handleResponse (response) {
     const requestId = response.id;
     const pending = this.pendingRequests.get(requestId);
 
@@ -98,7 +98,7 @@ class McpSseClient {
   /**
    * Send MCP request
    */
-  async sendRequest(method, params) {
+  async sendRequest (method, params) {
     const requestId = `req-${++this.requestIdCounter}`;
 
     const request = {
@@ -146,19 +146,19 @@ class McpSseClient {
   /**
    * List all tools
    */
-  async listTools() {
+  async listTools () {
     const response = await this.sendRequest('tools/list', {});
     return {
       request: { method: 'tools/list', params: {} },
       response,
-      tools: response.result?.tools || []
+      tools: response.result?.tools || [],
     };
   }
 
   /**
    * Call a tool
    */
-  async callTool(toolName, args) {
+  async callTool (toolName, args) {
     return await this.sendRequest('tools/call', {
       name: toolName,
       arguments: {
@@ -171,31 +171,31 @@ class McpSseClient {
   /**
    * List all resources
    */
-  async listResources() {
+  async listResources () {
     const response = await this.sendRequest('resources/list', {});
     return {
       request: { method: 'resources/list', params: {} },
       response,
-      resources: response.result?.resources || []
+      resources: response.result?.resources || [],
     };
   }
 
   /**
    * List all prompts
    */
-  async listPrompts() {
+  async listPrompts () {
     try {
       const response = await this.sendRequest('prompts/list', {});
       return {
         request: { method: 'prompts/list', params: {} },
         response,
-        prompts: response.result?.prompts || []
+        prompts: response.result?.prompts || [],
       };
     } catch (error) {
       return {
         request: { method: 'prompts/list', params: {} },
         response: { error: error.message },
-        prompts: []
+        prompts: [],
       };
     }
   }
@@ -203,14 +203,14 @@ class McpSseClient {
   /**
    * Read a resource
    */
-  async readResource(uri) {
+  async readResource (uri) {
     return await this.sendRequest('resources/read', { uri });
   }
 
   /**
    * Close connection
    */
-  close() {
+  close () {
     if (this.eventSource) {
       this.eventSource.close();
       console.log('\n✅ SSE connection closed');
@@ -221,7 +221,7 @@ class McpSseClient {
 /**
  * Test all tools
  */
-async function testTools(client, outputDir) {
+async function testTools (client, outputDir) {
   console.log('\n📋 Testing Tools...\n');
 
   let successCount = 0;
@@ -262,7 +262,7 @@ async function testTools(client, outputDir) {
 /**
  * Test all resources
  */
-async function testResources(client, outputDir) {
+async function testResources (client, outputDir) {
   console.log('\n📚 Testing Resources...\n');
 
   let successCount = 0;
@@ -297,7 +297,7 @@ async function testResources(client, outputDir) {
 /**
  * Test prompts listing
  */
-async function testPrompts(client, outputDir) {
+async function testPrompts (client, outputDir) {
   console.log('\n💬 Testing Prompts...\n');
 
   try {
@@ -312,7 +312,7 @@ async function testPrompts(client, outputDir) {
       console.log('No prompts available (or not supported by server)\n');
       return { successCount: 0, errorCount: 0 };
     }
-  } catch (error) {
+  } catch {
     console.log('Prompts not supported by this MCP server\n');
     return { successCount: 0, errorCount: 0 };
   }
@@ -321,7 +321,7 @@ async function testPrompts(client, outputDir) {
 /**
  * Main test function
  */
-async function runTests() {
+async function runTests () {
   logTestStart(TRANSPORT_NAME);
 
   // Ensure output directory exists
@@ -335,7 +335,7 @@ async function runTests() {
       throw new Error('MCP server is not responding');
     }
     console.log('✅ MCP server is running\n');
-  } catch (error) {
+  } catch {
     console.error('❌ Cannot connect to MCP server. Please start it with: npm run mcp:http');
     process.exit(1);
   }

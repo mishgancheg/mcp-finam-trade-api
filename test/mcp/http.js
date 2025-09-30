@@ -241,7 +241,7 @@ async function testPrompts (outputDir) {
       console.log('No prompts available (or not supported by server)\n');
       return { successCount: 0, errorCount: 0 };
     }
-  } catch (error) {
+  } catch {
     console.log('Prompts not supported by this MCP server\n');
     return { successCount: 0, errorCount: 0 };
   }
@@ -264,7 +264,7 @@ async function runTests () {
       throw new Error('MCP server is not responding');
     }
     console.log('✅ MCP server is running\n');
-  } catch (error) {
+  } catch {
     console.error('❌ Cannot connect to MCP server. Please start it with: npm run mcp:http');
     process.exit(1);
   }

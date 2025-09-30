@@ -31,7 +31,7 @@ import type {
 /**
  * Format API result based on tool name and return mode
  */
-export function formatResponse(toolName: string, data: unknown, returnAs: 'json' | 'string'): string {
+export function formatResponse (toolName: string, data: unknown, returnAs: 'json' | 'string'): string {
 
   // JSON mode - return as-is with special processing
   if (returnAs === 'json') {
@@ -45,14 +45,14 @@ export function formatResponse(toolName: string, data: unknown, returnAs: 'json'
 /**
  * Format response in JSON mode
  */
-function formatJsonResponse(toolName: string, data: unknown): string {
+function formatJsonResponse (toolName: string, data: unknown): string {
   // Special handling for Assets (3-1)
   if (toolName === 'Assets') {
     const response = data as AssetsResponse;
     if (response.assets && Array.isArray(response.assets)) {
       // Remove 'mic' property and limit to 1000 items
       const cleaned = response.assets.slice(0, 1000).map((asset) => {
-        const { mic, ...rest } = asset as { mic?: string };
+        const { mic: _mic, ...rest } = asset as { mic?: string };
         return rest;
       });
       return JSON.stringify({ assets: cleaned }, null, 2);
@@ -76,7 +76,7 @@ function formatJsonResponse(toolName: string, data: unknown): string {
 /**
  * Format response in string mode for LLM consumption
  */
-function formatStringResponse(toolName: string, data: unknown): string {
+function formatStringResponse (toolName: string, data: unknown): string {
   // Special handling for Assets (3-1)
   if (toolName === 'Assets') {
     return formatAssetsAsString(data as AssetsResponse);
@@ -139,7 +139,7 @@ function formatStringResponse(toolName: string, data: unknown): string {
  * Format Assets response as CSV string (max 2000 records)
  * Format: symbol,id,ticker,isin,type,name
  */
-function formatAssetsAsString(response: AssetsResponse): string {
+function formatAssetsAsString (response: AssetsResponse): string {
   if (!response.assets || !Array.isArray(response.assets)) {
     return 'No assets found';
   }
@@ -163,7 +163,7 @@ function formatAssetsAsString(response: AssetsResponse): string {
 /**
  * Format LatestTrades response as string (max 100 records)
  */
-function formatLatestTradesAsString(response: LatestTradesResponse): string {
+function formatLatestTradesAsString (response: LatestTradesResponse): string {
   if (!response.trades || !Array.isArray(response.trades)) {
     return 'No trades found';
   }
@@ -183,11 +183,11 @@ function formatLatestTradesAsString(response: LatestTradesResponse): string {
   return lines.join('\n');
 }
 
-function formatAuthAsString(response: AuthResponse): string {
+function formatAuthAsString (response: AuthResponse): string {
   return `JWT Token: ${response.token || 'N/A'}`;
 }
 
-function formatTokenDetailsAsString(response: TokenDetailsResponse): string {
+function formatTokenDetailsAsString (response: TokenDetailsResponse): string {
   const lines = [`Token Details:`, `- Created: ${response.created_at || 'N/A'}`, `- Expires: ${response.expires_at || 'N/A'}`];
 
   if (response.scopes && response.scopes.length > 0) {
@@ -197,7 +197,7 @@ function formatTokenDetailsAsString(response: TokenDetailsResponse): string {
   return lines.join('\n');
 }
 
-function formatAccountAsString(response: GetAccountResponse): string {
+function formatAccountAsString (response: GetAccountResponse): string {
   return [
     `Account: ${response.account_id || 'N/A'}`,
     `Equity: ${response.equity?.value || '0'}`,
@@ -206,7 +206,7 @@ function formatAccountAsString(response: GetAccountResponse): string {
   ].join('\n');
 }
 
-function formatTradesAsString(response: TradesResponse): string {
+function formatTradesAsString (response: TradesResponse): string {
   if (!response.trades || response.trades.length === 0) {
     return 'No trades found';
   }
@@ -221,7 +221,7 @@ function formatTradesAsString(response: TradesResponse): string {
   return lines.join('\n');
 }
 
-function formatTransactionsAsString(response: TransactionsResponse): string {
+function formatTransactionsAsString (response: TransactionsResponse): string {
   if (!response.transactions || response.transactions.length === 0) {
     return 'No transactions found';
   }
@@ -234,11 +234,11 @@ function formatTransactionsAsString(response: TransactionsResponse): string {
   return lines.join('\n');
 }
 
-function formatClockAsString(response: ClockResponse): string {
+function formatClockAsString (response: ClockResponse): string {
   return `Server Time: ${response.timestamp || 'N/A'}`;
 }
 
-function formatExchangesAsString(response: ExchangesResponse): string {
+function formatExchangesAsString (response: ExchangesResponse): string {
   if (!response.exchanges || response.exchanges.length === 0) {
     return 'No exchanges found';
   }
@@ -251,7 +251,7 @@ function formatExchangesAsString(response: ExchangesResponse): string {
   return lines.join('\n');
 }
 
-function formatAssetAsString(response: GetAssetResponse): string {
+function formatAssetAsString (response: GetAssetResponse): string {
   return [
     `Symbol: ${response.symbol}`,
     `Name: ${response.name}`,
@@ -262,7 +262,7 @@ function formatAssetAsString(response: GetAssetResponse): string {
   ].join('\n');
 }
 
-function formatAssetParamsAsString(response: GetAssetParamsResponse): string {
+function formatAssetParamsAsString (response: GetAssetParamsResponse): string {
   return [
     `Symbol: ${response.symbol}`,
     `Account: ${response.account_id}`,
@@ -274,7 +274,7 @@ function formatAssetParamsAsString(response: GetAssetParamsResponse): string {
   ].join('\n');
 }
 
-function formatAssetDetailsAsString(response: GetAssetResponse & GetAssetParamsResponse): string {
+function formatAssetDetailsAsString (response: GetAssetResponse & GetAssetParamsResponse): string {
   const lines = [
     '=== Asset Information ===',
     `Symbol: ${response.symbol}`,
@@ -341,7 +341,7 @@ function formatAssetDetailsAsString(response: GetAssetResponse & GetAssetParamsR
   return lines.join('\n');
 }
 
-function formatOptionsChainAsString(response: OptionsChainResponse): string {
+function formatOptionsChainAsString (response: OptionsChainResponse): string {
   if (!response.options || response.options.length === 0) {
     return 'No options found';
   }
@@ -355,7 +355,7 @@ function formatOptionsChainAsString(response: OptionsChainResponse): string {
   return lines.join('\n');
 }
 
-function formatScheduleAsString(response: ScheduleResponse): string {
+function formatScheduleAsString (response: ScheduleResponse): string {
   if (!response.sessions || response.sessions.length === 0) {
     return 'No schedule found';
   }
@@ -368,7 +368,7 @@ function formatScheduleAsString(response: ScheduleResponse): string {
   return lines.join('\n');
 }
 
-function formatPlaceOrderAsString(response: PlaceOrderResponse): string {
+function formatPlaceOrderAsString (response: PlaceOrderResponse): string {
   return [
     `Order Placed:`,
     `- Order ID: ${response.order_id}`,
@@ -377,11 +377,11 @@ function formatPlaceOrderAsString(response: PlaceOrderResponse): string {
   ].join('\n');
 }
 
-function formatCancelOrderAsString(response: CancelOrderResponse): string {
+function formatCancelOrderAsString (response: CancelOrderResponse): string {
   return `Order ${response.order_id} cancelled successfully`;
 }
 
-function formatOrdersAsString(response: GetOrdersResponse): string {
+function formatOrdersAsString (response: GetOrdersResponse): string {
   if (!response.orders || response.orders.length === 0) {
     return 'No orders found';
   }
@@ -396,7 +396,7 @@ function formatOrdersAsString(response: GetOrdersResponse): string {
   return lines.join('\n');
 }
 
-function formatOrderAsString(response: GetOrderResponse): string {
+function formatOrderAsString (response: GetOrderResponse): string {
   return [
     `Order ${response.order_id}:`,
     `- Symbol: ${response.order?.symbol}`,
@@ -408,7 +408,7 @@ function formatOrderAsString(response: GetOrderResponse): string {
   ].join('\n');
 }
 
-function formatBarsAsString(response: BarsResponse): string {
+function formatBarsAsString (response: BarsResponse): string {
   if (!response.bars || response.bars.length === 0) {
     return 'No bars found';
   }
@@ -423,7 +423,7 @@ function formatBarsAsString(response: BarsResponse): string {
   return lines.join('\n');
 }
 
-function formatLastQuoteAsString(response: LastQuoteResponse): string {
+function formatLastQuoteAsString (response: LastQuoteResponse): string {
   return [
     `Last Quote:`,
     `- Bid: ${response.bid?.value || 'N/A'}`,
@@ -433,7 +433,7 @@ function formatLastQuoteAsString(response: LastQuoteResponse): string {
   ].join('\n');
 }
 
-function formatOrderBookAsString(response: OrderBookResponse): string {
+function formatOrderBookAsString (response: OrderBookResponse): string {
   const rows = response.orderbook?.rows || [];
 
   const bids = rows.filter(r => r.buy_size && r.buy_size.value !== '0');

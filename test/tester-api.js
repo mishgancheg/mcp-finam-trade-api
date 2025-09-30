@@ -13,7 +13,7 @@ import { getJwtToken } from '../dist/src/lib/jwt-auth.js';
 
 // ==================== Configuration ====================
 
-function getTestConfig() {
+function getTestConfig () {
   const secretToken = process.env.API_SECRET_TOKEN;
   const accountId = process.env.ACCOUNT_ID;
   const baseUrl = process.env.API_BASE_URL;
@@ -36,7 +36,7 @@ function getTestConfig() {
 
 // ==================== Test Runner ====================
 
-async function runTest(fullId, name, testFn) {
+async function runTest (fullId, name, testFn) {
   try {
     await testFn();
     console.log(chalk.green(`[${fullId}] ✅  ${name}`));
@@ -51,7 +51,7 @@ async function runTest(fullId, name, testFn) {
 
 // ==================== Test Cases ====================
 
-function getTests(config) {
+function getTests (config) {
   const endTime = new Date().toISOString();
   const startTime30d = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
   const startTime7d = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
@@ -68,7 +68,7 @@ function getTests(config) {
       name: 'TokenDetails',
       testFn: async () => {
         const jwt_token = await getJwtToken(config.secretToken);
-        return api.TokenDetails({ jwt_token })
+        return api.TokenDetails({ jwt_token });
       },
     },
     // Group 2: Accounts
@@ -212,7 +212,7 @@ function getTests(config) {
 
 // ==================== Main Test Suite ====================
 
-async function runAllTests() {
+async function runAllTests () {
   const config = getTestConfig();
   const tests = getTests(config);
   const results = [];
@@ -230,7 +230,7 @@ async function runAllTests() {
 
 // ==================== CLI Interface ====================
 
-async function main() {
+async function main () {
   try {
     await runAllTests();
     process.exit(0);

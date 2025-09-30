@@ -36,7 +36,8 @@ import {
   BarsResponse,
   LastQuoteResponse,
   LatestTradesResponse,
-  OrderBookResponse, DecimalValue, Side, OrderType, TimeInForce, StopCondition, OrderLeg,
+  OrderBookResponse,
+  OrderLeg,
 } from './meta/finam-trade-api-interfaces.js';
 import { isNonEmptyObject, toDecimalString } from "./lib/utils.js";
 
@@ -75,10 +76,10 @@ async function makeRequest<T> (
 
   if (urlPath === 'sessions') {
     jwtToken = await getJwtToken(secretToken);
-    return { token: jwtToken  } as T;
+    return { token: jwtToken } as T;
   } else if (urlPath === 'sessions/details') {
     // No need to set Authorization header for this endpoint
-  }  else {
+  } else {
     jwtToken = await getJwtToken(secretToken);
     headers.Authorization = jwtToken;
   }
@@ -115,7 +116,7 @@ async function makeRequest<T> (
       if ('code' in obj && 'message' in obj) {
         throw new McpError(
           ErrorCode.InternalError,
-          obj.message as string
+          obj.message as string,
         );
       }
     }
@@ -123,7 +124,7 @@ async function makeRequest<T> (
     // Unknown API error format
     throw new McpError(
       ErrorCode.InternalError,
-      typeof response.body === 'string' ? response.body : JSON.stringify(response.body)
+      typeof response.body === 'string' ? response.body : JSON.stringify(response.body),
     );
 
   } catch (error) {
@@ -144,14 +145,14 @@ async function makeRequest<T> (
           ? 'Внешний API недоступен (timeout)'
           : isNetwork
             ? 'Не удалось подключиться к внешнему API'
-            : `Ошибка при обращении к API: ${error.message}`
+            : `Ошибка при обращении к API: ${error.message}`,
       );
     }
 
     // Unknown error type
     throw new McpError(
       ErrorCode.InternalError,
-      `Неизвестная ошибка: ${String(error)}`
+      `Неизвестная ошибка: ${String(error)}`,
     );
   }
 }
@@ -167,7 +168,7 @@ export async function Auth (params: { secret_token: string; }): Promise<AuthResp
 }
 
 // 1-2
-export async function TokenDetails (params: {  jwt_token: string}): Promise<TokenDetailsResponse> {
+export async function TokenDetails (params: { jwt_token: string }): Promise<TokenDetailsResponse> {
   const result = await makeRequest<TokenDetailsResponse>(
     'POST',
     `sessions/details`,
@@ -247,7 +248,7 @@ interface ExchangesCache {
 
 const exchangesCache: ExchangesCache = {
   data: null,
-  timestamp: 0
+  timestamp: 0,
 };
 
 // 3-3
@@ -309,7 +310,7 @@ export async function GetAssetDetails (params: {
 }): Promise<GetAssetResponse & GetAssetParamsResponse> {
   const [asset, assetParams] = await Promise.all([
     GetAsset(params),
-    GetAssetParams(params)
+    GetAssetParams(params),
   ]);
 
   return { ...asset, ...assetParams };

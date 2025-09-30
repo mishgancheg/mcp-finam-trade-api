@@ -188,7 +188,7 @@ class McpStdioClient {
     return {
       request: { method: 'tools/list', params: {} },
       response,
-      tools: response.result?.tools || []
+      tools: response.result?.tools || [],
     };
   }
 
@@ -213,7 +213,7 @@ class McpStdioClient {
     return {
       request: { method: 'resources/list', params: {} },
       response,
-      resources: response.result?.resources || []
+      resources: response.result?.resources || [],
     };
   }
 
@@ -226,13 +226,13 @@ class McpStdioClient {
       return {
         request: { method: 'prompts/list', params: {} },
         response,
-        prompts: response.result?.prompts || []
+        prompts: response.result?.prompts || [],
       };
     } catch (error) {
       return {
         request: { method: 'prompts/list', params: {} },
         response: { error: error.message },
-        prompts: []
+        prompts: [],
       };
     }
   }
@@ -349,7 +349,7 @@ async function testPrompts (client, outputDir) {
       console.log('No prompts available (or not supported by server)\n');
       return { successCount: 0, errorCount: 0 };
     }
-  } catch (error) {
+  } catch {
     console.log('Prompts not supported by this MCP server\n');
     return { successCount: 0, errorCount: 0 };
   }
