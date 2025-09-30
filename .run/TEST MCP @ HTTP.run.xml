@@ -1,0 +1,5 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="TEST MCP @ HTTP" type="NodeJSConfigurationType" folderName="TEST-MCP" path-to-js-file="http.js" working-dir="$PROJECT_DIR$/test/mcp">
+    <method v="2" />
+  </configuration>
+</component>

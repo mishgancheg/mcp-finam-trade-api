@@ -18,6 +18,9 @@
     "typecheck": "tsc --noEmit",
     "test:endpoints": "node test/tester-endpoints.js",
     "test:api": "node test/tester-api.js",
+    "test:mcp:http": "node test/mcp/http.js",
+    "test:mcp:sse": "node test/mcp/sse.js",
+    "test:mcp:stdio": "node test/mcp/stdio.js",
     "clean:nul": "node scripts/remove-nul.js",
     "emulator": "node test/emulator/emulator.js",
     "mcp": "node dist/src/mcp/index.js",
@@ -63,6 +66,7 @@
     "eslint": "^9.36.0",
     "eslint-config-at-25": "^25.9.6",
     "eslint-plugin-import": "^2.32.0",
+    "eventsource": "^2.0.2",
     "rimraf": "^6.0.1",
     "tsx": "^4.20.6",
     "typescript": "^5.9.2"

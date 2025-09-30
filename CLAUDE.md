@@ -33,6 +33,11 @@ npm run typecheck     # Check TypeScript types without building
 npm run mcp           # stdio transport (for Claude Desktop)
 npm run mcp:http      # HTTP/SSE transport
 
+# Test MCP Server (all transports)
+npm run test:mcp:http   # Test HTTP transport
+npm run test:mcp:sse    # Test SSE transport
+npm run test:mcp:stdio  # Test STDIO transport
+
 # Run the compiled application
 npm start
 ```
@@ -60,6 +65,11 @@ Copy `.env.example` to `.env` and configure:
   - `lib/` - Utility libraries (JWT auth, utils)
   - `index.ts` - Main entry point
 - `test/` - Testing infrastructure
+  - `mcp/` - MCP transport tests (HTTP, SSE, STDIO)
+    - `test-utils.js` - Shared test utilities
+    - `http.js` - HTTP transport tester
+    - `sse.js` - SSE transport tester
+    - `stdio.js` - STDIO transport tester
   - HTTP test files (`.http`) for manual API endpoint testing
   - JavaScript test modules for automated testing
 - `_fta/` - Source information about FINAM Trade API
@@ -153,11 +163,39 @@ curl http://localhost:3001/sse \
 ```
 
 #### 4. Testing Infrastructure
-- **API Tester**: Tests all real API endpoints
-  - Handles JWT authentication flow
-  - Substitutes placeholders: `{secretToken}`, `{jwtToken}`, `{account_id}`, `{order_id}`, `{symbol}`
-  - Saves results to `_test-data/<fullId>.md`
-- **MCP Tester**: Validates all MCP server tools work correctly
+
+##### API Tester (`test/tester-api.js`, `test/tester-endpoints.js`)
+Tests all real API endpoints:
+- Handles JWT authentication flow
+- Substitutes placeholders: `{secretToken}`, `{jwtToken}`, `{account_id}`, `{order_id}`, `{symbol}`
+- Saves results to `_test-data/<fullId>.md`
+
+##### MCP Transport Testers (`test/mcp/`)
+Validates all MCP server tools and resources across all three transport protocols:
+
+**HTTP Transport Tester** (`test/mcp/http.js`):
+- Tests Streamable HTTP transport (POST /mcp/v1)
+- Sends credentials via HTTP headers
+- Saves results to `_test-data/mcp/http/`
+
+**SSE Transport Tester** (`test/mcp/sse.js`):
+- Tests Server-Sent Events transport (GET /sse, POST /message)
+- Maintains persistent connection with event stream
+- Sends credentials via HTTP headers
+- Saves results to `_test-data/mcp/sse/`
+
+**STDIO Transport Tester** (`test/mcp/stdio.js`):
+- Tests standard input/output transport
+- Spawns MCP server process with environment variables
+- Communicates via stdin/stdout
+- Saves results to `_test-data/mcp/stdio/`
+
+**Common Features**:
+- Tests all MCP tools with appropriate parameters
+- Tests all MCP resources (enums and data resources)
+- Reports success/failure statistics
+- Saves detailed request/response logs in markdown format
+- See `test/mcp/README.md` for detailed documentation
 
 ## Development Workflow
 
@@ -174,12 +212,30 @@ curl http://localhost:3001/sse \
 3. **MCP Server Development**
    - Implement tools in the MCP server for each API endpoint
    - Test locally with emulator (set `API_BASE_URL` to `http://localhost:3000`)
-   - Validate with MCP tester or Claude Desktop
+   - Validate with MCP transport tests or Claude Desktop
 
-4. **Testing Workflow**
-   - Start emulator: `node dist/emulator/index.js` (or use real API)
-   - Start MCP server: `node dist/mcp/index.js`
-   - Run MCP tester to validate all tools
+4. **MCP Testing Workflow**
+
+   **For HTTP/SSE transports:**
+   ```bash
+   # Terminal 1: Start MCP server
+   npm run mcp:http
+
+   # Terminal 2: Run tests
+   npm run test:mcp:http
+   npm run test:mcp:sse
+   ```
+
+   **For STDIO transport:**
+   ```bash
+   # No server startup needed - test spawns its own process
+   npm run test:mcp:stdio
+   ```
+
+   **Important Notes:**
+   - Tests require valid credentials in `.env`
+   - Test results saved to `_test-data/mcp/{transport}/`
+   - See `test/mcp/README.md` for detailed documentation
    - **IMPORTANT**: Always stop emulator after testing: `scripts\kill-emulator.bat`
 
 ## Utility Scripts
