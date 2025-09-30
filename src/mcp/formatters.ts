@@ -107,6 +107,8 @@ function formatStringResponse(toolName: string, data: unknown): string {
       return formatAssetAsString(data as GetAssetResponse);
     case 'GetAssetParams':
       return formatAssetParamsAsString(data as GetAssetParamsResponse);
+    case 'GetAssetDetails':
+      return formatAssetDetailsAsString(data as GetAssetResponse & GetAssetParamsResponse);
     case 'OptionsChain':
       return formatOptionsChainAsString(data as OptionsChainResponse);
     case 'Schedule':
@@ -270,6 +272,73 @@ function formatAssetParamsAsString(response: GetAssetParamsResponse): string {
     `Min Order Size: ${response.min_order_size?.value || 'N/A'}`,
     `Max Order Size: ${response.max_order_size?.value || 'N/A'}`,
   ].join('\n');
+}
+
+function formatAssetDetailsAsString(response: GetAssetResponse & GetAssetParamsResponse): string {
+  const lines = [
+    '=== Asset Information ===',
+    `Symbol: ${response.symbol}`,
+    `Name: ${response.name}`,
+    `Type: ${response.type}`,
+    `Ticker: ${response.ticker}`,
+    `ISIN: ${response.isin || 'N/A'}`,
+    `Exchange: ${response.exchange || 'N/A'}`,
+    `Board: ${response.board || 'N/A'}`,
+    `Lot Size: ${response.lot_size?.value || 'N/A'}`,
+    `Decimals: ${response.decimals ?? 'N/A'}`,
+    `Min Step: ${response.min_step || 'N/A'}`,
+    '',
+    '=== Trading Parameters ===',
+    `Account ID: ${response.account_id}`,
+    `Tradeable: ${response.tradeable}`,
+  ];
+
+  // Longable info
+  if (response.longable && typeof response.longable === 'object' && 'value' in response.longable) {
+    lines.push(`Long Availability: ${response.longable.value}`);
+    if ('halted_days' in response.longable && response.longable.halted_days) {
+      lines.push(`  - Halted Days: ${response.longable.halted_days}`);
+    }
+  } else {
+    lines.push(`Longable: ${response.longable}`);
+  }
+
+  // Shortable info
+  if (response.shortable && typeof response.shortable === 'object' && 'value' in response.shortable) {
+    lines.push(`Short Availability: ${response.shortable.value}`);
+    if ('halted_days' in response.shortable && response.shortable.halted_days) {
+      lines.push(`  - Halted Days: ${response.shortable.halted_days}`);
+    }
+  } else {
+    lines.push(`Shortable: ${response.shortable}`);
+  }
+
+  // Risk rates
+  if (response.long_risk_rate?.value) {
+    lines.push(`Long Risk Rate: ${response.long_risk_rate.value}`);
+  }
+  if (response.short_risk_rate?.value) {
+    lines.push(`Short Risk Rate: ${response.short_risk_rate.value}`);
+  }
+
+  // Collateral
+  if (response.long_collateral) {
+    lines.push(`Long Collateral: ${response.long_collateral.units} ${response.long_collateral.currency_code}`);
+  }
+  if (response.short_collateral) {
+    lines.push(`Short Collateral: ${response.short_collateral.units} ${response.short_collateral.currency_code}`);
+  }
+
+  // Order sizes
+  lines.push(`Min Order Size: ${response.min_order_size?.value || 'N/A'}`);
+  lines.push(`Max Order Size: ${response.max_order_size?.value || 'N/A'}`);
+
+  // Trading status
+  if (response.trading_status) {
+    lines.push(`Trading Status: ${response.trading_status}`);
+  }
+
+  return lines.join('\n');
 }
 
 function formatOptionsChainAsString(response: OptionsChainResponse): string {

@@ -176,62 +176,37 @@ function createTools (defaultAccountId?: string): Tool[] {
         properties: {},
       },
     },
-    /*
 
-    [ // VVQ оформиь в виде ресурса
-  'EQUITIES',
-  'BONDS',
-  'FUNDS',
-  'FUTURES',
-  'CURRENCIES',
-  'OTHER',
-  'SWAPS',
-  'INDICES'
-]
-
-
-    * */
     {
-      name: 'GetAsset', // 3-4 // VVQ Совместить с 3-5
-      description: `Get detailed information about specific asset
-ID
-name 
-ticker
-mic - Exchange id
-Isin
-type - (e.g., EQUITIES / BONDS / FUNDS / FUTURES... ) 
-Board - trading mode code (tqbr)
-decimals - a number of decimal signs in price
-min_step - min price step. For calc final price step: min_step/(10ˆDecimals)
-lot_size - number in lots
-Expiration_Date - (for Futures)    
-    `,
-      inputSchema: {
-        type: 'object',
-        properties: {
-          symbol: symbolProp(),
-          account_id: accountIdProp('Account ID for which the Asset will be selected'),
-        },
-        required: addRequired(['symbol']),
-      },
-    },
-    {
-      name: 'GetAssetParams', // 3-5 // VVQ Совместить с 3-4
-      description: `Get trading parameters for a specific asset:
+      name: 'GetAssetDetails', // 3-4 + 3-5 Combined
+      description: `Get detailed information and trading parameters for a specific asset
+
+Asset Information:
+- ID, name, ticker
+- mic - Exchange id
+- Isin
+- type - (e.g., EQUITIES / BONDS / FUNDS / FUTURES...)
+- Board - trading mode code (tqbr)
+- decimals - number of decimal signs in price
+- min_step - min price step. For calc final price step: min_step/(10^Decimals)
+- lot_size - number in lots
+- Expiration_Date - (for Futures)
+
+Trading Parameters:
 - symbol
-- is trading is allowed
-- long/short availability
+- tradeable - is trading allowed
+- long/short availability:
   - value – (e.g., AVAILABLE / NOT_AVAILABLE / HALTED)
   - halted_days – days until restrictions are lifted
 - risk rate for long & short
 - maintenance collateral for long/short
-– min/max order size
+- min/max order size
 - trading status`,
       inputSchema: {
         type: 'object',
         properties: {
           symbol: symbolProp(),
-          account_id: accountIdProp('Account ID for which trading parameters will be selected'),
+          account_id: accountIdProp('Account ID for which the asset details will be selected'),
         },
         required: addRequired(['symbol']),
       },
@@ -270,7 +245,7 @@ Expiration_Date - (for Futures)
     // Group 4: Orders
     {
       name: 'CancelOrder', // 4-1
-      description: 'Cancel an existing order',
+      description: `Cancel an existing order. In response comes the canceled Order`,
       inputSchema: {
         type: 'object',
         properties: {
@@ -283,7 +258,22 @@ Expiration_Date - (for Futures)
 
     {
       name: 'GetOrder', // 4-2
-      description: 'Get specific order details',
+      description: `Get specific order details
+order_id
+exec_id
+status: new / partially_filled / filled / canceled / rejected
+account_id
+symbol
+quantity
+side
+type
+time_in_force
+limit_price
+stop_price
+stop_condition
+legs (Array) for multi legs order
+client_order_id  – uniq id for order
+      `,
       inputSchema: {
         type: 'object',
         properties: {
@@ -296,7 +286,7 @@ Expiration_Date - (for Futures)
 
     {
       name: 'GetOrders', // 4-3
-      description: 'Get all orders for account',
+      description: 'Get details for all orders for account',
       inputSchema: {
         type: 'object',
         properties: {

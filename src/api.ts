@@ -274,6 +274,20 @@ export async function GetAssetParams (params: {
   return result;
 }
 
+// 3-4 + 3-5 Combined
+export async function GetAssetDetails (params: {
+  secret_token: string;
+  account_id: string;
+  symbol: string;
+}): Promise<GetAssetResponse & GetAssetParamsResponse> {
+  const [asset, assetParams] = await Promise.all([
+    GetAsset(params),
+    GetAssetParams(params)
+  ]);
+
+  return { ...asset, ...assetParams };
+}
+
 // 3-6
 export async function OptionsChain (params: {
   secret_token: string;
