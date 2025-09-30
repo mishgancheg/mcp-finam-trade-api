@@ -1,0 +1,77 @@
+### ===============================  Подключение ===============================
+
+### Auth - Авторизация, часть 1. Получение JWT по секрету.
+# @name auth
+POST https://api.finam.ru/v1/sessions
+Content-Type: application/json
+Accept: application/json
+
+{
+  "secret": "{{secret}}"
+}
+
+> {% client.global.set("jwt", response.body.token); %}
+
+### =================================  LastQuote ==================================
+
+### LastQuote
+GET https://api.finam.ru/v1/instruments/LQDT@MISX/quotes/latest
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+### =================================  Заявки ==================================
+
+
+### ❌ PlaceOrder - Размещение заявки
+< {%
+    const ts = String(Date.now());
+    client.global.set("ts", ts);
+%}
+POST https://api.finam.ru/v1/accounts/{{account_id}}/orders
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+{
+  "symbol": "LQDT@MISX",
+  "quantity": {
+    "value": "1.0"
+  },
+  "side": "SIDE_BUY",
+  "type": "ORDER_TYPE_LIMIT",
+  "timeInForce": "TIME_IN_FORCE_DAY",
+  "limitPrice": {
+    "value": "1.7415"
+  },
+  "stopCondition": "STOP_CONDITION_UNSPECIFIED",
+  "legs": [],
+  "clientOrderId": "t{{ts}}"
+}
+
+> {%
+  if (response.body.order_id) {
+    client.global.set("order_id", response.body.order_id);
+  }
+%}
+
+
+### GetOrders - Получение списка заявок
+GET https://api.finam.ru/v1/accounts/{{account_id}}/orders
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+
+### GetOrder - Получение информации по конкретной заявке
+GET https://api.finam.ru/v1/accounts/{{account_id}}/orders/{{order_id}}
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}
+
+
+### CancelOrder - Отмена заявки
+DELETE https://api.finam.ru/v1/accounts/{{account_id}}/orders/{{order_id}}
+Content-Type: application/json
+Accept: application/json
+Authorization: {{jwt}}

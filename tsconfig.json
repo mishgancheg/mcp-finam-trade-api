@@ -28,6 +28,7 @@
   },
   "include": [
     "src/**/*",
+    "test/**/*",
     "tests/**/*"
   ],
   "exclude": [
