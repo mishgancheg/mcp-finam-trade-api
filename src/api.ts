@@ -236,10 +236,37 @@ export async function Clock (params: { secret_token: string; }): Promise<ClockRe
   return result;
 }
 
+// Cache configuration for Exchanges
+const CACHE_TTL_MS = 2 * 60 * 60 * 1000; // 2 hours in milliseconds
+
+// Cache storage for Exchanges
+interface ExchangesCache {
+  data: ExchangesResponse | null;
+  timestamp: number;
+}
+
+const exchangesCache: ExchangesCache = {
+  data: null,
+  timestamp: 0
+};
+
 // 3-3
 export async function Exchanges (params: { secret_token: string; }): Promise<ExchangesResponse> {
   const result = await makeRequest<ExchangesResponse>('GET', `exchanges`, params.secret_token);
   return result;
+}
+
+// 3-3 Cached version
+export async function ExchangesCached (params: { secret_token: string; }): Promise<ExchangesResponse> {
+  const now = Date.now();
+  const isExpired = now - exchangesCache.timestamp > CACHE_TTL_MS;
+
+  if (!exchangesCache.data || isExpired) {
+    exchangesCache.data = await Exchanges(params);
+    exchangesCache.timestamp = now;
+  }
+
+  return exchangesCache.data;
 }
 
 // 3-4

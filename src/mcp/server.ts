@@ -156,11 +156,18 @@ function createResources (): Resource[] {
       description: 'All possible order book action values',
       mimeType: 'application/json',
     },
+    {
+      uri: 'exchange://list',
+      name: 'Exchanges list',
+      description: 'List of all exchanges with names and mic codes (cached, updates every 2 hours)',
+      mimeType: 'application/json',
+    },
   ];
 }
 
 // Handle resource read requests
-function handleReadResource (uri: string): string {
+async function handleReadResource (uri: string): Promise<string> {
+  // Handle enum resources
   const enumMap: Record<string, Record<string, string>> = {
     'enum://OrderType': OrderType,
     'enum://TimeInForce': TimeInForce,
@@ -178,13 +185,22 @@ function handleReadResource (uri: string): string {
   };
 
   const enumData = enumMap[uri];
-  if (!enumData) {
-    throw new McpError(ErrorCode.InvalidRequest, `Unknown resource: ${uri}`);
+  if (enumData) {
+    // Return array of enum values only (without key duplication)
+    const values = Object.values(enumData);
+    return JSON.stringify(values, null, 2);
   }
 
-  // Return array of enum values only (without key duplication)
-  const values = Object.values(enumData);
-  return JSON.stringify(values, null, 2);
+  // Handle exchange resource
+  if (uri === 'exchange://list') {
+    if (!API_SECRET_TOKEN) {
+      throw new McpError(ErrorCode.InvalidRequest, 'API_SECRET_TOKEN not configured');
+    }
+    const exchanges = await api.ExchangesCached({ secret_token: API_SECRET_TOKEN });
+    return JSON.stringify(exchanges, null, 2);
+  }
+
+  throw new McpError(ErrorCode.InvalidRequest, `Unknown resource: ${uri}`);
 }
 
 // Create tool definitions with optional account_id default
@@ -298,15 +314,6 @@ function createTools (defaultAccountId?: string): Tool[] {
         properties: {},
       },
     },
-    {
-      name: 'Exchanges', // 3-3 // VVQ Переделать на Resourcesю С кешированием и обновлением раз 2 часа
-      description: 'Get list of exchanges: names and mic codes',
-      inputSchema: {
-        type: 'object',
-        properties: {},
-      },
-    },
-
     {
       name: 'GetAssetDetails', // 3-4 + 3-5 Combined
       description: `Get detailed information and trading parameters for a specific asset
@@ -640,7 +647,7 @@ export function createMcpServer (defaultAccountId?: string) {
 
   server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
     const uri = request.params.uri;
-    const content = handleReadResource(uri);
+    const content = await handleReadResource(uri);
     return {
       contents: [
         {
