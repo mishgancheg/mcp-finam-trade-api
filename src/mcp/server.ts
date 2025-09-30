@@ -598,11 +598,14 @@ export async function startStdioServer () {
 export async function startHttpServer (port: number = HTTP_PORT) {
   const app = express();
 
+  // Store active SSE transports (session_id -> transport)
+  const sseTransports = new Map<string, SSEServerTransport>();
+
   // Security middleware
   app.use(helmet());
-  // Skip body parsing for /mcp/v1 - we'll read it manually
+  // Skip body parsing for /mcp/v1 and /message - we'll read it manually
   app.use((req, res, next) => {
-    if (req.path === '/mcp/v1') {
+    if (req.path === '/mcp/v1' || req.path === '/message') {
       return next();
     }
     express.json()(req, res, next);
@@ -633,12 +636,17 @@ export async function startHttpServer (port: number = HTTP_PORT) {
 
   // SSE endpoint for MCP
   app.get('/sse', async (req, res) => {
-    console.error(`[SSE] New connection from ${req.ip}`);
+    const sessionId = `sse-${Date.now()}-${Math.random()}`;
+    console.error(`[SSE] New connection: ${sessionId}`);
 
     // Extract account_id from headers for tool descriptions
     const headerCreds = extractCredentials(req.headers as Record<string, string>);
     const server = createMcpServer(headerCreds?.account_id);
     const transport = new SSEServerTransport('/message', res);
+
+    // Store transport for this session
+    sseTransports.set(sessionId, transport);
+
     await server.connect(transport);
 
     // Override tool handler to pass headers
@@ -647,14 +655,31 @@ export async function startHttpServer (port: number = HTTP_PORT) {
     );
 
     req.on('close', () => {
-      console.error(`[SSE] Connection closed from ${req.ip}`);
+      console.error(`[SSE] Connection closed: ${sessionId}`);
+      sseTransports.delete(sessionId);
     });
   });
 
   // Message endpoint for SSE
   app.post('/message', async (req, res) => {
-    console.error(`[SSE] Received message:`, req.body);
-    res.json({ received: true });
+    // For simplicity, use the most recent SSE transport
+    // In production, you'd want to use session IDs to route to the correct transport
+    const transports = Array.from(sseTransports.values());
+    if (transports.length === 0) {
+      res.status(503).json({ error: 'No active SSE connection' });
+      return;
+    }
+
+    const transport = transports[transports.length - 1];
+    if (!transport) {
+      res.status(503).json({ error: 'Transport not available' });
+      return;
+    }
+
+    console.error(`[SSE] Routing message to transport (${transports.length} active)`);
+
+    // Let the transport handle the message
+    await transport.handlePostMessage(req, res);
   });
 
   // Streamable HTTP endpoint for MCP
