@@ -1,15 +1,21 @@
 {
   "name": "mcp-finam-trade-api",
   "version": "1.0.0",
-  "description": "",
-  "main": "dist/src/index.js",
+  "description": "Model Context Protocol (MCP) server for FINAM Trade API - provides trading tools for Claude AI and other MCP clients",
+  "main": "dist/src/mcp/index.js",
   "type": "module",
+  "bin": {
+    "mcp-finam-trade-api": "dist/src/mcp/index.js"
+  },
   "engines": {
     "node": ">=18.0.0"
   },
   "scripts": {
-    "start": "node dist/src/index.js",
+    "mcp": "node dist/src/mcp/index.js",
+    "mcp:http": "node dist/src/mcp/index.js --http",
+    "start": "node dist/src/mcp/index.js",
     "build": "tsc",
+    "prepublishOnly": "npm run build",
     "clean": "rimraf dist",
     "cb": "npm run clean && npm run build",
     "dev": "tsx watch src/index.ts",
@@ -21,10 +27,15 @@
     "test:mcp:http": "node test/mcp/http.js",
     "test:mcp:sse": "node test/mcp/sse.js",
     "test:mcp:stdio": "node test/mcp/stdio.js",
-    "clean:nul": "node scripts/remove-nul.js",
+    "test:search:http": "node test/test-search-http.js",
+    "test:search:stdio": "node test/test-search-stdio.js",
     "emulator": "node test/emulator/emulator.js",
-    "mcp": "node dist/src/mcp/index.js",
-    "mcp:http": "node dist/src/mcp/index.js --http"
+    "version:patch": "npm version patch -m \"chore: bump version to %s\"",
+    "version:minor": "npm version minor -m \"chore: bump version to %s\"",
+    "version:major": "npm version major -m \"chore: bump version to %s\"",
+    "release:patch": "npm run version:patch && git push && git push --tags",
+    "release:minor": "npm run version:minor && git push && git push --tags",
+    "release:major": "npm run version:major && git push && git push --tags"
   },
   "keywords": [
     "mcp",
