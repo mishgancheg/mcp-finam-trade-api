@@ -1,0 +1,5 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="tester-endpoints (Transactions,Assets,GetAsset)" type="NodeJSConfigurationType" application-parameters="Transactions,Assets,GetAsset" path-to-js-file="test/tester-endpoints.js" working-dir="$PROJECT_DIR$">
+    <method v="2" />
+  </configuration>
+</component>
