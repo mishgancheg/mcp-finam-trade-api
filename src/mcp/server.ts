@@ -679,15 +679,41 @@ export async function startHttpServer (port: number = HTTP_PORT) {
 
   // Security middleware
   app.use(helmet());
-  app.use(express.json());
+  // Skip body parsing for /mcp/v1 - we'll read it manually
+  app.use((req, res, next) => {
+    if (req.path === '/mcp/v1') {
+      return next();
+    }
+    express.json()(req, res, next);
+  });
 
   // Health check
   app.get('/health', (_req, res) => {
-    res.json({ status: 'ok', transport: 'http', returnAs: RETURN_AS });
+    res.json({
+      status: 'ok',
+      transports: ['stdio', 'sse', 'streamable-http'],
+      returnAs: RETURN_AS
+    });
+  });
+
+  // Root endpoint with information
+  app.get('/', (_req, res) => {
+    res.send(`
+      <h1>FINAM Trade API MCP Server</h1>
+      <p>Server is running and supports multiple transports:</p>
+      <ul>
+        <li><strong>STDIO:</strong> Start with <code>node dist/mcp/index.js</code></li>
+        <li><strong>SSE:</strong> Connect to <code>GET /sse</code> and send messages to <code>POST /message</code></li>
+        <li><strong>Streamable HTTP:</strong> Connect to <code>POST /mcp/v1</code></li>
+      </ul>
+      <p><a href="/health">Health Check</a></p>
+    `);
   });
 
   // SSE endpoint for MCP
   app.get('/sse', async (req, res) => {
+    console.error(`[SSE] New connection from ${req.ip}`);
+
     // Extract account_id from headers for tool descriptions
     const headerCreds = extractCredentials(req.headers as Record<string, string>);
     const server = createMcpServer(headerCreds?.account_id);
@@ -698,16 +724,118 @@ export async function startHttpServer (port: number = HTTP_PORT) {
     server.setRequestHandler(CallToolRequestSchema, async (request) =>
       handleToolCall(request, req.headers as Record<string, string>),
     );
+
+    req.on('close', () => {
+      console.error(`[SSE] Connection closed from ${req.ip}`);
+    });
   });
 
   // Message endpoint for SSE
   app.post('/message', async (req, res) => {
+    console.error(`[SSE] Received message:`, req.body);
     res.json({ received: true });
   });
 
+  // Streamable HTTP endpoint for MCP
+  app.post('/mcp/v1', async (req, res) => {
+    const sessionId = `http-${Date.now()}-${Math.random()}`;
+    console.error(`[Streamable HTTP] New connection: ${sessionId}`);
+
+    // Extract credentials from headers
+    const headerCreds = extractCredentials(req.headers as Record<string, string>);
+
+    try {
+      // Collect full request body
+      let body = '';
+
+      req.on('data', (chunk) => {
+        body += chunk.toString();
+      });
+
+      req.on('end', async () => {
+        try {
+          // Parse request
+          const request = JSON.parse(body.trim());
+          console.error(`[Streamable HTTP] Request:`, request);
+
+          // Process request
+          let result;
+          if (request.method === 'tools/list') {
+            const tools = createTools(headerCreds?.account_id);
+            result = { tools };
+          } else if (request.method === 'tools/call') {
+            result = await handleToolCall(request as CallToolRequest, req.headers as Record<string, string>);
+          } else if (request.method === 'resources/list') {
+            const resources = createResources();
+            result = { resources };
+          } else if (request.method === 'resources/read') {
+            const uri = request.params?.uri;
+            if (!uri) {
+              throw new McpError(ErrorCode.InvalidParams, 'uri parameter required');
+            }
+            const content = await handleReadResource(uri);
+            result = {
+              contents: [
+                {
+                  uri,
+                  mimeType: 'application/json',
+                  text: content,
+                },
+              ],
+            };
+          } else {
+            throw new McpError(ErrorCode.MethodNotFound, `Unknown method: ${request.method}`);
+          }
+
+          // Send response
+          const response = {
+            jsonrpc: '2.0',
+            id: request.id,
+            result
+          };
+
+          console.error(`[Streamable HTTP] Response sent for request ${request.id}`);
+          res.setHeader('Content-Type', 'application/json');
+          res.json(response);
+
+        } catch (err) {
+          console.error(`[Streamable HTTP] Processing error:`, err);
+          const errorResponse = {
+            jsonrpc: '2.0',
+            id: body ? (JSON.parse(body.trim()) as { id?: unknown }).id : null,
+            error: {
+              code: err instanceof McpError ? err.code : ErrorCode.InternalError,
+              message: err instanceof Error ? err.message : String(err),
+            },
+          };
+          res.status(400).json(errorResponse);
+        }
+      });
+
+      req.on('close', () => {
+        console.error(`[Streamable HTTP] Connection closed: ${sessionId}`);
+      });
+
+    } catch (error) {
+      console.error(`[Streamable HTTP] Error:`, error);
+      res.status(500).json({
+        jsonrpc: '2.0',
+        error: {
+          code: ErrorCode.InternalError,
+          message: error instanceof Error ? error.message : String(error),
+        },
+      });
+    }
+  });
+
   app.listen(port, () => {
-    console.error(`MCP Server running on HTTP transport at http://localhost:${port}`);
-    console.error(`SSE endpoint: http://localhost:${port}/sse`);
+    console.error(`\n🚀 MCP Server running on port ${port}`);
+    console.error(`\nAvailable endpoints:`);
+    console.error(`  - SSE:              http://localhost:${port}/sse`);
+    console.error(`  - SSE Messages:     http://localhost:${port}/message`);
+    console.error(`  - Streamable HTTP:  http://localhost:${port}/mcp/v1`);
+    console.error(`  - Health:           http://localhost:${port}/health`);
+    console.error(`\nActive transports: stdio, SSE, Streamable HTTP`);
     console.error(`Response format: ${RETURN_AS}`);
   });
 }
