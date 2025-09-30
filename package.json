@@ -19,7 +19,9 @@
     "test:endpoints": "node test/tester-endpoints.js",
     "test:api": "node test/tester-api.js",
     "clean:nul": "node scripts/remove-nul.js",
-    "emulator": "node test/emulator/emulator.js"
+    "emulator": "node test/emulator/emulator.js",
+    "mcp": "node dist/src/mcp/index.js",
+    "mcp:http": "node dist/src/mcp/index.js --http"
   },
   "keywords": [
     "mcp",

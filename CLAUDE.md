@@ -29,6 +29,10 @@ npm run lint:fix      # Auto-fix linting issues
 # Type checking
 npm run typecheck     # Check TypeScript types without building
 
+# Run MCP Server
+npm run mcp           # stdio transport (for Claude Desktop)
+npm run mcp:http      # HTTP/SSE transport
+
 # Run the compiled application
 npm start
 ```
@@ -40,13 +44,21 @@ Copy `.env.example` to `.env` and configure:
 - `API_SECRET_TOKEN`: Your secret token from https://tradeapi.finam.ru/docs/tokens/
 - `ACCOUNT_ID`: Your account ID without КлФ prefix
 - `EMULATOR_PORT`: Port for the API emulator (default: 3000)
+- `RETURN_AS`: MCP response format - `json` (structured data) or `string` (formatted text for LLM)
+- `MCP_HTTP_PORT`: HTTP transport port (default: 3001)
 
 ## Project Architecture
 
 ### Directory Structure
 - `src/` - Main source code
+  - `api.ts` - API wrapper functions for all endpoints
+  - `mcp/` - MCP server implementation
+    - `server.ts` - MCP server core logic
+    - `formatters.ts` - Response formatters (json/string modes)
+    - `index.ts` - Entry point
   - `meta/` - Structured metadata about FINAM Trade API endpoints
-  - `index.ts` - Entry point
+  - `lib/` - Utility libraries (JWT auth, utils)
+  - `index.ts` - Main entry point
 - `test/` - Testing infrastructure
   - HTTP test files (`.http`) for manual API endpoint testing
   - JavaScript test modules for automated testing
@@ -83,12 +95,62 @@ Implements all FINAM Trade API endpoints locally for development without real AP
 - Simulates authentication flow with JWT tokens
 - Returns realistic mock data matching API specifications
 
-#### 3. MCP Server
-Provides tools for all API endpoints with:
-- Support for HTTP, SSE, and stdio transports
-- Authentication via secret token and account ID
-- For stdio: CLI arguments for credentials
-- For HTTP/SSE: HTTP headers (Authorization: Bearer, X-Finam-Account-Id)
+#### 3. MCP Server (`src/mcp/`)
+Provides MCP tools wrapping all API endpoints with:
+- **Transports**: HTTP/SSE and stdio
+- **Authentication**:
+  - stdio: Environment variables `API_SECRET_TOKEN` and `ACCOUNT_ID`
+  - HTTP: Headers `Authorization: Bearer <token>` and `X-Finam-Account-Id: <id>`
+- **Response Formatting**: Controlled by `RETURN_AS` environment variable
+  - `json`: Structured data (default)
+  - `string`: Formatted text optimized for LLM consumption
+- **Special Handling**:
+  - Assets (3-1): Removes `mic` property, limits to 1000 items (json) or 2000 (string as CSV)
+  - LatestTrades (5-3): Limits to 100 records in both modes
+
+##### MCP Server Usage
+
+**stdio transport (for Claude Desktop):**
+```bash
+# Credentials from environment variables API_SECRET_TOKEN and ACCOUNT_ID
+npm run mcp
+
+# Or run directly
+node dist/src/mcp/index.js
+```
+
+**HTTP transport (for HTTP-based MCP clients):**
+```bash
+# Default port 3001
+npm run mcp:http
+
+# Custom port
+npm run mcp:http -- --port 3002
+
+# Credentials passed in HTTP headers per request
+curl http://localhost:3001/sse \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "X-Finam-Account-Id: YOUR_ACCOUNT"
+```
+
+**Claude Desktop Configuration:**
+```json
+{
+  "mcpServers": {
+    "finam-trade-api": {
+      "command": "node",
+      "args": [
+        "<path to project>/dist/src/mcp/index.js"
+      ],
+      "env": {
+        "API_SECRET_TOKEN": "YOUR_SECRET_TOKEN",
+        "ACCOUNT_ID": "YOUR_ACCOUNT_ID",
+        "RETURN_AS": "string"
+      }
+    }
+  }
+}
+```
 
 #### 4. Testing Infrastructure
 - **API Tester**: Tests all real API endpoints
@@ -173,10 +235,10 @@ Optional future enhancements:
 
 ## FAQ
 
-- Для генерации JWT-токена, с которым происходит обращение к методам API, необходим токен `secret-token`.
+- Для генерации JWT-токена, с которым происходит обращение к методам API, необходим токен `secret_token`.
 
-- secret-token генерируется на портале в рзделе "Токены" https://tradeapi.finam.ru/docs/tokens/.
-  В проекте secret-token указывается в .env в переменной окружения API_SECRET_TOKEN
+- secret_token генерируется на портале в рзделе "Токены" https://tradeapi.finam.ru/docs/tokens/.
+  В проекте secret_token указывается в .env в переменной окружения API_SECRET_TOKEN
 
 - JWT-токен живет 15 минут и генерируется методом API Auth (https://api.finam.ru/v1/sessions)
   подробнее о методе: https://tradeapi.finam.ru/docs/guides/rest/auth_service/Auth.
