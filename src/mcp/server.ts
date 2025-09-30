@@ -17,8 +17,11 @@ import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
+  ListResourcesRequestSchema,
+  ReadResourceRequestSchema,
   type CallToolRequest,
   type Tool,
+  type Resource,
   McpError,
   ErrorCode,
 } from '@modelcontextprotocol/sdk/types.js';
@@ -26,6 +29,21 @@ import express from 'express';
 import helmet from 'helmet';
 import * as api from '../api.js';
 import { formatResponse } from './formatters.js';
+import {
+  OrderType,
+  TimeInForce,
+  OrderStatus,
+  StopCondition,
+  QuoteLevel,
+  AccountType,
+  AccountStatus,
+  AssetType,
+  OptionType,
+  SessionType,
+  TimeFrame,
+  TransactionCategory,
+  OrderBookAction,
+} from '../meta/finam-trade-api-enums.js';
 
 // Environment configuration
 const RETURN_AS = (process.env.RETURN_AS || 'json') as 'json' | 'string';
@@ -55,6 +73,118 @@ function extractCredentials (headers?: Record<string, string>): IHeaderCreds | n
 
   const secret_token = authHeader.replace(/^Bearer\s+/i, '');
   return { secret_token, account_id: accountIdHeader };
+}
+
+// Create resource definitions for enums
+function createResources (): Resource[] {
+  return [
+    {
+      uri: 'enum://OrderType',
+      name: 'OrderType enum values',
+      description: 'All possible order type values',
+      mimeType: 'application/json',
+    },
+    {
+      uri: 'enum://TimeInForce',
+      name: 'TimeInForce enum values',
+      description: 'All possible time in force values',
+      mimeType: 'application/json',
+    },
+    {
+      uri: 'enum://OrderStatus',
+      name: 'OrderStatus enum values',
+      description: 'All possible order status values',
+      mimeType: 'application/json',
+    },
+    {
+      uri: 'enum://StopCondition',
+      name: 'StopCondition enum values',
+      description: 'All possible stop condition values',
+      mimeType: 'application/json',
+    },
+    {
+      uri: 'enum://QuoteLevel',
+      name: 'QuoteLevel enum values',
+      description: 'All possible quote level values',
+      mimeType: 'application/json',
+    },
+    {
+      uri: 'enum://AccountType',
+      name: 'AccountType enum values',
+      description: 'All possible account type values',
+      mimeType: 'application/json',
+    },
+    {
+      uri: 'enum://AccountStatus',
+      name: 'AccountStatus enum values',
+      description: 'All possible account status values',
+      mimeType: 'application/json',
+    },
+    {
+      uri: 'enum://AssetType',
+      name: 'AssetType enum values',
+      description: 'All possible asset type values',
+      mimeType: 'application/json',
+    },
+    {
+      uri: 'enum://OptionType',
+      name: 'OptionType enum values',
+      description: 'All possible option type values',
+      mimeType: 'application/json',
+    },
+    {
+      uri: 'enum://SessionType',
+      name: 'SessionType enum values',
+      description: 'All possible session type values',
+      mimeType: 'application/json',
+    },
+    {
+      uri: 'enum://TimeFrame',
+      name: 'TimeFrame enum values',
+      description: 'All possible timeframe values',
+      mimeType: 'application/json',
+    },
+    {
+      uri: 'enum://TransactionCategory',
+      name: 'TransactionCategory enum values',
+      description: 'All possible transaction category values',
+      mimeType: 'application/json',
+    },
+    {
+      uri: 'enum://OrderBookAction',
+      name: 'OrderBookAction enum values',
+      description: 'All possible order book action values',
+      mimeType: 'application/json',
+    },
+  ];
+}
+
+// Handle resource read requests
+function handleReadResource (uri: string): string {
+  const enumMap: Record<string, Record<string, string>> = {
+    'enum://OrderType': OrderType,
+    'enum://TimeInForce': TimeInForce,
+    'enum://OrderStatus': OrderStatus,
+    'enum://StopCondition': StopCondition,
+    'enum://QuoteLevel': QuoteLevel,
+    'enum://AccountType': AccountType,
+    'enum://AccountStatus': AccountStatus,
+    'enum://AssetType': AssetType,
+    'enum://OptionType': OptionType,
+    'enum://SessionType': SessionType,
+    'enum://TimeFrame': TimeFrame,
+    'enum://TransactionCategory': TransactionCategory,
+    'enum://OrderBookAction': OrderBookAction,
+  };
+
+  const enumData = enumMap[uri];
+  if (!enumData) {
+    throw new McpError(ErrorCode.InvalidRequest, `Unknown resource: ${uri}`);
+  }
+
+  // Return array of enum values only (without key duplication)
+  const values = Object.values(enumData);
+  return JSON.stringify(values, null, 2);
 }
 
 // Create tool definitions with optional account_id default
@@ -482,6 +612,7 @@ async function handleToolCall (request: CallToolRequest, headers?: Record<string
 // Create MCP server
 export function createMcpServer (defaultAccountId?: string) {
   const tools = createTools(defaultAccountId);
+  const resources = createResources();
 
   const server = new Server(
     {
@@ -491,6 +622,7 @@ export function createMcpServer (defaultAccountId?: string) {
     {
       capabilities: {
         tools: {},
+        resources: {},
       },
     },
   );
@@ -501,6 +633,24 @@ export function createMcpServer (defaultAccountId?: string) {
   });
 
   server.setRequestHandler(CallToolRequestSchema, async (request) => handleToolCall(request));
+
+  server.setRequestHandler(ListResourcesRequestSchema, async () => {
+    return { resources };
+  });
+
+  server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
+    const uri = request.params.uri;
+    const content = handleReadResource(uri);
+    return {
+      contents: [
+        {
+          uri,
+          mimeType: 'application/json',
+          text: content,
+        },
+      ],
+    };
+  });
 
   return server;
 }

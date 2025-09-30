@@ -41,163 +41,26 @@ export interface TimeInterval {
   end_time: string; // ISO 8601
 }
 
-/**
- * Сторона сделки
- */
-export enum Side {
-  SIDE_UNSPECIFIED = 'SIDE_UNSPECIFIED',
-  SIDE_BUY = 'SIDE_BUY',
-  SIDE_SELL = 'SIDE_SELL',
-}
+// ===================================
+// Enums (re-exported from runtime file)
+// ===================================
 
-/**
- * Тип заявки
- */
-export enum OrderType {
-  ORDER_TYPE_UNSPECIFIED = 'ORDER_TYPE_UNSPECIFIED',
-  ORDER_TYPE_LIMIT = 'ORDER_TYPE_LIMIT',
-  ORDER_TYPE_MARKET = 'ORDER_TYPE_MARKET',
-  ORDER_TYPE_STOP = 'ORDER_TYPE_STOP',
-  ORDER_TYPE_STOP_LIMIT = 'ORDER_TYPE_STOP_LIMIT',
-}
-
-/**
- * Время жизни заявки
- */
-export enum TimeInForce {
-  TIME_IN_FORCE_UNSPECIFIED = 'TIME_IN_FORCE_UNSPECIFIED',
-  TIME_IN_FORCE_DAY = 'TIME_IN_FORCE_DAY',
-  TIME_IN_FORCE_GTC = 'TIME_IN_FORCE_GTC',
-  TIME_IN_FORCE_IOC = 'TIME_IN_FORCE_IOC',
-  TIME_IN_FORCE_FOK = 'TIME_IN_FORCE_FOK',
-}
-
-/**
- * Статус заявки
- */
-export enum OrderStatus {
-  ORDER_STATUS_UNSPECIFIED = 'ORDER_STATUS_UNSPECIFIED',
-  ORDER_STATUS_NEW = 'ORDER_STATUS_NEW',
-  ORDER_STATUS_PARTIALLY_FILLED = 'ORDER_STATUS_PARTIALLY_FILLED',
-  ORDER_STATUS_FILLED = 'ORDER_STATUS_FILLED',
-  ORDER_STATUS_CANCELED = 'ORDER_STATUS_CANCELED',
-  ORDER_STATUS_REJECTED = 'ORDER_STATUS_REJECTED',
-}
-
-/**
- * Условие стоп-заявки
- */
-export enum StopCondition {
-  STOP_CONDITION_UNSPECIFIED = 'STOP_CONDITION_UNSPECIFIED',
-  STOP_CONDITION_MORE = 'STOP_CONDITION_MORE',
-  STOP_CONDITION_LESS = 'STOP_CONDITION_LESS',
-}
-
-/**
- * Уровень котировок для рыночных данных
- */
-export enum QuoteLevel {
-  QUOTE_LEVEL_UNSPECIFIED = 'QUOTE_LEVEL_UNSPECIFIED',
-  QUOTE_LEVEL_LAST_PRICE = 'QUOTE_LEVEL_LAST_PRICE',
-  QUOTE_LEVEL_BEST_BID_OFFER = 'QUOTE_LEVEL_BEST_BID_OFFER',
-  QUOTE_LEVEL_DEPTH_OF_MARKET = 'QUOTE_LEVEL_DEPTH_OF_MARKET',
-  QUOTE_LEVEL_DEPTH_OF_BOOK = 'QUOTE_LEVEL_DEPTH_OF_BOOK',
-  QUOTE_LEVEL_ACCESS_FORBIDDEN = 'QUOTE_LEVEL_ACCESS_FORBIDDEN',
-}
-
-/**
- * Тип аккаунта
- */
-export enum AccountType {
-  ACCOUNT_TYPE_UNSPECIFIED = 'ACCOUNT_TYPE_UNSPECIFIED',
-  SIMPLE = 'SIMPLE',
-  UNION = 'UNION',
-  IIA = 'IIA',
-}
-
-/**
- * Статус аккаунта
- */
-export enum AccountStatus {
-  ACCOUNT_STATUS_UNSPECIFIED = 'ACCOUNT_STATUS_UNSPECIFIED',
-  ACCOUNT_ACTIVE = 'ACCOUNT_ACTIVE',
-  ACCOUNT_CLOSED = 'ACCOUNT_CLOSED',
-}
-
-/**
- * Тип инструмента
- */
-export enum AssetType {
-  TYPE_UNSPECIFIED = 'TYPE_UNSPECIFIED',
-  EQUITIES = 'EQUITIES',
-  FUTURES = 'FUTURES',
-  OPTIONS = 'OPTIONS',
-  BONDS = 'BONDS',
-  CURRENCIES = 'CURRENCIES',
-  INDICES = 'INDICES',
-  ETF = 'ETF',
-}
-
-/**
- * Тип опциона
- */
-export enum OptionType {
-  TYPE_UNSPECIFIED = 'TYPE_UNSPECIFIED',
-  TYPE_CALL = 'TYPE_CALL',
-  TYPE_PUT = 'TYPE_PUT',
-}
-
-/**
- * Тип торговой сессии
- */
-export enum SessionType {
-  SESSION_TYPE_UNSPECIFIED = 'SESSION_TYPE_UNSPECIFIED',
-  CLOSED = 'CLOSED',
-  PRE_TRADING = 'PRE_TRADING',
-  EARLY_TRADING = 'EARLY_TRADING',
-  CORE_TRADING = 'CORE_TRADING',
-  LATE_TRADING = 'LATE_TRADING',
-  POST_TRADING = 'POST_TRADING',
-}
-
-/**
- * Временной интервал для баров
- */
-export enum TimeFrame {
-  TIME_FRAME_UNSPECIFIED = 'TIME_FRAME_UNSPECIFIED',
-  TIME_FRAME_M1 = 'TIME_FRAME_M1',
-  TIME_FRAME_M5 = 'TIME_FRAME_M5',
-  TIME_FRAME_M15 = 'TIME_FRAME_M15',
-  TIME_FRAME_M30 = 'TIME_FRAME_M30',
-  TIME_FRAME_H1 = 'TIME_FRAME_H1',
-  TIME_FRAME_H4 = 'TIME_FRAME_H4',
-  TIME_FRAME_D = 'TIME_FRAME_D',
-  TIME_FRAME_W = 'TIME_FRAME_W',
-  TIME_FRAME_MN = 'TIME_FRAME_MN',
-}
-
-/**
- * Категория транзакции
- */
-export enum TransactionCategory {
-  TRANSACTION_CATEGORY_UNSPECIFIED = 'TRANSACTION_CATEGORY_UNSPECIFIED',
-  DEPOSIT = 'DEPOSIT',
-  WITHDRAWAL = 'WITHDRAWAL',
-  COMMISSION = 'COMMISSION',
-  DIVIDEND = 'DIVIDEND',
-  TRADE = 'TRADE',
-  OTHER = 'OTHER',
-}
-
-/**
- * Действие в стакане
- */
-export enum OrderBookAction {
-  ACTION_UNSPECIFIED = 'ACTION_UNSPECIFIED',
-  ACTION_ADD = 'ACTION_ADD',
-  ACTION_UPDATE = 'ACTION_UPDATE',
-  ACTION_DELETE = 'ACTION_DELETE',
-}
+export {
+  Side,
+  OrderType,
+  TimeInForce,
+  OrderStatus,
+  StopCondition,
+  QuoteLevel,
+  AccountType,
+  AccountStatus,
+  AssetType,
+  OptionType,
+  SessionType,
+  TimeFrame,
+  TransactionCategory,
+  OrderBookAction,
+} from './finam-trade-api-enums.js';
 
 // ===================================
 // Auth Service (Группа 1: Подключение)
@@ -279,8 +142,8 @@ export interface PortfolioMargin {
  */
 export interface GetAccountResponse {
   account_id: string;
-  type: string; // AccountType as string
-  status: string; // AccountStatus as string
+  type: AccountType;
+  status: AccountStatus;
   equity: DecimalValue;
   unrealized_profit: DecimalValue;
   positions: Position[];
@@ -298,7 +161,7 @@ export interface Trade {
   symbol: string;
   price: DecimalValue;
   size: DecimalValue;
-  side: Side | string;
+  side: Side;
   timestamp: string; // ISO 8601
   order_id: string;
   account_id: string;
@@ -316,11 +179,11 @@ export interface TradesResponse {
  */
 export interface Transaction {
   id: string;
-  category: string; // TransactionCategory deprecated field
+  category: TransactionCategory; // deprecated field
   timestamp: string; // ISO 8601
   symbol: string;
   change: MoneyValue;
-  transaction_category: string; // TransactionCategory as string
+  transaction_category: TransactionCategory;
   transaction_name: string;
 }
 
@@ -344,7 +207,7 @@ export interface Asset {
   ticker: string;
   mic: string;
   isin?: string;
-  type: string; // AssetType as string
+  type: AssetType;
   name: string;
   board?: string;
   lot_size?: DecimalValue;
@@ -422,7 +285,7 @@ export interface GetAssetParamsResponse {
  */
 export interface Option {
   symbol: string;
-  type: string; // OptionType as string
+  type: OptionType;
   contract_size: DecimalValue;
   trade_last_day: Date;
   strike: DecimalValue;
@@ -442,7 +305,7 @@ export interface OptionsChainResponse {
  * Торговая сессия
  */
 export interface Session {
-  type: string; // SessionType as string
+  type: SessionType;
   interval: TimeInterval;
 }
 
@@ -464,7 +327,7 @@ export interface ScheduleResponse {
 export interface OrderLeg {
   symbol: string;
   quantity: DecimalValue;
-  side: Side | string;
+  side: Side;
 }
 
 /**
@@ -474,12 +337,12 @@ export interface OrderDetails {
   account_id: string;
   symbol: string;
   quantity: DecimalValue;
-  side: Side | string;
-  type: OrderType | string;
-  time_in_force: TimeInForce | string;
+  side: Side;
+  type: OrderType;
+  time_in_force: TimeInForce;
   limit_price?: DecimalValue;
   stop_price?: DecimalValue;
-  stop_condition: StopCondition | string;
+  stop_condition: StopCondition;
   client_order_id: string;
   legs: OrderLeg[];
 }
@@ -490,7 +353,7 @@ export interface OrderDetails {
 export interface OrderInfo {
   order_id: string;
   exec_id: string;
-  status: OrderStatus | string;
+  status: OrderStatus;
   order: OrderDetails;
   transact_at: string; // ISO 8601
   filled_quantity?: DecimalValue;
@@ -522,12 +385,12 @@ export interface GetOrdersResponse {
 export interface PlaceOrderRequest {
   symbol: string;
   quantity: DecimalValue;
-  side: Side | string;
-  type: OrderType | string;
-  time_in_force: TimeInForce | string;
+  side: Side;
+  type: OrderType;
+  time_in_force: TimeInForce;
   limit_price?: DecimalValue;
   stop_price?: DecimalValue;
-  stop_condition?: StopCondition | string;
+  stop_condition?: StopCondition;
 
   legs?: OrderLeg[]; // VVQ
   client_order_id?: string;
@@ -604,7 +467,7 @@ export interface LatestTrade {
   timestamp: string; // ISO 8601
   price: DecimalValue;
   size: DecimalValue;
-  side: Side | string;
+  side: Side;
 }
 
 /**
@@ -622,7 +485,7 @@ export interface OrderBookRow {
   price: DecimalValue;
   buy_size?: DecimalValue;
   sell_size?: DecimalValue;
-  action: OrderBookAction | string;
+  action: OrderBookAction;
   mpid: string;
   timestamp: string; // ISO 8601
 }
@@ -658,7 +521,7 @@ export interface TimeIntervalQueryParams {
  * Параметры запроса для методов с таймфреймом
  */
 export interface TimeFrameQueryParams extends TimeIntervalQueryParams {
-  timeframe: TimeFrame | string;
+  timeframe: TimeFrame;
 }
 
 /**
