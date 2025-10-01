@@ -39,6 +39,8 @@ const HTTP_PORT = parseInt(process.env.MCP_HTTP_PORT || '3001', 10);
 const API_SECRET_TOKEN: string | undefined = process.env.API_SECRET_TOKEN;
 const ACCOUNT_ID: string | undefined = process.env.ACCOUNT_ID;
 
+
+
 interface IHeaderCreds {
   secret_token: string;
   account_id: string
@@ -78,6 +80,44 @@ const ENUM_RESOURCES = [
   { name: 'OrderBookAction', description: 'order book action' },
 ] as const;
 
+// Schema descriptions for documentation resources
+const assetDescription = `
+id
+name
+ticker
+mic - Exchange MIC code
+symbol - (ticker@mic)
+isin? – ISIN identifier
+type - see enum://AssetType
+board? – Trading mode code
+lot_size?
+decimals? – Num of decimal digits in price
+min_step? – Min price step (for final step: min_step/(10^decimals))
+`;
+
+const orderInfoDescription = `
+order_id - Order identifier
+exec_id - Execution identifier
+status - Order status (see enum://OrderStatus)
+order – Order details
+    account_id – Account identifier
+    symbol – Instrument symbol
+    quantity – Quantity in units
+    side – SIDE_BUY | SIDE_SELL
+    type – Order type (see enum://OrderType)
+    time_in_force – Time in force (see enum://TimeInForce)
+    limit_price? – Required for limit and stop-limit orders
+    stop_price? – Required for stop-market and stop-limit orders
+    stop_condition – Required for stop-market and stop-limit orders (see enum://StopCondition)
+    legs? – Required for multi-leg orders. Array of: { symbol, quantity, side }
+    client_order_id – Unique order identifier. Auto-generated if not provided (max 20 characters)
+transact_at – Submission date and time
+filled_quantity? – Filled quantity
+cancel_time? – Cancellation date and time
+accept_at? – Acceptance date and time
+withdraw_at? – Cancellation date and time
+`;
+
 // Create resource definitions for enums
 function createResources (): Resource[] {
   // Generate enum resources
@@ -88,9 +128,26 @@ function createResources (): Resource[] {
     mimeType: 'application/json',
   }));
 
+  // Schema documentation resources
+  const schemaResources: Resource[] = [
+    {
+      uri: 'schema://asset',
+      name: 'Asset/Instrument Schema',
+      description: 'Complete description of asset/instrument fields',
+      mimeType: 'text/plain',
+    },
+    {
+      uri: 'schema://order',
+      name: 'Order Info Schema',
+      description: 'Complete description of order information fields',
+      mimeType: 'text/plain',
+    },
+  ];
+
   // Add exchange resource
   return [
     ...enumResources,
+    ...schemaResources,
     {
       uri: 'exchange://list',
       name: 'Exchanges list',
@@ -112,6 +169,14 @@ async function handleReadResource (uri: string): Promise<string> {
     return JSON.stringify(values, null, 2);
   }
 
+  // Handle schema resources
+  if (uri === 'schema://asset') {
+    return assetDescription.trim();
+  }
+  if (uri === 'schema://order') {
+    return orderInfoDescription.trim();
+  }
+
   // Handle exchange resource
   if (uri === 'exchange://list') {
     if (!API_SECRET_TOKEN) {
@@ -123,6 +188,28 @@ async function handleReadResource (uri: string): Promise<string> {
 
   throw new McpError(ErrorCode.InvalidRequest, `Unknown resource: ${uri}`);
 }
+
+const getAccountResponseDescription = `
+account_id
+type - see enum://AccountType
+status - see enum://AccountStatus
+equity - Funds available plus value of open positions
+unrealized_profit
+positions – Positions (open plus theoretical from active unfilled orders). Array of:
+    symbol
+    quantity – in units (signed value for long/short)
+    average_price – (not filled for FORTS positions)
+    current_price
+    daily_pnl – (not filled for FORTS)
+    unrealized_pnl
+cash – Own funds available for trading. Does not include margin funds. Array of (Money object)
+portfolio_mc? – Portfolio margin metrics
+    available_cash – Own funds available for trading (includes margin)
+    initial_margin
+    maintenance_margin
+balance? – Account balance
+currency?
+`;
 
 // Create tool definitions with optional account_id default
 function createTools (defaultAccountId?: string): Tool[] {
@@ -182,7 +269,9 @@ function createTools (defaultAccountId?: string): Tool[] {
     // Group 2: Accounts
     {
       name: 'GetAccount', // 2-1
-      description: 'Get account information',
+      description: `Get account information:
+${getAccountResponseDescription}     
+`,
       inputSchema: {
         type: 'object',
         properties: {
@@ -191,9 +280,20 @@ function createTools (defaultAccountId?: string): Tool[] {
         required: addRequired(),
       },
     },
+
     {
       name: 'Trades', // 2-2
-      description: 'Get account trades for specified time interval',
+      description: `Get account trades for specified time interval: 
+trades: Array of:
+  trade_id – (from exchange)
+  symbol
+  price
+  size
+  side – SIDE_BUY | SIDE_SELL
+  timestamp – (ISO 8601)
+  order_id
+  account_id
+      `,
       inputSchema: {
         type: 'object',
         properties: {
@@ -206,7 +306,16 @@ function createTools (defaultAccountId?: string): Tool[] {
     },
     {
       name: 'Transactions', // 2-3
-      description: 'Get account transactions for specified time interval',
+      description: `Get account transactions for specified time interval
+transactions – Aray of:
+  id
+  timestamp – (ISO 8601)
+  symbol
+  change (Money object)
+  transaction_category –  see enum://TransactionCategory
+  transaction_name      
+      `,
+
       inputSchema: {
         type: 'object',
         properties: {
@@ -218,10 +327,11 @@ function createTools (defaultAccountId?: string): Tool[] {
       },
     },
 
-    // Group 3: Instruments // VVA слишком много
+    // Group 3: Instruments
     {
       name: 'Assets', // 3-1
-      description: 'Get list of all available assets/instruments',
+      description: `Get list of all available assets/instruments.
+Array of instruments (see schema://asset resource for field descriptions)`,
       inputSchema: {
         type: 'object',
         properties: {},
@@ -229,7 +339,7 @@ function createTools (defaultAccountId?: string): Tool[] {
     },
     {
       name: 'Clock', // 3-2
-      description: 'Get server time',
+      description: 'Get server time (ISO 8601)',
       inputSchema: {
         type: 'object',
         properties: {},
@@ -238,28 +348,20 @@ function createTools (defaultAccountId?: string): Tool[] {
     {
       name: 'GetAssetDetails', // 3-4 + 3-5 Combined
       description: `Get detailed information and trading parameters for a specific asset
-
-Asset Information:
-- ID, name, ticker
-- mic - Exchange id
-- Isin
-- type - (e.g., EQUITIES / BONDS / FUNDS / FUTURES...)
-- Board - trading mode code (tqbr)
-- decimals - number of decimal signs in price
-- min_step - min price step. For calc final price step: min_step/(10^Decimals)
-- lot_size - number in lots
-- Expiration_Date - (for Futures)
+Asset Information: See schema://asset resource for field descriptions
 
 Trading Parameters:
 - symbol
+- account_id
 - tradeable - is trading allowed
-- long/short availability:
-  - value – (e.g., AVAILABLE / NOT_AVAILABLE / HALTED)
-  - halted_days – days until restrictions are lifted
-- risk rate for long & short
-- maintenance collateral for long/short
-- min/max order size
-- trading status`,
+- longable/shortable – Long/Short availability:
+    - value – Status (AVAILABLE / NOT_AVAILABLE / HALTED)
+    - halted_days – Days remaining for long/short restrictions (if any)
+- long_risk_rate
+- short_risk_rate
+- long_collateral?/short_collateral? – Maintenance collateral for long/short (Money object)
+- min_order_size?/max_order_size? – Min/Max order size
+- trading_status`,
       inputSchema: {
         type: 'object',
         properties: {
@@ -271,14 +373,16 @@ Trading Parameters:
     },
     {
       name: 'OptionsChain', // 3-6
-      description: `Get options chain for underlying asset
-- Symbol - basic optional asset
-- Options (Array) In each:
-  - Symbol and type of instrument
-  - lot, number of basic asset in the tool
-  - Starting dates and ending
-  - The price of execution and the factor multiplier
-  - The start/end of expiration
+      description: `Get options chain for underlying asset:
+symbol
+options – Array of:
+    symbol – Option instrument symbol
+    type – see enum://OptionType
+    contract_size – (quantity)
+    trade_last_day
+    strike – Strike price
+    expiration_first_day
+    expiration_last_day
       `,
       inputSchema: {
         type: 'object',
@@ -290,7 +394,14 @@ Trading Parameters:
     },
     {
       name: 'Schedule', // 3-7
-      description: 'Get trading schedule for asset (asset sessions and their intervals)',
+      description: `Get trading schedule for asset:
+symbol
+sessions – Array:
+    type – see enum://SessionType
+    interval:
+        start_time – (ISO 8601)
+        end_time – (ISO 8601)
+      `,
       inputSchema: {
         type: 'object',
         properties: {
@@ -303,7 +414,8 @@ Trading Parameters:
     // Group 4: Orders
     {
       name: 'CancelOrder', // 4-1
-      description: `Cancel an existing order. In response comes the canceled Order`,
+      description: `Cancel an existing order. 
+Returns the canceled order (see schema://order resource for field descriptions)`,
       inputSchema: {
         type: 'object',
         properties: {
@@ -316,22 +428,7 @@ Trading Parameters:
 
     {
       name: 'GetOrder', // 4-2
-      description: `Get specific order details
-order_id
-exec_id
-status: new / partially_filled / filled / canceled / rejected
-account_id
-symbol
-quantity
-side
-type
-time_in_force
-limit_price
-stop_price
-stop_condition
-legs (Array) for multi legs order
-client_order_id  – uniq id for order
-      `,
+      description: `Get specific order details (see schema://order resource for field descriptions)`,
       inputSchema: {
         type: 'object',
         properties: {
@@ -344,7 +441,8 @@ client_order_id  – uniq id for order
 
     {
       name: 'GetOrders', // 4-3
-      description: 'Get details for all orders for account',
+      description: `Get details for all orders for account. 
+Returns array of orders (see schema://order resource for field descriptions)`,
       inputSchema: {
         type: 'object',
         properties: {
@@ -356,7 +454,8 @@ client_order_id  – uniq id for order
 
     {
       name: 'PlaceOrder', // 4-4
-      description: 'Place a new order',
+      description: `Place a new order. 
+Returns the created order (see schema://order resource for field descriptions)`,
       inputSchema: {
         type: 'object',
         properties: {
@@ -450,7 +549,25 @@ client_order_id  – uniq id for order
     },
     {
       name: 'LastQuote', // 5-2
-      description: 'Get latest quote for instrument',
+      description: `Get latest quote for instrument
+symbol
+quote (for day):
+    symbol
+    timestamp (ISO 8601)
+    ask – price
+    ask_size
+    bid – price
+    bid_size
+    last – price
+    last_size
+    volume
+    turnover
+    open
+    high
+    low
+    close
+    change – Price change (last minus close)
+      `,
       inputSchema: {
         type: 'object',
         properties: {
@@ -461,7 +578,16 @@ client_order_id  – uniq id for order
     },
     {
       name: 'LatestTrades', // 5-3
-      description: 'Get latest trades for instrument (max 100 records)',
+      description: `Get latest trades for instrument (max 100 records)
+symbol
+trades – Array:
+    trade_id
+    mpid – Market participant identifier
+    timestamp – (ISO 8601)
+    price
+    size
+    side – (buy or sell)      
+      `,
       inputSchema: {
         type: 'object',
         properties: {
@@ -472,7 +598,17 @@ client_order_id  – uniq id for order
     },
     {
       name: 'OrderBook', // 5-4
-      description: 'Get order book for instrument',
+      description: `Get order book for instrument:
+symbol
+orderbook:
+    rows – Array:
+        price
+        buy_size
+        sell_size
+        action – see enum://OrderBookAction
+        mpid – Market participant identifier
+        timestamp – (ISO 8601)      
+      `,
       inputSchema: {
         type: 'object',
         properties: {
@@ -481,11 +617,32 @@ client_order_id  – uniq id for order
         required: ['symbol'],
       },
     },
+
+    // Semantic Search
+    {
+      name: 'SearchInstruments',
+      description: 'Search for financial instruments using natural language. Uses semantic search with AI embeddings to find instruments by name, ticker, symbol, or description. Returns top matching results with relevance scores.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          query: {
+            type: 'string',
+            description: 'Natural language search query (e.g., "Yandex", "Russian stocks", "YDEX", "Газпром")',
+          },
+          limit: {
+            type: 'number',
+            description: 'Maximum number of results to return (default: 10, max: 50)',
+            default: 10,
+          },
+        },
+        required: ['query'],
+      },
+    },
   ];
 }
 
 // Tool handler
-async function handleToolCall (request: CallToolRequest, headers?: Record<string, string>) {
+async function handleToolCall (request: CallToolRequest, headers?: Record<string, string>, isHttpTransport = false) {
   const { name, arguments: args } = request.params;
 
   // Merge credentials: request args > HTTP headers > server defaults
@@ -649,9 +806,9 @@ export async function startHttpServer (port: number = HTTP_PORT) {
 
     await server.connect(transport);
 
-    // Override tool handler to pass headers
+    // Override tool handler to pass headers and mark as HTTP transport
     server.setRequestHandler(CallToolRequestSchema, async (request) =>
-      handleToolCall(request, req.headers as Record<string, string>),
+      handleToolCall(request, req.headers as Record<string, string>, true),
     );
 
     req.on('close', () => {
@@ -706,11 +863,26 @@ export async function startHttpServer (port: number = HTTP_PORT) {
 
           // Process request
           let result;
-          if (request.method === 'tools/list') {
+          if (request.method === 'initialize') {
+            result = {
+              protocolVersion: '0.1.0',
+              capabilities: {
+                tools: {},
+                resources: {},
+              },
+              serverInfo: {
+                name: 'finam-trade-api',
+                version: '1.0.0',
+              },
+            };
+          } else if (request.method === 'initialized') {
+            // Client confirms initialization - no response needed
+            result = {};
+          } else if (request.method === 'tools/list') {
             const tools = createTools(headerCreds?.account_id);
             result = { tools };
           } else if (request.method === 'tools/call') {
-            result = await handleToolCall(request as CallToolRequest, req.headers as Record<string, string>);
+            result = await handleToolCall(request as CallToolRequest, req.headers as Record<string, string>, true);
           } else if (request.method === 'resources/list') {
             const resources = createResources();
             result = { resources };
@@ -774,7 +946,7 @@ export async function startHttpServer (port: number = HTTP_PORT) {
     }
   });
 
-  app.listen(port, () => {
+  app.listen(port, async () => {
     console.error(`\n🚀 MCP Server running on port ${port}`);
     console.error(`\nAvailable endpoints:`);
     console.error(`  - SSE:              http://localhost:${port}/sse`);

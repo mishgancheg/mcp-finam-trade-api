@@ -27,6 +27,7 @@ import type {
   LastQuoteResponse,
   OrderBookResponse,
 } from '../meta/finam-trade-api-interfaces.js';
+import type { SearchResult } from '../services/instrument-search.js';
 
 /**
  * Format API result based on tool name and return mode
@@ -67,6 +68,12 @@ function formatJsonResponse (toolName: string, data: unknown): string {
       const limited = response.trades.slice(0, 100);
       return JSON.stringify({ trades: limited }, null, 2);
     }
+  }
+
+  // Special handling for SearchInstruments
+  if (toolName === 'SearchInstruments') {
+    const results = data as SearchResult[];
+    return JSON.stringify(results, null, 2);
   }
 
   // Default: return as formatted JSON
@@ -127,6 +134,8 @@ function formatStringResponse (toolName: string, data: unknown): string {
       return formatLastQuoteAsString(data as LastQuoteResponse);
     case 'OrderBook':
       return formatOrderBookAsString(data as OrderBookResponse);
+    case 'SearchInstruments':
+      return formatSearchResultsAsString(data as SearchResult[]);
     default:
       // Fallback to JSON
       return JSON.stringify(data, null, 2);
@@ -450,6 +459,38 @@ function formatOrderBookAsString (response: OrderBookResponse): string {
     'price,size',
     ...asks.slice(0, 10).map((a) => `${a.price?.value},${a.sell_size?.value}`),
   ];
+
+  return lines.join('\n');
+}
+
+/**
+ * Format SearchInstruments results as readable text
+ */
+function formatSearchResultsAsString (results: SearchResult[]): string {
+  if (!results || results.length === 0) {
+    return 'No matching instruments found.';
+  }
+
+  const lines = ['Search Results:', ''];
+
+  for (const result of results) {
+    const asset = result.asset;
+    const score = (result.score * 100).toFixed(1);
+
+    lines.push(`${asset.name || asset.ticker} (${asset.symbol})`);
+    lines.push(`  ID: ${asset.id}`);
+    lines.push(`  Ticker: ${asset.ticker}`);
+    lines.push(`  MIC: ${asset.mic}`);
+    if (asset.isin) {
+      lines.push(`  ISIN: ${asset.isin}`);
+    }
+    lines.push(`  Type: ${asset.type}`);
+    lines.push(`  Relevance: ${score}%`);
+    lines.push(`  Matched field: ${result.matchedField}`);
+    lines.push('');
+  }
+
+  lines.push(`Total: ${results.length} instruments`);
 
   return lines.join('\n');
 }
