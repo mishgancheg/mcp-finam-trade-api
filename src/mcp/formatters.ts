@@ -26,8 +26,8 @@ import type {
   BarsResponse,
   LastQuoteResponse,
   OrderBookResponse,
-} from '../meta/finam-trade-api-interfaces.js';
-import type { SearchResult } from '../services/instrument-search.js';
+  Asset,
+} from '../types/finam-trade-api-interfaces.js';
 
 /**
  * Format API result based on tool name and return mode
@@ -72,7 +72,7 @@ function formatJsonResponse (toolName: string, data: unknown): string {
 
   // Special handling for SearchInstruments
   if (toolName === 'SearchInstruments') {
-    const results = data as SearchResult[];
+    const results = data as Asset[];
     return JSON.stringify(results, null, 2);
   }
 
@@ -135,7 +135,7 @@ function formatStringResponse (toolName: string, data: unknown): string {
     case 'OrderBook':
       return formatOrderBookAsString(data as OrderBookResponse);
     case 'SearchInstruments':
-      return formatSearchResultsAsString(data as SearchResult[]);
+      return formatSearchResultsAsString(data as Asset[]);
     default:
       // Fallback to JSON
       return JSON.stringify(data, null, 2);
@@ -466,17 +466,14 @@ function formatOrderBookAsString (response: OrderBookResponse): string {
 /**
  * Format SearchInstruments results as readable text
  */
-function formatSearchResultsAsString (results: SearchResult[]): string {
+function formatSearchResultsAsString (results: Asset[]): string {
   if (!results || results.length === 0) {
     return 'No matching instruments found.';
   }
 
   const lines = ['Search Results:', ''];
 
-  for (const result of results) {
-    const asset = result.asset;
-    const score = (result.score * 100).toFixed(1);
-
+  for (const asset of results) {
     lines.push(`${asset.name || asset.ticker} (${asset.symbol})`);
     lines.push(`  ID: ${asset.id}`);
     lines.push(`  Ticker: ${asset.ticker}`);
@@ -484,9 +481,9 @@ function formatSearchResultsAsString (results: SearchResult[]): string {
     if (asset.isin) {
       lines.push(`  ISIN: ${asset.isin}`);
     }
-    lines.push(`  Type: ${asset.type}`);
-    lines.push(`  Relevance: ${score}%`);
-    lines.push(`  Matched field: ${result.matchedField}`);
+    if (asset.type) {
+      lines.push(`  Type: ${asset.type}`);
+    }
     lines.push('');
   }
 

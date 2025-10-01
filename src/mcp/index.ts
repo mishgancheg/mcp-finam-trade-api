@@ -21,8 +21,50 @@
 import '../init-config.js';
 import { startStdioServer, startHttpServer } from './server.js';
 
+const HELP_TEXT = `
+MCP Server for FINAM Trade API
+
+USAGE:
+  mcp-finam-trade-api [OPTIONS]
+
+OPTIONS:
+  --help              Show this help message
+  --http              Start HTTP/SSE transport server (default: stdio)
+  --port <number>     HTTP server port (default: 3001, requires --http)
+
+TRANSPORT MODES:
+  stdio (default)     For Claude Desktop integration
+                      Credentials: API_SECRET_TOKEN and ACCOUNT_ID from environment
+
+  HTTP/SSE            For HTTP-based MCP clients
+                      Credentials: Authorization Bearer header and X-Finam-Account-Id header
+
+ENVIRONMENT VARIABLES:
+  API_SECRET_TOKEN    Secret token for authentication (stdio mode)
+  ACCOUNT_ID          Account ID (stdio mode)
+  RETURN_AS           Response format: json|string (default: json)
+  MCP_HTTP_PORT       HTTP server port (default: 3001)
+
+EXAMPLES:
+  # Start stdio server (for Claude Desktop)
+  mcp-finam-trade-api
+
+  # Start HTTP server on default port 3001
+  mcp-finam-trade-api --http
+
+  # Start HTTP server on custom port
+  mcp-finam-trade-api --http --port 3002
+`;
+
 // Parse CLI arguments
 const args = process.argv.slice(2);
+
+// Show help if requested
+if (args.includes('--help') || args.includes('-h')) {
+  console.log(HELP_TEXT);
+  process.exit(0);
+}
+
 const isHttpMode = args.includes('--http');
 
 if (isHttpMode) {

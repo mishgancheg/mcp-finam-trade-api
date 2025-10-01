@@ -213,6 +213,8 @@ function getTests (config) {
 // ==================== Main Test Suite ====================
 
 async function runAllTests () {
+  const baseUrl = process.env.API_BASE_URL;
+  console.log(`Testing ${baseUrl} through a layer of API functions`);
   const config = getTestConfig();
   const tests = getTests(config);
   const results = [];

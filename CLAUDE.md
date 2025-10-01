@@ -61,7 +61,7 @@ Copy `.env.example` to `.env` and configure:
     - `server.ts` - MCP server core logic
     - `formatters.ts` - Response formatters (json/string modes)
     - `index.ts` - Entry point
-  - `meta/` - Structured metadata about FINAM Trade API endpoints
+  - `test/finam-trade-api-registry.js` - Structured metadata about FINAM Trade API endpoints
   - `lib/` - Utility libraries (JWT auth, utils)
   - `index.ts` - Main entry point
 - `test/` - Testing infrastructure
@@ -83,7 +83,7 @@ Copy `.env.example` to `.env` and configure:
 
 ### Key Implementation Components
 
-#### 1. API Registry (`src/meta/finam-trade-api-registry.js`)
+#### 1. API Registry (`test/finam-trade-api-registry.js`)
 Central registry containing all FINAM Trade API endpoints with:
 - Full endpoint metadata (method, path, parameters)
 - Request/response interfaces
@@ -205,7 +205,7 @@ Validates all MCP server tools and resources across all three transport protocol
    - Run `npm run build` to compile TypeScript
 
 2. **API Development**
-   - Update `src/meta/finam-trade-api-registry.js` with new endpoints
+   - Update `test/finam-trade-api-registry.js` with new endpoints
    - Test endpoints using `.http` files in `test/` directory
    - Validate with the API tester
 
@@ -235,7 +235,6 @@ Validates all MCP server tools and resources across all three transport protocol
    **Important Notes:**
    - Tests require valid credentials in `.env`
    - Test results saved to `_test-data/mcp/{transport}/`
-   - See `test/mcp/README.md` for detailed documentation
    - **IMPORTANT**: Always stop emulator after testing: `scripts\kill-emulator.bat`
 
 ## Utility Scripts

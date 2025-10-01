@@ -13,11 +13,11 @@ dist         - Скомпиллированный JS
 _fta         - Вся исходная информация о FINAM Trade API, полученная с сайта, документации, proto, postman
 prompts      - План выполнения и промпты, используемые для вайбкодинга
 src          - Код
-src/meta     - структурированные сведения о FINAM Trade API
+test/finam-trade-api-registry.js     - структурированные сведения о FINAM Trade API
 _test-data   - тестовыые данные
 test         - *.http файл для тесирования эндпоинтов API, js-модули тестирования эндпоинтов API и инструментов MCP сервера
 
-2) Получить и зафиксировать в файле src/meta/finam-trade-api-registry.js
+2) Получить и зафиксировать в файле test/finam-trade-api-registry.js
    полные сведения обо всех эндпоинтах FINAM Trade API.
    Пример массива с описанием эндпоинтов API - в _fta/api-registry-example.js
    ЦЕЛЬ: Получить точные и исчерпывающие сведения об API

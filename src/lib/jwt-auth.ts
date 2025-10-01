@@ -2,7 +2,7 @@ import '../init-config.js';
 
 import got from 'got';
 import { getJti } from './utils.js';
-import { AuthResponse } from "../meta/finam-trade-api-interfaces";
+import { AuthResponse } from "../types/finam-trade-api-interfaces";
 
 let baseUrl = process.env.API_BASE_URL;
 

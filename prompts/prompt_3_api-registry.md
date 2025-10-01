@@ -1,5 +1,5 @@
 # Цель
-Получить и зафиксировать в файле src/meta/finam-trade-api-registry.js
+Получить и зафиксировать в файле test/finam-trade-api-registry.js
 полные сведения обо всех эндпоинтах FINAM Trade API
 
 # Источник информации
@@ -30,10 +30,10 @@ _fta/REST API.postman_collection.json
    https://tradeapi.finam.ru/docs/guides/rest/accounts_service/GetAccount
 
 
-2) Создай массив сведений для каждого эндпоинта в файле src/meta/finam-trade-api-registry.js
+2) Создай массив сведений для каждого эндпоинта в файле test/finam-trade-api-registry.js
    по примеру из файла _fta/api-registry-example.js
 
-   Используй добавление геттеров свойств как в примере src/meta/finam-trade-api-registry.js
+   Используй добавление геттеров свойств как в примере test/finam-trade-api-registry.js
    
    Набор эндпоинтов смотри в _fta/REST API.postman_collection.json
    В поле `group` помещай значение `item.name` первого уровна

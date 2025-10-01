@@ -6,7 +6,7 @@ import * as _c from '../dist/src/init-config.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import got from 'got';
-import { FINAM_API_REGISTRY } from '../src/meta/finam-trade-api-registry.js';
+import { FINAM_API_REGISTRY } from './finam-trade-api-registry.js';
 import { getJwtToken } from '../dist/src/lib/jwt-auth.js';
 import { formatHttpError, isNonEmptyObject, ensureDir } from '../dist/src/lib/utils.js';
 
@@ -96,6 +96,8 @@ const h2 = got.extend({
   retry: { limit: 0 },    // без ретраев, чтобы видеть «сырой» ответ
 });
 
+let orderId = process.env.ORDER_ID || '68631684267';
+
 async function main () {
   if (['API_BASE_URL', 'API_SECRET_TOKEN', 'ACCOUNT_ID'].some((v) => {
     if (!process.env[v]) {
@@ -110,7 +112,6 @@ async function main () {
   const baseUrl = process.env.API_BASE_URL;
   const secretToken = process.env.API_SECRET_TOKEN;
   const accountId = process.env.ACCOUNT_ID;
-  const orderId = process.env.ORDER_ID || '68631684267';
   const symbol = process.env.SYMBOL || 'YDEX@MISX';
 
   ensureDir(path.join(process.cwd(), '_test-data'));
@@ -121,12 +122,13 @@ async function main () {
     order_id: orderId,
     symbol: symbol,
   };
+  console.log(`Testing ${baseUrl} directly`);
 
   // Step 1: Auth to get JWT using the new jwt-auth module
   let jwtToken = '';
   try {
     jwtToken = await getJwtToken(secretToken);
-    console.log('✅ JWT token obtained successfully (using cache if available)');
+    console.log('[1-1] ✅  JWT token obtained successfully');
   } catch (error) {
     console.error(formatHttpError(error));
     process.exitCode = 1;
@@ -165,7 +167,7 @@ async function main () {
       continue;
     }
 
-    const placeholders = { ...commonPlaceholders, jwtToken };
+    const placeholders = { ...commonPlaceholders, jwtToken, ts: Date.now() };
 
     // Simple placeholders substitution: try to replace everything available
 
@@ -227,6 +229,10 @@ async function main () {
       const report = toMarkdownReport({ ep, request: req, response: resp, error: err, started });
       const filename = path.join('_test-data', `${ep.fullId}.md`);
       fs.writeFileSync(filename, report, 'utf8');
+    }
+
+    if (ep.name === 'PlaceOrder' && resp?.body?.order?.client_order_id  ) {
+      orderId = resp?.body.order.client_order_id
     }
 
     // Basic console output

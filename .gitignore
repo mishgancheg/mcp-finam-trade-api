@@ -19,3 +19,4 @@ _tmp
 *.private.*
 *.local.*
 /_test-data/
+assets_data.json

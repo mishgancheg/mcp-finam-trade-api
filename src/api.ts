@@ -38,7 +38,7 @@ import {
   LatestTradesResponse,
   OrderBookResponse,
   OrderLeg,
-} from './meta/finam-trade-api-interfaces.js';
+} from './types/finam-trade-api-interfaces.js';
 import { isNonEmptyObject, toDecimalString } from "./lib/utils.js";
 
 const baseUrl = process.env.API_BASE_URL;

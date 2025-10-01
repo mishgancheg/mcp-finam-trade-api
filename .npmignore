@@ -21,6 +21,8 @@ eslint.config.js
 package-lock.json
 tsconfig.json
 
+assets_data.json
+
 dist/**/*.map
 dist/**/*.d.ts
 

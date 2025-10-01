@@ -1,8 +1,8 @@
 // TypeScript
 import { strict as assert } from 'assert';
-import { toDecimalString } from '../../src/lib/utils.js';
+import { toDecimalString } from '../../dist/src/lib/utils.js';
 
-const cases: Array<[number, string]> = [
+const cases = [
   [0, '0'],
   [1, '1'],
   [-1, '-1'],
@@ -28,7 +28,7 @@ for (const [input, expected] of cases) {
 }
 
 // Проверка ошибок
-const invalid: any[] = [Infinity, -Infinity, NaN];
+const invalid = [Infinity, -Infinity, NaN];
 for (const v of invalid) {
   let threw = false;
   try {

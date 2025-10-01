@@ -776,136 +776,6 @@ const RAW_ENDPOINTS = [
 
   // ==================== Группа 4: Заявки ====================
   {
-    fullId: '4-1',
-    group: 'Заявки',
-    name: 'CancelOrder',
-    description: 'Отмена заявки',
-    method: 'DELETE',
-    endpoint: '/v1/accounts/{account_id}/orders/{order_id}',
-    sourceUri: 'https://tradeapi.finam.ru/docs/guides/rest/orders_service/CancelOrder',
-    responseInterface: 'CancelOrderResponse',
-    pathParams: {
-      account_id: '{account_id}',
-      order_id: '{order_id}',
-    },
-    expectedStatus: 200,
-    responseExample: {
-      order_id: 'O123456789',
-      exec_id: 'E123456790',
-      status: 'ORDER_STATUS_CANCELED',
-      order: {
-        account_id: '123456',
-        symbol: 'SBER@MISX',
-        quantity: { value: '10' },
-        side: 'SIDE_BUY',
-        type: 'ORDER_TYPE_LIMIT',
-        time_in_force: 'TIME_IN_FORCE_DAY',
-        limit_price: { value: '250.00' },
-        stop_condition: 'STOP_CONDITION_UNSPECIFIED',
-        legs: [],
-        client_order_id: 'test_order_001',
-      },
-      transact_at: '2025-01-15T10:30:00Z',
-      cancel_time: '2025-01-15T10:35:00Z',
-    },
-
-    responseExample2: {
-      "order_id": "71118056704",
-      "exec_id": "ord.71118056704.1759201872095495",
-      "status": "ORDER_STATUS_CANCELED",
-      "order": {
-        "account_id": "1982834",
-        "symbol": "LQDT@MISX",
-        "quantity": {
-          "value": "1.0"
-        },
-        "side": "SIDE_BUY",
-        "type": "ORDER_TYPE_LIMIT",
-        "time_in_force": "TIME_IN_FORCE_DAY",
-        "limit_price": {
-          "value": "1.7415"
-        },
-        "stop_condition": "STOP_CONDITION_UNSPECIFIED",
-        "legs": [],
-        "client_order_id": "01K6DDRY3NVG50EH62KX2QSC81",
-        "valid_before": "VALID_BEFORE_UNSPECIFIED"
-      },
-      "transact_at": "2025-09-30T13:47:31.787Z"
-    },
-
-    validation: {
-      checkFields: (r) => {
-        return r.order_id && r.status === 'ORDER_STATUS_CANCELED';
-      },
-      expectedProps: ['order_id', 'status', 'cancel_time'],
-    },
-  },
-  {
-    fullId: '4-2',
-    group: 'Заявки',
-    name: 'GetOrder',
-    description: 'Получение информации по конкретной заявке',
-    method: 'GET',
-    endpoint: '/v1/accounts/{account_id}/orders/{order_id}',
-    sourceUri: 'https://tradeapi.finam.ru/docs/guides/rest/orders_service/GetOrder',
-    responseInterface: 'GetOrderResponse',
-    pathParams: {
-      account_id: '{account_id}',
-      order_id: '{order_id}',
-    },
-    expectedStatus: 200,
-    responseExample: {
-      order_id: 'O123456789',
-      exec_id: 'E123456789',
-      status: 'ORDER_STATUS_NEW',
-      order: {
-        account_id: '123456',
-        symbol: 'SBER@MISX',
-        quantity: { value: '10' },
-        side: 'SIDE_BUY',
-        type: 'ORDER_TYPE_LIMIT',
-        time_in_force: 'TIME_IN_FORCE_DAY',
-        limit_price: { value: '250.00' },
-        stop_condition: 'STOP_CONDITION_UNSPECIFIED',
-        legs: [],
-        client_order_id: 'test_order_001',
-      },
-      transact_at: '2025-01-15T10:30:00Z',
-      filled_quantity: { value: '0' },
-    },
-
-    responseExample2: {
-      'order_id': '71118056704',
-      'exec_id': 'ord.71118056704.1759201872000555',
-      'status': 'ORDER_STATUS_NEW',
-      'order': {
-        'account_id': '1982834',
-        'symbol': 'LQDT@MISX',
-        'quantity': {
-          'value': '1.0',
-        },
-        'side': 'SIDE_BUY',
-        'type': 'ORDER_TYPE_LIMIT',
-        'time_in_force': 'TIME_IN_FORCE_DAY',
-        'limit_price': {
-          'value': '1.7415',
-        },
-        'stop_condition': 'STOP_CONDITION_UNSPECIFIED',
-        'legs': [],
-        'client_order_id': 't1759239763266',
-        'valid_before': 'VALID_BEFORE_UNSPECIFIED',
-      },
-      'transact_at': '2025-09-30T13:42:44.098Z',
-    },
-
-    validation: {
-      checkFields: (r) => {
-        return r.order_id && r.status;
-      },
-      expectedProps: ['order_id', 'status', 'order'],
-    },
-  },
-  {
     fullId: '4-3',
     group: 'Заявки',
     name: 'GetOrders',
@@ -991,15 +861,19 @@ const RAW_ENDPOINTS = [
       account_id: '{account_id}',
     },
     data: {
-      symbol: 'SBER@MISX',
-      quantity: { value: '10' },
+      symbol: 'LQDT@MISX',
+      quantity: {
+        value: '1.0',
+      },
       side: 'SIDE_BUY',
       type: 'ORDER_TYPE_LIMIT',
       timeInForce: 'TIME_IN_FORCE_DAY',
-      limitPrice: { value: '250.00' },
+      limitPrice: {
+        value: '1.7415',
+      },
       stopCondition: 'STOP_CONDITION_UNSPECIFIED',
       legs: [],
-      clientOrderId: 'test_order_001',
+      clientOrderId: 't{ts}',
     },
     expectedStatus: 200,
     responseExample: {
@@ -1062,6 +936,136 @@ const RAW_ENDPOINTS = [
         return r.order_id && r.status;
       },
       expectedProps: ['order_id', 'status', 'order'],
+    },
+  },
+  {
+    fullId: '4-2',
+    group: 'Заявки',
+    name: 'GetOrder',
+    description: 'Получение информации по конкретной заявке',
+    method: 'GET',
+    endpoint: '/v1/accounts/{account_id}/orders/{order_id}',
+    sourceUri: 'https://tradeapi.finam.ru/docs/guides/rest/orders_service/GetOrder',
+    responseInterface: 'GetOrderResponse',
+    pathParams: {
+      account_id: '{account_id}',
+      order_id: '{order_id}',
+    },
+    expectedStatus: 200,
+    responseExample: {
+      order_id: 'O123456789',
+      exec_id: 'E123456789',
+      status: 'ORDER_STATUS_NEW',
+      order: {
+        account_id: '123456',
+        symbol: 'SBER@MISX',
+        quantity: { value: '10' },
+        side: 'SIDE_BUY',
+        type: 'ORDER_TYPE_LIMIT',
+        time_in_force: 'TIME_IN_FORCE_DAY',
+        limit_price: { value: '250.00' },
+        stop_condition: 'STOP_CONDITION_UNSPECIFIED',
+        legs: [],
+        client_order_id: 'test_order_001',
+      },
+      transact_at: '2025-01-15T10:30:00Z',
+      filled_quantity: { value: '0' },
+    },
+
+    responseExample2: {
+      'order_id': '71118056704',
+      'exec_id': 'ord.71118056704.1759201872000555',
+      'status': 'ORDER_STATUS_NEW',
+      'order': {
+        'account_id': '1982834',
+        'symbol': 'LQDT@MISX',
+        'quantity': {
+          'value': '1.0',
+        },
+        'side': 'SIDE_BUY',
+        'type': 'ORDER_TYPE_LIMIT',
+        'time_in_force': 'TIME_IN_FORCE_DAY',
+        'limit_price': {
+          'value': '1.7415',
+        },
+        'stop_condition': 'STOP_CONDITION_UNSPECIFIED',
+        'legs': [],
+        'client_order_id': 't1759239763266',
+        'valid_before': 'VALID_BEFORE_UNSPECIFIED',
+      },
+      'transact_at': '2025-09-30T13:42:44.098Z',
+    },
+
+    validation: {
+      checkFields: (r) => {
+        return r.order_id && r.status;
+      },
+      expectedProps: ['order_id', 'status', 'order'],
+    },
+  },
+  {
+    fullId: '4-1',
+    group: 'Заявки',
+    name: 'CancelOrder',
+    description: 'Отмена заявки',
+    method: 'DELETE',
+    endpoint: '/v1/accounts/{account_id}/orders/{order_id}',
+    sourceUri: 'https://tradeapi.finam.ru/docs/guides/rest/orders_service/CancelOrder',
+    responseInterface: 'CancelOrderResponse',
+    pathParams: {
+      account_id: '{account_id}',
+      order_id: '{order_id}',
+    },
+    expectedStatus: 200,
+    responseExample: {
+      order_id: 'O123456789',
+      exec_id: 'E123456790',
+      status: 'ORDER_STATUS_CANCELED',
+      order: {
+        account_id: '123456',
+        symbol: 'SBER@MISX',
+        quantity: { value: '10' },
+        side: 'SIDE_BUY',
+        type: 'ORDER_TYPE_LIMIT',
+        time_in_force: 'TIME_IN_FORCE_DAY',
+        limit_price: { value: '250.00' },
+        stop_condition: 'STOP_CONDITION_UNSPECIFIED',
+        legs: [],
+        client_order_id: 'test_order_001',
+      },
+      transact_at: '2025-01-15T10:30:00Z',
+      cancel_time: '2025-01-15T10:35:00Z',
+    },
+
+    responseExample2: {
+      'order_id': '71118056704',
+      'exec_id': 'ord.71118056704.1759201872095495',
+      'status': 'ORDER_STATUS_CANCELED',
+      'order': {
+        'account_id': '1982834',
+        'symbol': 'LQDT@MISX',
+        'quantity': {
+          'value': '1.0',
+        },
+        'side': 'SIDE_BUY',
+        'type': 'ORDER_TYPE_LIMIT',
+        'time_in_force': 'TIME_IN_FORCE_DAY',
+        'limit_price': {
+          'value': '1.7415',
+        },
+        'stop_condition': 'STOP_CONDITION_UNSPECIFIED',
+        'legs': [],
+        'client_order_id': '01K6DDRY3NVG50EH62KX2QSC81',
+        'valid_before': 'VALID_BEFORE_UNSPECIFIED',
+      },
+      'transact_at': '2025-09-30T13:47:31.787Z',
+    },
+
+    validation: {
+      checkFields: (r) => {
+        return r.order_id && r.status === 'ORDER_STATUS_CANCELED';
+      },
+      expectedProps: ['order_id', 'status', 'cancel_time'],
     },
   },
 

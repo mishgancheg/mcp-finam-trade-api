@@ -5,7 +5,7 @@
 Написать тестер всех методов FINAM Trade API.
 
 # Источник сведений об эндпоинтах 
-файл src/meta/finam-trade-api-registry.js
+файл test/finam-trade-api-registry.js
 
 # Указания:
 - BaseURL берется из .env (API_BASE_URL)

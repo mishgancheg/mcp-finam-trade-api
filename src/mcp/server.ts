@@ -1,3 +1,5 @@
+// noinspection UnnecessaryLocalVariableJS
+
 /**
  * MCP Server for FINAM Trade API
  *
@@ -29,7 +31,8 @@ import express from 'express';
 import helmet from 'helmet';
 import * as api from '../api.js';
 import { formatResponse } from './formatters.js';
-import * as Enums from '../meta/finam-trade-api-enums.js';
+import * as Enums from '../types/finam-trade-api-enums.js';
+import { getInstrumentSearch } from '../services/instrument-search.js';
 
 // Environment configuration
 const RETURN_AS = (process.env.RETURN_AS || 'json') as 'json' | 'string';
@@ -621,18 +624,13 @@ orderbook:
     // Semantic Search
     {
       name: 'SearchInstruments',
-      description: 'Search for financial instruments using natural language. Uses semantic search with AI embeddings to find instruments by name, ticker, symbol, or description. Returns top matching results with relevance scores.',
+      description: 'Exact instrument lookup only. The LLM must infer which strict key the user means and pass exactly one of: symbol (e.g., SBER@MISX), isin (e.g., RU000A1014L8), or ticker (e.g., SBER). Matches are exact.',
       inputSchema: {
         type: 'object',
         properties: {
           query: {
             type: 'string',
-            description: 'Natural language search query (e.g., "Yandex", "Russian stocks", "YDEX", "Газпром")',
-          },
-          limit: {
-            type: 'number',
-            description: 'Maximum number of results to return (default: 10, max: 50)',
-            default: 10,
+            description: 'A strict value of one key: symbol | isin | ticker. Examples: "SBER@MISX", "RU000A1014L8", "SBER".',
           },
         },
         required: ['query'],
@@ -663,16 +661,25 @@ async function handleToolCall (request: CallToolRequest, headers?: Record<string
   }
 
   try {
-    // Call API wrapper
-    const apiFn = api[name as keyof typeof api] as (params: Record<string, string>) => Promise<unknown>;
-    if (!apiFn) {
-      throw new McpError(
-        ErrorCode.MethodNotFound,
-        `Tool ${name} not found`,
-      );
-    }
+    let result: unknown;
 
-    const result = await apiFn(params);
+    // Handle SearchInstruments specially
+    if (name === 'SearchInstruments') {
+      const instrumentSearch = getInstrumentSearch();
+      const query = params.query as string;
+      const instruments = await instrumentSearch.search(query);
+      result = instruments;
+    } else {
+      // Call API wrapper
+      const apiFn = api[name as keyof typeof api] as (params: Record<string, string>) => Promise<unknown>;
+      if (!apiFn) {
+        throw new McpError(
+          ErrorCode.MethodNotFound,
+          `Tool ${name} not found`,
+        );
+      }
+      result = await apiFn(params);
+    }
 
     // Format response based on RETURN_AS setting
     const formatted = formatResponse(name, result, RETURN_AS);
@@ -742,6 +749,10 @@ export function createMcpServer (defaultAccountId?: string) {
 
 // Start stdio transport
 export async function startStdioServer () {
+  // Set transport type for instrument search (stdio = exact search only)
+  const instrumentSearch = getInstrumentSearch();
+  instrumentSearch.setTransport('stdio');
+
   const server = createMcpServer(ACCOUNT_ID);
   const transport = new StdioServerTransport();
   await server.connect(transport);
@@ -955,5 +966,11 @@ export async function startHttpServer (port: number = HTTP_PORT) {
     console.error(`  - Health:           http://localhost:${port}/health`);
     console.error(`\nActive transports: stdio, SSE, Streamable HTTP`);
     console.error(`Response format: ${RETURN_AS}`);
+
+    // Initialize instrument search for HTTP/SSE transports
+    const instrumentSearch = getInstrumentSearch();
+    instrumentSearch.setTransport('http');
+    await instrumentSearch.initialize();
+    instrumentSearch.startCacheRefresh(); // Start periodic cache refresh for HTTP transport
   });
 }

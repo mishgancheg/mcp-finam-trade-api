@@ -15,7 +15,7 @@
 - используй пакет dotenv для получения переменных окружения
 
 - В качестве примеров ответов можешь использовать 
-  - свойства responseExample в файле src/meta/finam-trade-api-registry.js
+  - свойства responseExample в файле test/finam-trade-api-registry.js
   - данные из файлов _test-data/good/<fullId>.md
   - ориентируйся на типы данных ответов из src/meta/finam-trade-api-interfaces.d.ts 
 
