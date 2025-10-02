@@ -185,8 +185,19 @@ async function handleReadResource (uri: string): Promise<string> {
     if (!API_SECRET_TOKEN) {
       throw new McpError(ErrorCode.InvalidRequest, 'API_SECRET_TOKEN not configured');
     }
-    const exchanges = await api.ExchangesCached({ secret_token: API_SECRET_TOKEN });
-    return JSON.stringify(exchanges, null, 2);
+    try {
+      const exchanges = await api.ExchangesCached({ secret_token: API_SECRET_TOKEN });
+      return JSON.stringify(exchanges, null, 2);
+    } catch (error) {
+      if (error instanceof McpError) {
+        throw error;
+      }
+      // Network/timeout errors - throw McpError
+      if (error instanceof Error) {
+        throw new McpError(ErrorCode.InvalidRequest, error.message);
+      }
+      throw new McpError(ErrorCode.InvalidRequest, `Unknown error: ${error}`);
+    }
   }
 
   throw new McpError(ErrorCode.InvalidRequest, `Unknown resource: ${uri}`);
@@ -647,7 +658,7 @@ Returns instrument details (see schema://asset resource for field descriptions))
 }
 
 // Tool handler
-async function handleToolCall (request: CallToolRequest, headers?: Record<string, string>, isHttpTransport = false) {
+async function handleToolCall (request: CallToolRequest, headers?: Record<string, string>) {
   const { name, arguments: args } = request.params;
 
   // Merge credentials: request args > HTTP headers > server defaults
@@ -826,7 +837,7 @@ export async function startHttpServer (port: number = HTTP_PORT) {
 
     // Override tool handler to pass headers and mark as HTTP transport
     server.setRequestHandler(CallToolRequestSchema, async (request) =>
-      handleToolCall(request, req.headers as Record<string, string>, true),
+      handleToolCall(request, req.headers as Record<string, string>),
     );
 
     req.on('close', () => {
@@ -900,7 +911,7 @@ export async function startHttpServer (port: number = HTTP_PORT) {
             const tools = createTools(headerCreds?.account_id);
             result = { tools };
           } else if (request.method === 'tools/call') {
-            result = await handleToolCall(request as CallToolRequest, req.headers as Record<string, string>, true);
+            result = await handleToolCall(request as CallToolRequest, req.headers as Record<string, string>);
           } else if (request.method === 'resources/list') {
             const resources = createResources();
             result = { resources };
@@ -966,6 +977,8 @@ export async function startHttpServer (port: number = HTTP_PORT) {
 
   app.listen(port, async () => {
     console.error(`\n🚀 MCP Server running on port ${port}`);
+    console.error(`\n🚀 FINAM Trade API: ${process.env.API_BASE_URL}`);
+
     console.error(`\nAvailable endpoints:`);
     console.error(`  - SSE:              http://localhost:${port}/sse`);
     console.error(`  - SSE Messages:     http://localhost:${port}/message`);
