@@ -624,7 +624,14 @@ orderbook:
     // Semantic Search
     {
       name: 'SearchInstruments',
-      description: 'Exact instrument lookup only. The LLM must infer which strict key the user means and pass exactly one of: symbol (e.g., SBER@MISX), isin (e.g., RU000A1014L8), or ticker (e.g., SBER). Matches are exact.',
+      description: `Exact instrument lookup only. 
+The LLM must infer which strict key the user means and pass exactly one of: 
+symbol (e.g., SBER@MISX), 
+isin (e.g., RU000A1014L8), 
+or ticker (e.g., SBER)
+
+Returns instrument details (see schema://asset resource for field descriptions))
+`,
       inputSchema: {
         type: 'object',
         properties: {

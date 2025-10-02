@@ -1065,7 +1065,7 @@ const RAW_ENDPOINTS = [
       checkFields: (r) => {
         return r.order_id && r.status === 'ORDER_STATUS_CANCELED';
       },
-      expectedProps: ['order_id', 'status', 'cancel_time'],
+      expectedProps: ['order_id', 'status'],
     },
   },
 

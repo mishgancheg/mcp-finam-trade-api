@@ -96,8 +96,6 @@ const h2 = got.extend({
   retry: { limit: 0 },    // без ретраев, чтобы видеть «сырой» ответ
 });
 
-let orderId = process.env.ORDER_ID || '68631684267';
-
 async function main () {
   if (['API_BASE_URL', 'API_SECRET_TOKEN', 'ACCOUNT_ID'].some((v) => {
     if (!process.env[v]) {
@@ -111,16 +109,14 @@ async function main () {
 
   const baseUrl = process.env.API_BASE_URL;
   const secretToken = process.env.API_SECRET_TOKEN;
-  const accountId = process.env.ACCOUNT_ID;
-  const symbol = process.env.SYMBOL || 'YDEX@MISX';
 
   ensureDir(path.join(process.cwd(), '_test-data'));
 
   const commonPlaceholders = {
     secretToken,
-    account_id: accountId,
-    order_id: orderId,
-    symbol: symbol,
+    account_id: process.env.ACCOUNT_ID,
+    order_id: process.env.ORDER_ID || '68631684267',
+    symbol: process.env.SYMBOL || 'YDEX@MISX',
   };
   console.log(`Testing ${baseUrl} directly`);
 
@@ -231,8 +227,13 @@ async function main () {
       fs.writeFileSync(filename, report, 'utf8');
     }
 
-    if (ep.name === 'PlaceOrder' && resp?.body?.order?.client_order_id  ) {
-      orderId = resp?.body.order.client_order_id
+    if (ep.name === 'PlaceOrder' && resp?.body?.order_id) {
+      commonPlaceholders.order_id = resp?.body.order_id;
+      console.log(`\tNew order: ${commonPlaceholders.order_id}`);
+    }
+
+    if (ep.name === 'PlaceOrder' || ep.name === 'GetOrder' || ep.name === 'CancelOrder') {
+      console.log(JSON.stringify(resp?.body, null, 2));
     }
 
     // Basic console output

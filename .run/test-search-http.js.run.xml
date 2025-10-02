@@ -1,0 +1,5 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="test-search-http.js" type="NodeJSConfigurationType" folderName="TEST SEARCH" nameIsGenerated="true" path-to-js-file="test/search/test-search-http.js" working-dir="$PROJECT_DIR$">
+    <method v="2" />
+  </configuration>
+</component>
