@@ -395,8 +395,40 @@ export async function CancelOrder (params: {
 export async function GetOrders (params: {
   secret_token: string;
   account_id: string;
+  status_filter?: string[];
 }): Promise<GetOrdersResponse> {
   const result = await makeRequest<GetOrdersResponse>('GET', `accounts/${params.account_id}/orders`, params.secret_token);
+  // Apply default status_filter if not provided
+  if (!params.status_filter?.length) {
+    params.status_filter = [
+      'ORDER_STATUS_NEW',
+      'ORDER_STATUS_PARTIALLY_FILLED',
+      'ORDER_STATUS_PENDING_NEW',
+      'ORDER_STATUS_PENDING_CANCEL',
+      'ORDER_STATUS_FORWARDING',
+      'ORDER_STATUS_WAIT',
+      'ORDER_STATUS_WATCHING',
+      'ORDER_STATUS_LINK_WAIT',
+      'ORDER_STATUS_SL_GUARD_TIME',
+      'ORDER_STATUS_SL_FORWARDING',
+      'ORDER_STATUS_TP_GUARD_TIME',
+      'ORDER_STATUS_TP_FORWARDING',
+      'ORDER_STATUS_TP_CORR_GUARD_TIME',
+    ];
+  }
+
+  // Apply client-side filtering if status_filter is provided
+  if (params.status_filter && params.status_filter.length > 0) {
+    const filteredOrders = result.orders.filter(order =>
+      params.status_filter!.includes(order.status),
+    );
+    return {
+      ...result,
+      orders: filteredOrders,
+      total: filteredOrders.length,
+    };
+  }
+
   return result;
 }
 

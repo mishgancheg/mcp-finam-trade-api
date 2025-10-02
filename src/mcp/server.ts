@@ -455,12 +455,23 @@ Returns the canceled order (see schema://order resource for field descriptions)`
 
     {
       name: 'GetOrders', // 4-3
-      description: `Get details for all orders for account. 
+      description: `Get details for all orders for account.
 Returns array of orders (see schema://order resource for field descriptions)`,
       inputSchema: {
         type: 'object',
         properties: {
           account_id: accountIdProp('Account ID'),
+          status_filter: {
+            type: 'array',
+            description: `Filter orders by status (optional).
+Values: see enum://OrderStatus
+If empty array or not provided, returns only active orders (default).
+If non-empty, returns only orders with matching statuses (OR logic).
+`,
+            items: {
+              type: 'string',
+            },
+          },
         },
         required: addRequired(),
       },
