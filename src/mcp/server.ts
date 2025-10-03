@@ -21,9 +21,9 @@ import {
   ListToolsRequestSchema,
   ListResourcesRequestSchema,
   ReadResourceRequestSchema,
+  ListPromptsRequestSchema,
+  GetPromptRequestSchema,
   type CallToolRequest,
-  type Tool,
-  type Resource,
   McpError,
   ErrorCode,
 } from '@modelcontextprotocol/sdk/types.js';
@@ -31,8 +31,10 @@ import express from 'express';
 import helmet from 'helmet';
 import * as api from '../api.js';
 import { formatResponse } from './formatters.js';
-import * as Enums from '../types/finam-trade-api-enums.js';
 import { getInstrumentSearch } from '../services/instrument-search.js';
+import { createTools } from './tools.js';
+import { createResources, handleReadResource } from './resources.js';
+import { createPrompts, handleGetPrompt } from './prompts.js';
 
 // Environment configuration
 const RETURN_AS = (process.env.RETURN_AS || 'json') as 'json' | 'string';
@@ -64,608 +66,6 @@ function extractCredentials (headers?: Record<string, string>): IHeaderCreds | n
 
   const secret_token = authHeader.replace(/^Bearer\s+/i, '');
   return { secret_token, account_id: accountIdHeader };
-}
-
-// Enum resources configuration
-const ENUM_RESOURCES = [
-  { name: 'OrderType', description: 'order type' },
-  { name: 'TimeInForce', description: 'time in force' },
-  { name: 'OrderStatus', description: 'order status' },
-  { name: 'StopCondition', description: 'stop condition' },
-  { name: 'QuoteLevel', description: 'quote level' },
-  { name: 'AccountType', description: 'account type' },
-  { name: 'AccountStatus', description: 'account status' },
-  { name: 'AssetType', description: 'asset type' },
-  { name: 'OptionType', description: 'option type' },
-  { name: 'SessionType', description: 'session type' },
-  { name: 'TimeFrame', description: 'timeframe' },
-  { name: 'TransactionCategory', description: 'transaction category' },
-  { name: 'OrderBookAction', description: 'order book action' },
-] as const;
-
-// Schema descriptions for documentation resources
-const assetDescription = `
-id
-name
-ticker
-mic - Exchange MIC code
-symbol - (ticker@mic)
-isin? – ISIN identifier
-type - see enum://AssetType
-board? – Trading mode code
-lot_size?
-decimals? – Num of decimal digits in price
-min_step? – Min price step (for final step: min_step/(10^decimals))
-`;
-
-const orderInfoDescription = `
-order_id - Order identifier
-exec_id - Execution identifier
-status - Order status (see enum://OrderStatus)
-order – Order details
-    account_id – Account identifier
-    symbol – Instrument symbol
-    quantity – Quantity in units
-    side – SIDE_BUY | SIDE_SELL
-    type – Order type (see enum://OrderType)
-    time_in_force – Time in force (see enum://TimeInForce)
-    limit_price? – Required for limit and stop-limit orders
-    stop_price? – Required for stop-market and stop-limit orders
-    stop_condition – Required for stop-market and stop-limit orders (see enum://StopCondition)
-    legs? – Required for multi-leg orders. Array of: { symbol, quantity, side }
-    client_order_id – Unique order identifier. Auto-generated if not provided (max 20 characters)
-transact_at – Submission date and time
-filled_quantity? – Filled quantity
-cancel_time? – Cancellation date and time
-accept_at? – Acceptance date and time
-withdraw_at? – Cancellation date and time
-`;
-
-// Create resource definitions for enums
-function createResources (): Resource[] {
-  // Generate enum resources
-  const enumResources = ENUM_RESOURCES.map(({ name, description }) => ({
-    uri: `enum://${name}`,
-    name: `${name} enum values`,
-    description: `All possible ${description} values`,
-    mimeType: 'application/json',
-  }));
-
-  // Schema documentation resources
-  const schemaResources: Resource[] = [
-    {
-      uri: 'schema://asset',
-      name: 'Asset/Instrument Schema',
-      description: 'Complete description of asset/instrument fields',
-      mimeType: 'text/plain',
-    },
-    {
-      uri: 'schema://order',
-      name: 'Order Info Schema',
-      description: 'Complete description of order information fields',
-      mimeType: 'text/plain',
-    },
-  ];
-
-  // Add exchange resource
-  return [
-    ...enumResources,
-    ...schemaResources,
-    {
-      uri: 'exchange://list',
-      name: 'Exchanges list',
-      description: 'List of all exchanges with names and mic codes (cached, updates every 2 hours)',
-      mimeType: 'application/json',
-    },
-  ];
-}
-
-// Handle resource read requests
-async function handleReadResource (uri: string): Promise<string> {
-  // Handle enum resources
-  const enumResource = ENUM_RESOURCES.find(({ name }) => uri === `enum://${name}`);
-  if (enumResource) {
-    // Get enum object dynamically by name
-    const enumObject = Enums[enumResource.name as keyof typeof Enums];
-    // Return array of enum values only (without key duplication)
-    const values = Object.values(enumObject);
-    return JSON.stringify(values, null, 2);
-  }
-
-  // Handle schema resources
-  if (uri === 'schema://asset') {
-    return assetDescription.trim();
-  }
-  if (uri === 'schema://order') {
-    return orderInfoDescription.trim();
-  }
-
-  // Handle exchange resource
-  if (uri === 'exchange://list') {
-    if (!API_SECRET_TOKEN) {
-      throw new McpError(ErrorCode.InvalidRequest, 'API_SECRET_TOKEN not configured');
-    }
-    try {
-      const exchanges = await api.ExchangesCached({ secret_token: API_SECRET_TOKEN });
-      return JSON.stringify(exchanges, null, 2);
-    } catch (error) {
-      if (error instanceof McpError) {
-        throw error;
-      }
-      // Network/timeout errors - throw McpError
-      if (error instanceof Error) {
-        throw new McpError(ErrorCode.InvalidRequest, error.message);
-      }
-      throw new McpError(ErrorCode.InvalidRequest, `Unknown error: ${error}`);
-    }
-  }
-
-  throw new McpError(ErrorCode.InvalidRequest, `Unknown resource: ${uri}`);
-}
-
-const getAccountResponseDescription = `
-account_id
-type - see enum://AccountType
-status - see enum://AccountStatus
-equity - Funds available plus value of open positions
-unrealized_profit
-positions – Positions (open plus theoretical from active unfilled orders). Array of:
-    symbol
-    quantity – in units (signed value for long/short)
-    average_price – (not filled for FORTS positions)
-    current_price
-    daily_pnl – (not filled for FORTS)
-    unrealized_pnl
-cash – Own funds available for trading. Does not include margin funds. Array of (Money object)
-portfolio_mc? – Portfolio margin metrics
-    available_cash – Own funds available for trading (includes margin)
-    initial_margin
-    maintenance_margin
-balance? – Account balance
-currency?
-`;
-
-// Create tool definitions with optional account_id default
-function createTools (defaultAccountId?: string): Tool[] {
-
-  // Helper to add account_id Description
-  const accountIdProp = (s: string): { type: 'string', description: string } => {
-    return {
-      type: 'string',
-      description: s + (defaultAccountId ? ` (optional. Default ${defaultAccountId})` : ''),
-    };
-  };
-
-  // Helper to add account_id Description
-  const symbolProp = (s?: string): { type: 'string', description: string } => {
-    return {
-      type: 'string',
-      description: s || 'Instrument/Asset symbol (e.g., YDEX@MISX)',
-    };
-  };
-
-  const accountIdRequired = !defaultAccountId;
-
-  // Helper to add account_id to required array if needed
-  const addRequired = (base: string[] = []): string[] => {
-    return accountIdRequired ? [...base, 'account_id'] : base;
-  };
-
-  return [
-    // Group 1: Connection
-    {
-      name: 'Auth', // 1-1
-      description: 'Authenticate and get JWT token',
-      inputSchema: {
-        type: 'object',
-        properties: {
-          secret_token: {
-            type: 'string',
-            description: 'Secret token (optional if provided at startup)',
-          },
-        },
-      },
-    },
-    {
-      name: 'TokenDetails', // 1-2
-      description: 'Get token details and permissions',
-      inputSchema: {
-        type: 'object',
-        properties: {
-          jwt_token: {
-            type: 'string',
-            description: 'JWT token',
-          },
-        },
-      },
-    },
-
-    // Group 2: Accounts
-    {
-      name: 'GetAccount', // 2-1
-      description: `Get account information:
-${getAccountResponseDescription}     
-`,
-      inputSchema: {
-        type: 'object',
-        properties: {
-          account_id: accountIdProp('Account ID'),
-        },
-        required: addRequired(),
-      },
-    },
-
-    {
-      name: 'Trades', // 2-2
-      description: `Get account trades for specified time interval: 
-trades: Array of:
-  trade_id – (from exchange)
-  symbol
-  price
-  size
-  side – SIDE_BUY | SIDE_SELL
-  timestamp – (ISO 8601)
-  order_id
-  account_id
-      `,
-      inputSchema: {
-        type: 'object',
-        properties: {
-          account_id: accountIdProp('Account ID'),
-          start_time: { type: 'string', description: 'Start time (RFC3339 format)' },
-          end_time: { type: 'string', description: 'End time (RFC3339 format)' },
-        },
-        required: addRequired(['start_time', 'end_time']),
-      },
-    },
-    {
-      name: 'Transactions', // 2-3
-      description: `Get account transactions for specified time interval
-transactions – Aray of:
-  id
-  timestamp – (ISO 8601)
-  symbol
-  change (Money object)
-  transaction_category –  see enum://TransactionCategory
-  transaction_name      
-      `,
-
-      inputSchema: {
-        type: 'object',
-        properties: {
-          account_id: accountIdProp('Account ID'),
-          start_time: { type: 'string', description: 'Start time (RFC3339 format)' },
-          end_time: { type: 'string', description: 'End time (RFC3339 format)' },
-        },
-        required: addRequired(['start_time', 'end_time']),
-      },
-    },
-
-    // Group 3: Instruments
-    {
-      name: 'Assets', // 3-1
-      description: `Get list of all available assets/instruments.
-Array of instruments (see schema://asset resource for field descriptions)`,
-      inputSchema: {
-        type: 'object',
-        properties: {},
-      },
-    },
-    {
-      name: 'Clock', // 3-2
-      description: 'Get server time (ISO 8601)',
-      inputSchema: {
-        type: 'object',
-        properties: {},
-      },
-    },
-    {
-      name: 'GetAssetDetails', // 3-4 + 3-5 Combined
-      description: `Get detailed information and trading parameters for a specific asset
-Asset Information: See schema://asset resource for field descriptions
-
-Trading Parameters:
-- symbol
-- account_id
-- tradeable - is trading allowed
-- longable/shortable – Long/Short availability:
-    - value – Status (AVAILABLE / NOT_AVAILABLE / HALTED)
-    - halted_days – Days remaining for long/short restrictions (if any)
-- long_risk_rate
-- short_risk_rate
-- long_collateral?/short_collateral? – Maintenance collateral for long/short (Money object)
-- min_order_size?/max_order_size? – Min/Max order size
-- trading_status`,
-      inputSchema: {
-        type: 'object',
-        properties: {
-          symbol: symbolProp(),
-          account_id: accountIdProp('Account ID for which the asset details will be selected'),
-        },
-        required: addRequired(['symbol']),
-      },
-    },
-    {
-      name: 'OptionsChain', // 3-6
-      description: `Get options chain for underlying asset:
-symbol
-options – Array of:
-    symbol – Option instrument symbol
-    type – see enum://OptionType
-    contract_size – (quantity)
-    trade_last_day
-    strike – Strike price
-    expiration_first_day
-    expiration_last_day
-      `,
-      inputSchema: {
-        type: 'object',
-        properties: {
-          symbol: symbolProp('Underlying asset symbol'),
-        },
-        required: ['symbol'],
-      },
-    },
-    {
-      name: 'Schedule', // 3-7
-      description: `Get trading schedule for asset:
-symbol
-sessions – Array:
-    type – see enum://SessionType
-    interval:
-        start_time – (ISO 8601)
-        end_time – (ISO 8601)
-      `,
-      inputSchema: {
-        type: 'object',
-        properties: {
-          symbol: symbolProp(),
-        },
-        required: ['symbol'],
-      },
-    },
-
-    // Group 4: Orders
-    {
-      name: 'CancelOrder', // 4-1
-      description: `Cancel an existing order. 
-Returns the canceled order (see schema://order resource for field descriptions)`,
-      inputSchema: {
-        type: 'object',
-        properties: {
-          account_id: accountIdProp('Account ID'),
-          order_id: { type: 'string', description: 'Order ID to cancel' },
-        },
-        required: addRequired(['order_id']),
-      },
-    },
-
-    {
-      name: 'GetOrder', // 4-2
-      description: `Get specific order details (see schema://order resource for field descriptions)`,
-      inputSchema: {
-        type: 'object',
-        properties: {
-          account_id: accountIdProp('Account ID'),
-          order_id: { type: 'string', description: 'Order ID' },
-        },
-        required: addRequired(['order_id']),
-      },
-    },
-
-    {
-      name: 'GetOrders', // 4-3
-      description: `Get details for all orders for account.
-Returns array of orders (see schema://order resource for field descriptions)`,
-      inputSchema: {
-        type: 'object',
-        properties: {
-          account_id: accountIdProp('Account ID'),
-          status_filter: {
-            type: 'array',
-            description: `Filter orders by status (optional).
-Values: see enum://OrderStatus
-If empty array or not provided, returns only active orders (default).
-If non-empty, returns only orders with matching statuses (OR logic).
-`,
-            items: {
-              type: 'string',
-            },
-          },
-        },
-        required: addRequired(),
-      },
-    },
-
-    {
-      name: 'PlaceOrder', // 4-4
-      description: `Place a new order. 
-Returns the created order (see schema://order resource for field descriptions)`,
-      inputSchema: {
-        type: 'object',
-        properties: {
-          account_id: accountIdProp('Account ID'),
-          symbol: symbolProp(),
-          quantity: {
-            type: 'number',
-            description: 'Order quantity',
-          },
-          side: {
-            type: 'string',
-            enum: ['SIDE_BUY', 'SIDE_SELL'],
-            description: 'Order side',
-          },
-          type: {
-            type: 'string',
-            enum: ['ORDER_TYPE_LIMIT', 'ORDER_TYPE_MARKET', 'ORDER_TYPE_STOP', 'ORDER_TYPE_STOP_LIMIT'],
-            description: 'Order type',
-          },
-          time_in_force: {
-            type: 'string',
-            enum: ['TIME_IN_FORCE_DAY', 'TIME_IN_FORCE_GTC', 'TIME_IN_FORCE_IOC', 'TIME_IN_FORCE_FOK'],
-            description: 'Time in force',
-          },
-          limit_price: {
-            type: 'number',
-            description: 'Limit price (required for limit orders)',
-          },
-          stop_price: {
-            type: 'number',
-            description: 'Stop price (required for stop orders)',
-          },
-          stop_condition: {
-            type: 'string',
-            enum: ['STOP_CONDITION_MORE', 'STOP_CONDITION_LESS'],
-            description: 'Stop condition (optional)',
-          },
-          client_order_id: {
-            type: 'string',
-            description: 'Unique order ID (optional). Automatically generated if not sent. (maximum 20 characters)',
-            minLength: 3,
-            maxLength: 20,
-            pattern: "^[A-Za-z0-9 ]+$",
-          },
-          legs: {
-            type: 'array',
-            description: 'Order legs for complex orders (optional)',
-            items: {
-              type: 'object',
-              properties: {
-                symbol: {
-                  type: 'string',
-                  description: 'Instrument symbol in format: SYMBOL@MIC (e.g. SBER@MISX)',
-                },
-                quantity: {
-                  type: 'number',
-                  description: 'Leg quantity',
-                },
-                side: {
-                  type: 'string',
-                  enum: ['SIDE_BUY', 'SIDE_SELL'],
-                  description: 'Leg side',
-                },
-              },
-              required: ['symbol', 'quantity', 'side'],
-            },
-          },
-        },
-        required: addRequired(['symbol', 'quantity', 'side', 'type', 'time_in_force']),
-      },
-    },
-
-    // Group 5: Market Data
-    {
-      name: 'Bars', // 5-1
-      description: 'Get historical bars/candles for instrument',
-      inputSchema: {
-        type: 'object',
-        properties: {
-          symbol: symbolProp(),
-          start_time: { type: 'string', description: 'Start time (RFC3339 format)' },
-          end_time: { type: 'string', description: 'End time (RFC3339 format)' },
-          timeframe: {
-            type: 'string',
-            enum: ['TIME_FRAME_M1', 'TIME_FRAME_M5', 'TIME_FRAME_M15', 'TIME_FRAME_H1', 'TIME_FRAME_D'],
-            description: 'Timeframe',
-          },
-        },
-        required: ['symbol', 'start_time', 'end_time', 'timeframe'],
-      },
-    },
-    {
-      name: 'LastQuote', // 5-2
-      description: `Get latest quote for instrument
-symbol
-quote (for day):
-    symbol
-    timestamp (ISO 8601)
-    ask – price
-    ask_size
-    bid – price
-    bid_size
-    last – price
-    last_size
-    volume
-    turnover
-    open
-    high
-    low
-    close
-    change – Price change (last minus close)
-      `,
-      inputSchema: {
-        type: 'object',
-        properties: {
-          symbol: symbolProp(),
-        },
-        required: ['symbol'],
-      },
-    },
-    {
-      name: 'LatestTrades', // 5-3
-      description: `Get latest trades for instrument (max 100 records)
-symbol
-trades – Array:
-    trade_id
-    mpid – Market participant identifier
-    timestamp – (ISO 8601)
-    price
-    size
-    side – (buy or sell)      
-      `,
-      inputSchema: {
-        type: 'object',
-        properties: {
-          symbol: symbolProp(),
-        },
-        required: ['symbol'],
-      },
-    },
-    {
-      name: 'OrderBook', // 5-4
-      description: `Get order book for instrument:
-symbol
-orderbook:
-    rows – Array:
-        price
-        buy_size
-        sell_size
-        action – see enum://OrderBookAction
-        mpid – Market participant identifier
-        timestamp – (ISO 8601)      
-      `,
-      inputSchema: {
-        type: 'object',
-        properties: {
-          symbol: symbolProp(),
-        },
-        required: ['symbol'],
-      },
-    },
-
-    // Semantic Search
-    {
-      name: 'SearchInstruments',
-      description: `Exact instrument lookup only. 
-The LLM must infer which strict key the user means and pass exactly one of: 
-symbol (e.g., SBER@MISX), 
-isin (e.g., RU000A1014L8), 
-or ticker (e.g., SBER)
-
-Returns instrument details (see schema://asset resource for field descriptions))
-`,
-      inputSchema: {
-        type: 'object',
-        properties: {
-          query: {
-            type: 'string',
-            description: 'A strict value of one key: symbol | isin | ticker. Examples: "SBER@MISX", "RU000A1014L8", "SBER".',
-          },
-        },
-        required: ['query'],
-      },
-    },
-  ];
 }
 
 // Tool handler
@@ -734,6 +134,7 @@ async function handleToolCall (request: CallToolRequest, headers?: Record<string
 export function createMcpServer (defaultAccountId?: string) {
   const tools = createTools(defaultAccountId);
   const resources = createResources();
+  const prompts = createPrompts(defaultAccountId);
 
   const server = new Server(
     {
@@ -744,6 +145,7 @@ export function createMcpServer (defaultAccountId?: string) {
       capabilities: {
         tools: {},
         resources: {},
+        prompts: {},
       },
     },
   );
@@ -761,7 +163,7 @@ export function createMcpServer (defaultAccountId?: string) {
 
   server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
     const uri = request.params.uri;
-    const content = await handleReadResource(uri);
+    const content = await handleReadResource(uri, API_SECRET_TOKEN);
     return {
       contents: [
         {
@@ -771,6 +173,15 @@ export function createMcpServer (defaultAccountId?: string) {
         },
       ],
     };
+  });
+
+  server.setRequestHandler(ListPromptsRequestSchema, async () => {
+    return { prompts };
+  });
+
+  server.setRequestHandler(GetPromptRequestSchema, async (request) => {
+    const { name, arguments: args } = request.params;
+    return handleGetPrompt(name, args, defaultAccountId);
   });
 
   return server;
@@ -909,6 +320,7 @@ export async function startHttpServer (port: number = HTTP_PORT) {
               capabilities: {
                 tools: {},
                 resources: {},
+                prompts: {},
               },
               serverInfo: {
                 name: 'finam-trade-api',
@@ -931,7 +343,7 @@ export async function startHttpServer (port: number = HTTP_PORT) {
             if (!uri) {
               throw new McpError(ErrorCode.InvalidParams, 'uri parameter required');
             }
-            const content = await handleReadResource(uri);
+            const content = await handleReadResource(uri, headerCreds?.secret_token);
             result = {
               contents: [
                 {
@@ -941,6 +353,15 @@ export async function startHttpServer (port: number = HTTP_PORT) {
                 },
               ],
             };
+          } else if (request.method === 'prompts/list') {
+            const prompts = createPrompts(headerCreds?.account_id);
+            result = { prompts };
+          } else if (request.method === 'prompts/get') {
+            const name = request.params?.name;
+            if (!name) {
+              throw new McpError(ErrorCode.InvalidParams, 'name parameter required');
+            }
+            result = handleGetPrompt(name, request.params?.arguments, headerCreds?.account_id);
           } else {
             throw new McpError(ErrorCode.MethodNotFound, `Unknown method: ${request.method}`);
           }
