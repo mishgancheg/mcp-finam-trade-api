@@ -45,7 +45,6 @@ const API_SECRET_TOKEN: string | undefined = process.env.API_SECRET_TOKEN;
 const ACCOUNT_ID: string | undefined = process.env.ACCOUNT_ID;
 
 
-
 interface IHeaderCreds {
   secret_token: string;
   account_id: string

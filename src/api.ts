@@ -396,11 +396,14 @@ export async function GetOrders (params: {
   secret_token: string;
   account_id: string;
   status_filter?: string[];
+  limit?: number;
 }): Promise<GetOrdersResponse> {
   const result = await makeRequest<GetOrdersResponse>('GET', `accounts/${params.account_id}/orders`, params.secret_token);
-  // Apply default status_filter if not provided
-  if (!params.status_filter?.length) {
-    params.status_filter = [
+  let { status_filter = [] } = params;
+  const { limit = 50 } = params;
+
+  if (status_filter?.[0] === 'ACTIVE') {
+    status_filter = [
       'ORDER_STATUS_NEW',
       'ORDER_STATUS_PARTIALLY_FILLED',
       'ORDER_STATUS_PENDING_NEW',
@@ -416,20 +419,20 @@ export async function GetOrders (params: {
       'ORDER_STATUS_TP_CORR_GUARD_TIME',
     ];
   }
-
-  // Apply client-side filtering if status_filter is provided
-  if (params.status_filter && params.status_filter.length > 0) {
-    const filteredOrders = result.orders.filter(order =>
-      params.status_filter!.includes(order.status),
+  let filteredOrders = result.orders;
+  if (status_filter.length > 0) {
+    filteredOrders = result.orders.filter(order =>
+      status_filter!.includes(order.status),
     );
-    return {
-      ...result,
-      orders: filteredOrders,
-      total: filteredOrders.length,
-    };
   }
-
-  return result;
+  filteredOrders = filteredOrders.sort((a, b) => {
+    return new Date(b.transact_at).getTime() - new Date(a.transact_at).getTime();
+  });
+  filteredOrders = filteredOrders.slice(0, limit);
+  return {
+    orders: filteredOrders,
+    total: filteredOrders.length,
+  };
 }
 
 // 4-4

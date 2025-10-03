@@ -22,11 +22,6 @@ export function createPrompts(defaultAccountId?: string): Prompt[] {
         },
       ],
     },
-    {
-      name: 'how-much',
-      description: 'Classic question about quantity or weight',
-      arguments: [],
-    },
   ];
 }
 
@@ -44,21 +39,7 @@ export function handleGetPrompt(
           role: 'user',
           content: {
             type: 'text',
-            text: `/ :@CB>9 B>@3>2K9 035=B, ?><>30N B>@3>20BL ?> 1@>:5@A:><C AG5BC ${accountId}`,
-          },
-        },
-      ],
-    };
-  }
-
-  if (name === 'how-much') {
-    return {
-      messages: [
-        {
-          role: 'user',
-          content: {
-            type: 'text',
-            text: '!:>;L:> 25H0BL 3@0<<>2',
+            text: `I am a trading agent. I help trade on brokerage account ${accountId}`,
           },
         },
       ],

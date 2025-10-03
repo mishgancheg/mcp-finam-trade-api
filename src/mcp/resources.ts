@@ -33,35 +33,35 @@ name
 ticker
 mic - Exchange MIC code
 symbol - (ticker@mic)
-isin?  ISIN identifier
+isin? - ISIN identifier
 type - see enum://AssetType
-board?  Trading mode code
+board? - Trading mode code
 lot_size?
-decimals?  Num of decimal digits in price
-min_step?  Min price step (for final step: min_step/(10^decimals))
+decimals? - Num of decimal digits in price
+min_step? - Min price step (for final step: min_step/(10^decimals))
 `;
 
 const orderInfoDescription = `
 order_id - Order identifier
 exec_id - Execution identifier
 status - Order status (see enum://OrderStatus)
-order  Order details
-    account_id  Account identifier
-    symbol  Instrument symbol
-    quantity  Quantity in units
-    side  SIDE_BUY | SIDE_SELL
-    type  Order type (see enum://OrderType)
-    time_in_force  Time in force (see enum://TimeInForce)
-    limit_price?  Required for limit and stop-limit orders
-    stop_price?  Required for stop-market and stop-limit orders
-    stop_condition  Required for stop-market and stop-limit orders (see enum://StopCondition)
-    legs?  Required for multi-leg orders. Array of: { symbol, quantity, side }
-    client_order_id  Unique order identifier. Auto-generated if not provided (max 20 characters)
-transact_at  Submission date and time
-filled_quantity?  Filled quantity
-cancel_time?  Cancellation date and time
-accept_at?  Acceptance date and time
-withdraw_at?  Cancellation date and time
+order - Order details
+    account_id - Account identifier
+    symbol - Instrument symbol
+    quantity - Quantity in units
+    side - SIDE_BUY | SIDE_SELL
+    type - Order type (see enum://OrderType)
+    time_in_force - Time in force (see enum://TimeInForce)
+    limit_price? - Required for limit and stop-limit orders
+    stop_price? - Required for stop-market and stop-limit orders
+    stop_condition - Required for stop-market and stop-limit orders (see enum://StopCondition)
+    legs? - Required for multi-leg orders. Array of: { symbol, quantity, side }
+    client_order_id - Unique order identifier. Auto-generated if not provided (max 20 characters)
+transact_at - Submission date and time
+filled_quantity? - Filled quantity
+cancel_time? - Cancellation date and time
+accept_at? - Acceptance date and time
+withdraw_at? - Cancellation date and time
 `;
 
 // Create resource definitions for enums

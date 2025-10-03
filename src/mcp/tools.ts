@@ -6,30 +6,8 @@
 
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 
-const getAccountResponseDescription = `
-account_id
-type - see enum://AccountType
-status - see enum://AccountStatus
-equity - Funds available plus value of open positions
-unrealized_profit
-positions  Positions (open plus theoretical from active unfilled orders). Array of:
-    symbol
-    quantity  in units (signed value for long/short)
-    average_price  (not filled for FORTS positions)
-    current_price
-    daily_pnl  (not filled for FORTS)
-    unrealized_pnl
-cash  Own funds available for trading. Does not include margin funds. Array of (Money object)
-portfolio_mc?  Portfolio margin metrics
-    available_cash  Own funds available for trading (includes margin)
-    initial_margin
-    maintenance_margin
-balance?  Account balance
-currency?
-`;
-
 // Create tool definitions with optional account_id default
-export function createTools(defaultAccountId?: string): Tool[] {
+export function createTools (defaultAccountId?: string): Tool[] {
 
   // Helper to add account_id Description
   const accountIdProp = (s: string): { type: 'string', description: string } => {
@@ -87,7 +65,25 @@ export function createTools(defaultAccountId?: string): Tool[] {
     {
       name: 'GetAccount', // 2-1
       description: `Get account information:
-${getAccountResponseDescription}
+account_id
+type - see enum://AccountType
+status - see enum://AccountStatus
+equity - Funds available plus value of open positions
+unrealized_profit
+positions - Positions (open plus theoretical from active unfilled orders). Array of:
+    symbol
+    quantity - in units (signed value for long/short)
+    average_price - (not filled for FORTS positions)
+    current_price
+    daily_pnl - (not filled for FORTS)
+    unrealized_pnl
+cash - Own funds available for trading. Does not include margin funds. Array of (Money object)
+portfolio_mc? - Portfolio margin metrics
+    available_cash - Own funds available for trading (includes margin)
+    initial_margin
+    maintenance_margin
+balance? - Account balance
+currency?
 `,
       inputSchema: {
         type: 'object',
@@ -102,12 +98,12 @@ ${getAccountResponseDescription}
       name: 'Trades', // 2-2
       description: `Get account trades for specified time interval:
 trades: Array of:
-  trade_id  (from exchange)
+  trade_id - (from exchange)
   symbol
   price
   size
-  side  SIDE_BUY | SIDE_SELL
-  timestamp  (ISO 8601)
+  side - SIDE_BUY | SIDE_SELL
+  timestamp - (ISO 8601)
   order_id
   account_id
       `,
@@ -124,12 +120,12 @@ trades: Array of:
     {
       name: 'Transactions', // 2-3
       description: `Get account transactions for specified time interval
-transactions  Aray of:
+transactions - Aray of:
   id
-  timestamp  (ISO 8601)
+  timestamp - (ISO 8601)
   symbol
   change (Money object)
-  transaction_category   see enum://TransactionCategory
+  transaction_category -  see enum://TransactionCategory
   transaction_name
       `,
 
@@ -171,13 +167,13 @@ Trading Parameters:
 - symbol
 - account_id
 - tradeable - is trading allowed
-- longable/shortable  Long/Short availability:
-    - value  Status (AVAILABLE / NOT_AVAILABLE / HALTED)
-    - halted_days  Days remaining for long/short restrictions (if any)
+- longable/shortable - Long/Short availability:
+    - value - Status (AVAILABLE / NOT_AVAILABLE / HALTED)
+    - halted_days - Days remaining for long/short restrictions (if any)
 - long_risk_rate
 - short_risk_rate
-- long_collateral?/short_collateral?  Maintenance collateral for long/short (Money object)
-- min_order_size?/max_order_size?  Min/Max order size
+- long_collateral?/short_collateral? - Maintenance collateral for long/short (Money object)
+- min_order_size?/max_order_size? - Min/Max order size
 - trading_status`,
       inputSchema: {
         type: 'object',
@@ -192,12 +188,12 @@ Trading Parameters:
       name: 'OptionsChain', // 3-6
       description: `Get options chain for underlying asset:
 symbol
-options  Array of:
-    symbol  Option instrument symbol
-    type  see enum://OptionType
-    contract_size  (quantity)
+options - Array of:
+    symbol - Option instrument symbol
+    type - see enum://OptionType
+    contract_size - (quantity)
     trade_last_day
-    strike  Strike price
+    strike - Strike price
     expiration_first_day
     expiration_last_day
       `,
@@ -213,11 +209,11 @@ options  Array of:
       name: 'Schedule', // 3-7
       description: `Get trading schedule for asset:
 symbol
-sessions  Array:
-    type  see enum://SessionType
+sessions - Array:
+    type - see enum://SessionType
     interval:
-        start_time  (ISO 8601)
-        end_time  (ISO 8601)
+        start_time - (ISO 8601)
+        end_time - (ISO 8601)
       `,
       inputSchema: {
         type: 'object',
@@ -267,14 +263,19 @@ Returns array of orders (see schema://order resource for field descriptions)`,
           status_filter: {
             type: 'array',
             description: `Filter orders by status (optional).
-Values: see enum://OrderStatus
-If empty array or not provided, returns only active orders (default).
+Values: see enum://OrderStatus + 'ACTIVE' (for active orders only).
+If empty array or not provided, returns all orders.
 If non-empty, returns only orders with matching statuses (OR logic).
 `,
             items: {
               type: 'string',
             },
           },
+          limit: {
+            type: 'number',
+            description: 'Default 50',
+          },
+
         },
         required: addRequired(),
       },
@@ -382,11 +383,11 @@ symbol
 quote (for day):
     symbol
     timestamp (ISO 8601)
-    ask  price
+    ask - price
     ask_size
-    bid  price
+    bid - price
     bid_size
-    last  price
+    last - price
     last_size
     volume
     turnover
@@ -394,7 +395,7 @@ quote (for day):
     high
     low
     close
-    change  Price change (last minus close)
+    change - Price change (last minus close)
       `,
       inputSchema: {
         type: 'object',
@@ -408,13 +409,13 @@ quote (for day):
       name: 'LatestTrades', // 5-3
       description: `Get latest trades for instrument (max 100 records)
 symbol
-trades  Array:
+trades - Array:
     trade_id
-    mpid  Market participant identifier
-    timestamp  (ISO 8601)
+    mpid - Market participant identifier
+    timestamp - (ISO 8601)
     price
     size
-    side  (buy or sell)
+    side - (buy or sell)
       `,
       inputSchema: {
         type: 'object',
@@ -429,13 +430,13 @@ trades  Array:
       description: `Get order book for instrument:
 symbol
 orderbook:
-    rows  Array:
+    rows - Array:
         price
         buy_size
         sell_size
-        action  see enum://OrderBookAction
-        mpid  Market participant identifier
-        timestamp  (ISO 8601)
+        action - see enum://OrderBookAction
+        mpid - Market participant identifier
+        timestamp - (ISO 8601)
       `,
       inputSchema: {
         type: 'object',
