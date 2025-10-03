@@ -43,19 +43,8 @@ ORDER_STATUS_TP_CORR_GUARD_TIME
 Например, если параметр filter = \['ORDER_STATUS_NEW', 'ORDER_STATUS_WATCHING'], 
 то в ответ должны попасть заявки с любым из этих статусов.
 
-По умолчанию filter = [
-"ORDER_STATUS_NEW",
-"ORDER_STATUS_PARTIALLY_FILLED",
-"ORDER_STATUS_PENDING_NEW",
-"ORDER_STATUS_PENDING_CANCEL",
-"ORDER_STATUS_FORWARDING",
-"ORDER_STATUS_WAIT",
-"ORDER_STATUS_WATCHING",
-"ORDER_STATUS_LINK_WAIT",
-"ORDER_STATUS_SL_GUARD_TIME",
-"ORDER_STATUS_SL_FORWARDING",
-"ORDER_STATUS_TP_GUARD_TIME",
-"ORDER_STATUS_TP_FORWARDING",
-"ORDER_STATUS_TP_CORR_GUARD_TIME"
-]
+По умолчанию filter = []
+
+Второй параметр - limit - обраничение на количество заявок.
+ЗАявки сортировать по убыванию времени 
 
