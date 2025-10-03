@@ -24,6 +24,7 @@ import {
   ListPromptsRequestSchema,
   GetPromptRequestSchema,
   type CallToolRequest,
+  type ReadResourceRequest,
   McpError,
   ErrorCode,
 } from '@modelcontextprotocol/sdk/types.js';
@@ -63,13 +64,15 @@ function extractCredentials (headers?: Record<string, string>): IHeaderCreds | n
     return null;
   }
 
-  const secret_token = authHeader.replace(/^Bearer\s+/i, '');
-  return { secret_token, account_id: accountIdHeader };
+  return {
+    secret_token: authHeader.replace(/^Bearer\s+/i, ''),
+    account_id: accountIdHeader
+  };
 }
 
-// Tool handler
-async function handleToolCall (request: CallToolRequest, headers?: Record<string, string>) {
-  const { name, arguments: args } = request.params;
+// Merge credentials: request args > HTTP headers > server defaults
+function mergeCredentials (request: any, headers?: Record<string, string>): Record<string, string> {
+  const { arguments: args } = request.params;
 
   // Merge credentials: request args > HTTP headers > server defaults
   let params = { ...args } as Record<string, string>;
@@ -87,6 +90,13 @@ async function handleToolCall (request: CallToolRequest, headers?: Record<string
       'secret_token is required',
     );
   }
+  return params as Record<string, string>;
+}
+
+// Tool handler
+async function handleToolCall (request: CallToolRequest, headers?: Record<string, string>) {
+  const { name } = request.params;
+  let params = mergeCredentials(request, headers);
 
   try {
     let result: unknown;
@@ -95,7 +105,7 @@ async function handleToolCall (request: CallToolRequest, headers?: Record<string
     if (name === 'SearchInstruments') {
       const instrumentSearch = getInstrumentSearch();
       const query = params.query as string;
-      const instruments = await instrumentSearch.search(query);
+      const instruments = await instrumentSearch.search(query, params.secret_token as string);
       result = instruments;
     } else {
       // Call API wrapper
@@ -129,6 +139,22 @@ async function handleToolCall (request: CallToolRequest, headers?: Record<string
   }
 }
 
+// Resource handler
+async function handleResourceRead (request: ReadResourceRequest, headers?: Record<string, string>) {
+  let params = mergeCredentials(request, headers);
+  const uri = request.params.uri;
+  const content = await handleReadResource(uri, params.secret_token);
+  return {
+    contents: [
+      {
+        uri,
+        mimeType: 'application/json',
+        text: content,
+      },
+    ],
+  };
+}
+
 // Create MCP server
 export function createMcpServer (defaultAccountId?: string) {
   const tools = createTools(defaultAccountId);
@@ -160,19 +186,7 @@ export function createMcpServer (defaultAccountId?: string) {
     return { resources };
   });
 
-  server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
-    const uri = request.params.uri;
-    const content = await handleReadResource(uri, API_SECRET_TOKEN);
-    return {
-      contents: [
-        {
-          uri,
-          mimeType: 'application/json',
-          text: content,
-        },
-      ],
-    };
-  });
+  server.setRequestHandler(ReadResourceRequestSchema, async (request) => handleResourceRead(request));
 
   server.setRequestHandler(ListPromptsRequestSchema, async () => {
     return { prompts };
@@ -259,6 +273,11 @@ export async function startHttpServer (port: number = HTTP_PORT) {
     // Override tool handler to pass headers and mark as HTTP transport
     server.setRequestHandler(CallToolRequestSchema, async (request) =>
       handleToolCall(request, req.headers as Record<string, string>),
+    );
+
+    // Override resource handler to pass headers and mark as HTTP transport
+    server.setRequestHandler(ReadResourceRequestSchema, async (request) =>
+      handleResourceRead(request, req.headers as Record<string, string>),
     );
 
     req.on('close', () => {
@@ -417,11 +436,5 @@ export async function startHttpServer (port: number = HTTP_PORT) {
     console.error(`  - Health:           http://localhost:${port}/health`);
     console.error(`\nActive transports: stdio, SSE, Streamable HTTP`);
     console.error(`Response format: ${RETURN_AS}`);
-
-    // Initialize instrument search for HTTP/SSE transports
-    const instrumentSearch = getInstrumentSearch();
-    instrumentSearch.setTransport('http');
-    await instrumentSearch.initialize();
-    instrumentSearch.startCacheRefresh(); // Start periodic cache refresh for HTTP transport
   });
 }

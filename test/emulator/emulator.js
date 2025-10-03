@@ -16,7 +16,12 @@ import { getMockResponse } from './data/data.js';
 // Configuration
 const PORT = process.env.EMULATOR_PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'test-jwt-secret-key';
-const DEFAULT_ACCOUNT_ID = process.env.ACCOUNT_ID || '1899011';
+const DEFAULT_ACCOUNT_ID = process.env.TEST_ACCOUNT_ID;
+
+if (!DEFAULT_ACCOUNT_ID) {
+  console.error('ERROR: Environment variable TEST_ACCOUNT_ID is not set');
+  process.exit(1);
+}
 
 // Store for dynamic data
 const dataStore = {

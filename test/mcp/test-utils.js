@@ -168,8 +168,8 @@ const mcpHttpPort = parseInt(process.env.MCP_HTTP_PORT || '3001', 10);
  * Test configuration with credentials from environment
  */
 export const testConfig = {
-  secretToken: process.env.API_SECRET_TOKEN,
-  accountId: process.env.ACCOUNT_ID,
+  secretToken: process.env.TEST_API_SECRET_TOKEN,
+  accountId: process.env.TEST_ACCOUNT_ID,
   mcpHttpPort,
   baseUrl: `http://localhost:${mcpHttpPort}`,
 };

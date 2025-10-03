@@ -1,6 +1,6 @@
 {
   "name": "mcp-finam-trade-api",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Model Context Protocol (MCP) server for FINAM Trade API - provides trading tools for Claude AI and other MCP clients",
   "main": "dist/src/mcp/index.js",
   "type": "module",
