@@ -6,24 +6,70 @@ import type { Tool } from '../types/index.js';
 export class MCPConnector {
   private client: Client | null = null;
   private transport: StdioClientTransport | SSEClientTransport | null = null;
+  private currentSecretKey: string | undefined;
+  private currentAccountId: string | undefined;
+  private serverUrl: string = '';
+  private isHttpTransport: boolean = false;
+
+  /**
+   * Set credentials for MCP HTTP requests and reconnect if using HTTP transport
+   * @param secretKey - Secret token for Authorization header
+   * @param accountId - Account ID for X-Finam-Account-Id header
+   */
+  async setCredentials (secretKey?: string, accountId?: string): Promise<void> {
+    // Only reconnect if credentials actually changed
+    const credentialsChanged =
+      this.currentSecretKey !== secretKey ||
+      this.currentAccountId !== accountId;
+
+    this.currentSecretKey = secretKey;
+    this.currentAccountId = accountId;
+
+    // If using HTTP transport and credentials changed, reconnect with new headers
+    if (this.isHttpTransport && credentialsChanged && this.serverUrl) {
+      await this.disconnect();
+      await this.connect(this.serverUrl);
+    }
+  }
 
   /**
    * Connect to MCP server using stdio or HTTP(SSE) transport
    * @param serverUrl - URL or command path for the MCP server
    */
   async connect (serverUrl: string): Promise<void> {
+    // Store server URL for potential reconnection
+    this.serverUrl = serverUrl;
+
     // Trim and validate serverUrl
     serverUrl = serverUrl.trim();
 
     // If HTTP(S) URL provided, use SSE transport
     if (/^https?:\/\//i.test(serverUrl)) {
+      this.isHttpTransport = true;
+
       // Allow URLs like http://host:port, http://host:port/mcp or /mcp/v1
       const url = new URL(serverUrl);
       const baseOrigin = `${url.protocol}//${url.host}`;
       // If path already points to /sse, use as-is; otherwise, connect to /sse on same origin
       const sseUrl = new URL(url.pathname === '/sse' ? url.href : `${baseOrigin}/sse`);
 
-      this.transport = new SSEClientTransport(sseUrl);
+      // Get credentials from current settings or environment
+      const secretKey = this.currentSecretKey || process.env.API_SECRET_TOKEN;
+      const accountId = this.currentAccountId || process.env.ACCOUNT_ID;
+
+      const headers: Record<string, string> = {};
+      if (secretKey) {
+        headers['Authorization'] = `Bearer ${secretKey}`;
+      }
+      if (accountId) {
+        headers['X-Finam-Account-Id'] = accountId;
+      }
+
+      this.transport = new SSEClientTransport(sseUrl, {
+        requestInit: {
+          headers,
+        },
+      });
 
       this.client = new Client({
         name: 'finam-demo-agent',
@@ -33,6 +79,8 @@ export class MCPConnector {
       await this.client.connect(this.transport);
       return;
     }
+
+    this.isHttpTransport = false;
 
     // Default: stdio transport (stdio://path/to/server)
     const command = serverUrl.replace('stdio://', '');

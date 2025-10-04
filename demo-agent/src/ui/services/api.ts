@@ -35,11 +35,13 @@ export const sendMessage = async (
   sessionId: string,
   message: string,
   accountId?: string,
+  secretKey?: string,
 ): Promise<SendMessageResponse> => {
   const response = await axios.post(`${API_BASE}/chat`, {
     sessionId,
     message,
     accountId,
+    secretKey,
   });
   return response.data;
 };
@@ -48,11 +50,15 @@ export const sendMessageStream = async (
   sessionId: string,
   message: string,
   accountId: string | undefined,
+  secretKey: string | undefined,
   onChunk: (chunk: StreamChunk) => void,
 ): Promise<void> => {
   let url = `${API_BASE}/chat/stream?sessionId=${encodeURIComponent(sessionId)}&message=${encodeURIComponent(message)}`;
   if (accountId) {
     url += `&accountId=${encodeURIComponent(accountId)}`;
+  }
+  if (secretKey) {
+    url += `&secretKey=${encodeURIComponent(secretKey)}`;
   }
 
   const response = await fetch(url);

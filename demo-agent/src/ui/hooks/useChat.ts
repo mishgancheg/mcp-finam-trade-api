@@ -2,13 +2,47 @@ import { useState, useCallback } from 'react';
 import { sendMessage as apiSendMessage, sendMessageStream as apiSendMessageStream } from '../services/api';
 import type { Message, ToolCall } from '../../types/index';
 
-export const useChat = (sessionId: string, accountId: string) => {
+export const useChat = (sessionId: string, accountId: string, secretKey: string) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [toolCalls, setToolCalls] = useState<ToolCall[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const sendMessage = useCallback(async (message: string) => {
     if (!message.trim()) return;
+
+    // Validate secretKey and accountId
+    if (!secretKey && !accountId) {
+      console.error('Секретный ключ и номер счета не заданы');
+      const errorMessage: Message = {
+        role: 'assistant',
+        content: 'Ошибка: не задан секретный ключ и номер счета',
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
+      return;
+    }
+
+    if (!secretKey) {
+      console.error('Секретный ключ не задан');
+      const errorMessage: Message = {
+        role: 'assistant',
+        content: 'Ошибка: не задан секретный ключ',
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
+      return;
+    }
+
+    if (!accountId) {
+      console.error('Номер счета не задан');
+      const errorMessage: Message = {
+        role: 'assistant',
+        content: 'Ошибка: не задан номер счета',
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
+      return;
+    }
 
     setIsLoading(true);
     setToolCalls([]);
@@ -22,7 +56,7 @@ export const useChat = (sessionId: string, accountId: string) => {
     setMessages(prev => [...prev, userMessage]);
 
     try {
-      const response = await apiSendMessage(sessionId, message, accountId);
+      const response = await apiSendMessage(sessionId, message, accountId, secretKey);
 
       // Add assistant response
       const assistantMessage: Message = {
@@ -47,10 +81,44 @@ export const useChat = (sessionId: string, accountId: string) => {
     } finally {
       setIsLoading(false);
     }
-  }, [sessionId, accountId]);
+  }, [sessionId, accountId, secretKey]);
 
   const sendMessageStream = useCallback(async (message: string) => {
     if (!message.trim()) return;
+
+    // Validate secretKey and accountId
+    if (!secretKey && !accountId) {
+      console.error('Секретный ключ и номер счета не заданы');
+      const errorMessage: Message = {
+        role: 'assistant',
+        content: 'Ошибка: не задан секретный ключ и номер счета',
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
+      return;
+    }
+
+    if (!secretKey) {
+      console.error('Секретный ключ не задан');
+      const errorMessage: Message = {
+        role: 'assistant',
+        content: 'Ошибка: не задан секретный ключ',
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
+      return;
+    }
+
+    if (!accountId) {
+      console.error('Номер счета не задан');
+      const errorMessage: Message = {
+        role: 'assistant',
+        content: 'Ошибка: не задан номер счета',
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
+      return;
+    }
 
     setIsLoading(true);
     setToolCalls([]);
@@ -70,6 +138,7 @@ export const useChat = (sessionId: string, accountId: string) => {
         sessionId,
         message,
         accountId,
+        secretKey,
         (chunk) => {
           if (chunk.type === 'text') {
             assistantMessageContent += chunk.content;
@@ -106,7 +175,7 @@ export const useChat = (sessionId: string, accountId: string) => {
     } finally {
       setIsLoading(false);
     }
-  }, [sessionId, accountId]);
+  }, [sessionId, accountId, secretKey]);
 
   return {
     messages,

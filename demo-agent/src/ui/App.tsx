@@ -6,6 +6,7 @@ const App: React.FC = () => {
   const { sessionId, createSession, clearSession } = useSession();
   const [isLoading, setIsLoading] = useState(true);
   const [accountId, setAccountId] = useState('1982834');
+  const [secretKey, setSecretKey] = useState('');
 
   useEffect(() => {
     const init = async () => {
@@ -23,6 +24,10 @@ const App: React.FC = () => {
     setAccountId(e.target.value);
   };
 
+  const handleSecretKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSecretKey(e.target.value);
+  };
+
   if (isLoading) {
     return (
       <div className="app-loading">
@@ -38,7 +43,17 @@ const App: React.FC = () => {
         <h1>FINAM Demo Agent</h1>
         <div className="header-controls">
           <div className="account-id-input">
-            <label htmlFor="accountId">Account ID:</label>
+            <label htmlFor="secretKey">Секретный ключ:</label>
+            <input
+              id="secretKey"
+              type="password"
+              value={secretKey}
+              onChange={handleSecretKeyChange}
+              placeholder="Secret Key"
+            />
+          </div>
+          <div className="account-id-input">
+            <label htmlFor="accountId">Номер счета:</label>
             <input
               id="accountId"
               type="text"
@@ -54,7 +69,7 @@ const App: React.FC = () => {
       </header>
       <main className="app-main">
         {sessionId ? (
-          <ChatWindow sessionId={sessionId} accountId={accountId} />
+          <ChatWindow sessionId={sessionId} accountId={accountId} secretKey={secretKey} />
         ) : (
           <div className="no-session">Нет активной сессии</div>
         )}

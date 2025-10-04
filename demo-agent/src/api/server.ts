@@ -176,7 +176,7 @@ app.post('/api/chat', async (req: Request, res: Response) => {
   }
 
   try {
-    const { sessionId, message, accountId } = req.body;
+    const { sessionId, message, accountId, secretKey } = req.body;
 
     if (!sessionId || !message) {
       return res.status(400).json({ error: 'sessionId and message are required' });
@@ -192,7 +192,7 @@ app.post('/api/chat', async (req: Request, res: Response) => {
       ? `[Account ID: ${accountId}]\n${message}`
       : message;
 
-    const response = await agentManager.processMessage(sessionId, contextualMessage);
+    const response = await agentManager.processMessage(sessionId, contextualMessage, accountId, secretKey);
 
     res.json({
       sessionId,
@@ -218,6 +218,7 @@ app.get('/api/chat/stream', async (req: Request, res: Response) => {
     const sessionId = req.query.sessionId as string;
     const message = req.query.message as string;
     const accountId = req.query.accountId as string | undefined;
+    const secretKey = req.query.secretKey as string | undefined;
 
     if (!sessionId || !message) {
       return res.status(400).json({ error: 'sessionId and message are required' });
@@ -242,7 +243,7 @@ app.get('/api/chat/stream', async (req: Request, res: Response) => {
       : message;
 
     // Process message with streaming
-    for await (const chunk of agentManager.processMessageStream(sessionId, contextualMessage)) {
+    for await (const chunk of agentManager.processMessageStream(sessionId, contextualMessage, accountId, secretKey)) {
       const data = JSON.stringify(chunk);
       res.write(`data: ${data}\n\n`);
 

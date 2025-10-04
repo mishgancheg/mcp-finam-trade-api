@@ -6,10 +6,11 @@ import { useChat } from '../hooks/useChat';
 interface ChatWindowProps {
   sessionId: string;
   accountId: string;
+  secretKey: string;
 }
 
-const ChatWindow: React.FC<ChatWindowProps> = ({ sessionId, accountId }) => {
-  const { messages, toolCalls, isLoading, sendMessage, sendMessageStream } = useChat(sessionId, accountId);
+const ChatWindow: React.FC<ChatWindowProps> = ({ sessionId, accountId, secretKey }) => {
+  const { messages, toolCalls, isLoading, sendMessage, sendMessageStream } = useChat(sessionId, accountId, secretKey);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {

@@ -122,10 +122,15 @@ export class AgentManager {
   /**
    * Process user message with agent loop
    */
-  async processMessage (sessionId: string, message: string): Promise<AgentResponse> {
+  async processMessage (sessionId: string, message: string, accountId?: string, secretKey?: string): Promise<AgentResponse> {
     const session = this.getSession(sessionId);
     if (!session) {
       throw new Error(`Session ${sessionId} not found`);
+    }
+
+    // Set MCP credentials if provided
+    if (accountId || secretKey) {
+      await this.mcpConnector.setCredentials(secretKey, accountId);
     }
 
     session.addMessage('user', message);
@@ -268,10 +273,15 @@ export class AgentManager {
   /**
    * Process message with streaming
    */
-  async* processMessageStream (sessionId: string, message: string): AsyncGenerator<StreamChunk> {
+  async* processMessageStream (sessionId: string, message: string, accountId?: string, secretKey?: string): AsyncGenerator<StreamChunk> {
     const session = this.getSession(sessionId);
     if (!session) {
       throw new Error(`Session ${sessionId} not found`);
+    }
+
+    // Set MCP credentials if provided
+    if (accountId || secretKey) {
+      await this.mcpConnector.setCredentials(secretKey, accountId);
     }
 
     session.addMessage('user', message);
