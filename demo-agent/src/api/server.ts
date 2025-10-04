@@ -143,7 +143,7 @@ app.post('/api/chat', async (req: Request, res: Response) => {
   }
 
   try {
-    const { sessionId, message } = req.body;
+    const { sessionId, message, accountId } = req.body;
 
     if (!sessionId || !message) {
       return res.status(400).json({ error: 'sessionId and message are required' });
@@ -154,7 +154,12 @@ app.post('/api/chat', async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Session not found' });
     }
 
-    const response = await agentManager.processMessage(sessionId, message);
+    // Если указан accountId, добавляем его в контекст сообщения
+    const contextualMessage = accountId
+      ? `[Account ID: ${accountId}]\n${message}`
+      : message;
+
+    const response = await agentManager.processMessage(sessionId, contextualMessage);
 
     res.json({
       sessionId,
@@ -179,6 +184,7 @@ app.get('/api/chat/stream', async (req: Request, res: Response) => {
   try {
     const sessionId = req.query.sessionId as string;
     const message = req.query.message as string;
+    const accountId = req.query.accountId as string | undefined;
 
     if (!sessionId || !message) {
       return res.status(400).json({ error: 'sessionId and message are required' });
@@ -197,8 +203,13 @@ app.get('/api/chat/stream', async (req: Request, res: Response) => {
     // Send initial connection event
     res.write('data: {"type":"connected"}\n\n');
 
+    // Если указан accountId, добавляем его в контекст сообщения
+    const contextualMessage = accountId
+      ? `[Account ID: ${accountId}]\n${message}`
+      : message;
+
     // Process message with streaming
-    for await (const chunk of agentManager.processMessageStream(sessionId, message)) {
+    for await (const chunk of agentManager.processMessageStream(sessionId, contextualMessage)) {
       const data = JSON.stringify(chunk);
       res.write(`data: ${data}\n\n`);
 

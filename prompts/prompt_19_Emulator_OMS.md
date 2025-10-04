@@ -8,16 +8,16 @@
 ## 1. Scope и ограничения
 
 ### Что делаем
-✅ In-memory OMS с полным lifecycle управления ордерами, позициями, транзакциями
-✅ Реалистичная предзаполненная история (3-6 месяцев активной торговли)
-✅ Market data generator для исторических и текущих данных
-✅ Логика исполнения ордеров (matching, partial fills, commissions)
+✅ In-memory OMS с полным lifecycle управления ордерами, позициями, транзакциями  
+✅ Реалистичная предзаполненная история (3-6 месяцев активной торговли)  
+✅ Market data generator для исторических и текущих данных  
+✅ Логика исполнения ордеров (matching, partial fills, commissions)  
 
 ### Что НЕ делаем
-❌ Новые endpoints сверх существующих FINAM API
-❌ Persistent storage (SQLite/PostgreSQL) - только in-memory + optional JSON dump
-❌ WebSocket streaming (опционально для будущего)
-❌ Real-time market data feed
+❌ Новые endpoints сверх существующих FINAM API  
+❌ Persistent storage (SQLite/PostgreSQL) - только in-memory + optional JSON dump  
+❌ WebSocket streaming (опционально для будущего)  
+❌ Real-time market data feed  
 
 ### API Surface
 Эмулятор реализует **ТОЛЬКО** существующие endpoints из `finam-trade-api-registry.js`:

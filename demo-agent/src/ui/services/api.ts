@@ -34,10 +34,12 @@ export const deleteSession = async (sessionId: string) => {
 export const sendMessage = async (
   sessionId: string,
   message: string,
+  accountId?: string,
 ): Promise<SendMessageResponse> => {
   const response = await axios.post(`${API_BASE}/chat`, {
     sessionId,
     message,
+    accountId,
   });
   return response.data;
 };
@@ -45,9 +47,13 @@ export const sendMessage = async (
 export const sendMessageStream = async (
   sessionId: string,
   message: string,
+  accountId: string | undefined,
   onChunk: (chunk: StreamChunk) => void,
 ): Promise<void> => {
-  const url = `${API_BASE}/chat/stream?sessionId=${encodeURIComponent(sessionId)}&message=${encodeURIComponent(message)}`;
+  let url = `${API_BASE}/chat/stream?sessionId=${encodeURIComponent(sessionId)}&message=${encodeURIComponent(message)}`;
+  if (accountId) {
+    url += `&accountId=${encodeURIComponent(accountId)}`;
+  }
 
   const response = await fetch(url);
 

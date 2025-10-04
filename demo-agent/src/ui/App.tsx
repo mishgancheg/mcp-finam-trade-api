@@ -5,6 +5,7 @@ import { useSession } from './hooks/useSession';
 const App: React.FC = () => {
   const { sessionId, createSession, clearSession } = useSession();
   const [isLoading, setIsLoading] = useState(true);
+  const [accountId, setAccountId] = useState('1982834');
 
   useEffect(() => {
     const init = async () => {
@@ -16,6 +17,10 @@ const App: React.FC = () => {
 
   const handleNewChat = async () => {
     await createSession();
+  };
+
+  const handleAccountIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAccountId(e.target.value);
   };
 
   if (isLoading) {
@@ -31,13 +36,25 @@ const App: React.FC = () => {
     <div className="app">
       <header className="app-header">
         <h1>FINAM Demo Agent</h1>
-        <button onClick={handleNewChat} className="btn-new-chat">
-          Новый чат
-        </button>
+        <div className="header-controls">
+          <div className="account-id-input">
+            <label htmlFor="accountId">Account ID:</label>
+            <input
+              id="accountId"
+              type="text"
+              value={accountId}
+              onChange={handleAccountIdChange}
+              placeholder="Account ID"
+            />
+          </div>
+          <button onClick={handleNewChat} className="btn-new-chat">
+            Новый чат
+          </button>
+        </div>
       </header>
       <main className="app-main">
         {sessionId ? (
-          <ChatWindow sessionId={sessionId} />
+          <ChatWindow sessionId={sessionId} accountId={accountId} />
         ) : (
           <div className="no-session">Нет активной сессии</div>
         )}

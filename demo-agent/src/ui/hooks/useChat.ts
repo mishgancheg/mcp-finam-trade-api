@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { sendMessage as apiSendMessage, sendMessageStream as apiSendMessageStream } from '../services/api';
 import type { Message, ToolCall } from '../../types/index';
 
-export const useChat = (sessionId: string) => {
+export const useChat = (sessionId: string, accountId: string) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [toolCalls, setToolCalls] = useState<ToolCall[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -22,7 +22,7 @@ export const useChat = (sessionId: string) => {
     setMessages(prev => [...prev, userMessage]);
 
     try {
-      const response = await apiSendMessage(sessionId, message);
+      const response = await apiSendMessage(sessionId, message, accountId);
 
       // Add assistant response
       const assistantMessage: Message = {
@@ -47,7 +47,7 @@ export const useChat = (sessionId: string) => {
     } finally {
       setIsLoading(false);
     }
-  }, [sessionId]);
+  }, [sessionId, accountId]);
 
   const sendMessageStream = useCallback(async (message: string) => {
     if (!message.trim()) return;
@@ -69,6 +69,7 @@ export const useChat = (sessionId: string) => {
       await apiSendMessageStream(
         sessionId,
         message,
+        accountId,
         (chunk) => {
           if (chunk.type === 'text') {
             assistantMessageContent += chunk.content;
@@ -105,7 +106,7 @@ export const useChat = (sessionId: string) => {
     } finally {
       setIsLoading(false);
     }
-  }, [sessionId]);
+  }, [sessionId, accountId]);
 
   return {
     messages,
