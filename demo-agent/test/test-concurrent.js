@@ -1,14 +1,14 @@
 // noinspection UnnecessaryLocalVariableJS
 
 /**
- * Test demo-agent with data from test.csv
+ * Test demo-agent with concurrent requests (different sessions)
  *
  * How it works:
  * 1. Loads questions from demo-agent/test/data/test.csv
- * 2. Sends each question to demo-agent via REST API (/api/chat)
- * 3. Demo-agent uses Claude to understand and call MCP tools
- * 4. MCP Server returns result + list of called API endpoints
- * 5. Demo-agent extracts `endpoints` from MCP response
+ * 2. Creates separate session for each question
+ * 3. Sends questions concurrently in batches
+ * 4. Demo-agent uses Claude to understand and call MCP tools
+ * 5. Collects endpoints from toolCalls
  * 6. Saves results to _test-data/<timestamp>_result.json and _test-data/<timestamp>_submission.csv
  */
 
@@ -24,8 +24,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const API_BASE = process.env.DEMO_API_BASE || 'http://localhost:3002';
-const BATCH_SIZE = 50;
-const BATCH_DELAY_MS = 500;
+const CONCURRENT_LIMIT = 10; // Process 5 questions concurrently
 const CSV_PATH = path.join(__dirname, 'data', 'test.csv');
 const OUTPUT_DIR = path.join(__dirname, '..', '_test-data');
 
@@ -153,67 +152,89 @@ function extractEndpoints(toolCalls, accountId) {
 }
 
 /**
- * Process a batch of questions with delay
- * @param {Array<{uid: string, question: string}>} questions
- * @param {string} sessionId
- * @param {number} batchIndex
- * @param {number} startIndex - Starting index in the full question list
- * @returns {Promise<Array<{uid: string, type: string, endpointsAndNames: Array<string>}>>}
+ * Process a single question with its own session
+ * @param {Object} questionData - Question data
+ * @param {number} questionNumber - Question number
+ * @returns {Promise<Object>} - Result object
  */
-async function processBatch(questions, sessionId, batchIndex, startIndex) {
-  const results = [];
+async function processQuestion(questionData, questionNumber) {
+  const { uid, question } = questionData;
 
-  console.log(`\n📦 Processing batch ${batchIndex + 1} (${questions.length} questions)...`);
+  try {
+    // Create separate session for this question
+    const session = await createSession(`user-${uid}`);
 
-  for (let i = 0; i < questions.length; i++) {
-    const { uid, question } = questions[i];
-    const questionNumber = startIndex + i + 1;
+    console.log(`\n  📤 [${questionNumber}] Creating session ${session.sessionId} for: "${question.substring(0, 60)}${question.length > 60 ? '...' : ''}" (${uid})`);
+    const requestTime = Date.now();
 
-    try {
-      // Send message to API
-      console.log(`\n  📤 [${questionNumber}] Sending: "${question.substring(0, 60)}${question.length > 60 ? '...' : ''}" (${uid})`);
-      const requestTime = Date.now();
+    const response = await sendMessage(session.sessionId, question, TEST_ACCOUNT_ID, TEST_API_SECRET_TOKEN);
 
-      const response = await sendMessage(sessionId, question, TEST_ACCOUNT_ID, TEST_API_SECRET_TOKEN);
+    const responseTime = Date.now() - requestTime;
 
-      const responseTime = Date.now() - requestTime;
+    const endpointsAndNames = extractEndpoints(response.toolCalls, TEST_ACCOUNT_ID);
 
-      const endpointsAndNames = extractEndpoints(response.toolCalls, TEST_ACCOUNT_ID);
+    // Determine type (for now, we'll extract it from the first endpoint's method)
+    const type = endpointsAndNames.length > 0
+      ? endpointsAndNames[0][1].split(';')[0]
+      : 'UNKNOWN';
 
-      // Determine type (for now, we'll extract it from the first endpoint's method)
-      const type = endpointsAndNames.length > 0
-        ? endpointsAndNames[0][1].split(';')[0]
-        : 'UNKNOWN';
+    console.log(`  📥 [${questionNumber}] Response received (${responseTime}ms): ${
+      endpointsAndNames.length} endpoint${endpointsAndNames.length !== 1 ? 's' : ''} - ${
+      endpointsAndNames.map(([n, e]) => {
+        return `${n}: ${e}`
+      }).join(', ')
+    }`);
 
-      results.push({
-        uid,
-        type,
-        question,
-        endpointsAndNames
-      });
+    return {
+      uid,
+      type,
+      question,
+      endpointsAndNames,
+      sessionId: session.sessionId
+    };
+  } catch (error) {
+    console.error(`  ❌ [${questionNumber}] Error (${uid}): ${error.message}`);
+    return {
+      uid,
+      type: 'ERROR',
+      question,
+      endpointsAndNames: [],
+      error: error.message
+    };
+  }
+}
 
-      console.log(`  📥 [${questionNumber}] Response received (${responseTime}ms): ${
-        endpointsAndNames.length} endpoint${endpointsAndNames.length !== 1 ? 's' : ''} - ${
-        endpointsAndNames.map(([n, e]) => {
-          return `${n}: ${e}`
-        }).join(', ')
-      }`);
+/**
+ * Process questions in concurrent batches
+ * @param {Array} questions - All questions
+ * @returns {Promise<Array>} - All results
+ */
+async function processAllQuestions(questions) {
+  const allResults = [];
+  const totalQuestions = questions.length;
 
-      // Delay between requests in the same batch
-      if (i < questions.length - 1) {
-        await new Promise(resolve => setTimeout(resolve, BATCH_DELAY_MS));
-      }
-    } catch (error) {
-      console.error(`  ❌ [${questionNumber}] Error (${uid}): ${error.message}`);
-      results.push({
-        uid,
-        type: 'ERROR',
-        endpointsAndNames: []
-      });
-    }
+  console.log(`\n📊 Processing ${totalQuestions} questions with concurrency limit: ${CONCURRENT_LIMIT}...`);
+
+  for (let i = 0; i < questions.length; i += CONCURRENT_LIMIT) {
+    const chunk = questions.slice(i, i + CONCURRENT_LIMIT);
+    const batchNumber = Math.floor(i / CONCURRENT_LIMIT) + 1;
+    const totalBatches = Math.ceil(questions.length / CONCURRENT_LIMIT);
+
+    console.log(`\n📦 Processing batch ${batchNumber}/${totalBatches} (${chunk.length} questions concurrently)...`);
+
+    // Process chunk concurrently
+    const promises = chunk.map((questionData, j) => {
+      const questionNumber = i + j + 1;
+      return processQuestion(questionData, questionNumber);
+    });
+
+    const chunkResults = await Promise.all(promises);
+    allResults.push(...chunkResults);
+
+    console.log(`✅ Batch ${batchNumber}/${totalBatches} completed`);
   }
 
-  return results;
+  return allResults;
 }
 
 /**
@@ -266,12 +287,13 @@ function saveSubmissionCSV(results, timestamp) {
  * Main test function
  */
 async function runTest() {
-  console.log('🧪 Starting demo-agent test...\n');
+  console.log('🧪 Starting demo-agent concurrent test...\n');
 
   // Log credentials
   console.log('🔐 Credentials:');
   console.log(`   TEST_ACCOUNT_ID: ${TEST_ACCOUNT_ID ? '***' + TEST_ACCOUNT_ID.slice(-4) : 'NOT SET'}`);
   console.log(`   TEST_API_SECRET_TOKEN: ${TEST_API_SECRET_TOKEN ? '***' + TEST_API_SECRET_TOKEN.slice(-4) : 'NOT SET'}`);
+  console.log(`   CONCURRENT_LIMIT: ${CONCURRENT_LIMIT}`);
 
   // Ensure output directory exists
   if (!fs.existsSync(OUTPUT_DIR)) {
@@ -286,32 +308,10 @@ async function runTest() {
     process.exit(1);
   }
 
-  // Create session
-  console.log('\n🔑 Creating session...');
-  const session = await createSession('test-user');
-  console.log(`✅ Session created: ${session.sessionId}`);
-
-  // Process questions in batches
-  const allResults = [];
-  const batches = [];
-
-  for (let i = 0; i < questions.length; i += BATCH_SIZE) {
-    batches.push(questions.slice(i, i + BATCH_SIZE));
-  }
-
-  console.log(`\n📊 Processing ${questions.length} questions in ${batches.length} batch${batches.length !== 1 ? 'es' : ''}...`);
-
-  for (let i = 0; i < batches.length; i++) {
-    const startIndex = i * BATCH_SIZE;
-    const batchResults = await processBatch(batches[i], session.sessionId, i, startIndex);
-    allResults.push(...batchResults);
-
-    // Delay between batches
-    if (i < batches.length - 1) {
-      console.log(`\n⏳ Waiting ${BATCH_DELAY_MS}ms before next batch...`);
-      await new Promise(resolve => setTimeout(resolve, BATCH_DELAY_MS));
-    }
-  }
+  // Process all questions concurrently
+  const startTime = Date.now();
+  const allResults = await processAllQuestions(questions);
+  const totalTime = Date.now() - startTime;
 
   // Generate timestamp for filenames
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-').replace('T', '_').split('Z')[0];
@@ -325,8 +325,10 @@ async function runTest() {
   console.log('📈 TEST SUMMARY');
   console.log('='.repeat(60));
   console.log(`Total questions: ${questions.length}`);
-  console.log(`Successful: ${allResults.filter(r => r.endpoints.length > 0).length}`);
-  console.log(`Failed: ${allResults.filter(r => r.endpoints.length === 0).length}`);
+  console.log(`Successful: ${allResults.filter(r => r.endpointsAndNames.length > 0).length}`);
+  console.log(`Failed: ${allResults.filter(r => r.endpointsAndNames.length === 0).length}`);
+  console.log(`Total time: ${(totalTime / 1000).toFixed(2)}s`);
+  console.log(`Average time per question: ${(totalTime / questions.length).toFixed(0)}ms`);
   console.log('='.repeat(60));
   console.log('\n✅ Test completed successfully!');
 }

@@ -1,5 +1,16 @@
 # FINAM Trade API MCP Server
 
+-----
+
+<font size="5">
+Выполнено в рамках хакатона `Finam AI Trade Hack`. 04.10.2025   
+</font>
+
+[Тестер для размещения результатов на leaderboard](demo-agent/test/README.md)
+
+-----
+
+
 MCP server providing 30+ trading tools for Claude AI and other MCP clients.
 
 ## 🚀 Quick Start
@@ -25,6 +36,7 @@ Add to `claude_desktop_config.json`:
 ```
 
 **Get Credentials:**
+
 1. **API_SECRET_TOKEN**: https://tradeapi.finam.ru/docs/tokens/ → Generate token
 2. **ACCOUNT_ID**: Personal account → Copy ID (digits only, without КЛФ-)
 
@@ -49,6 +61,7 @@ npm run mcp:http     # HTTP server
 ## 🔌 Connection Methods
 
 ### 1. Local STDIO (via npx)
+
 ```json
 {
   "mcpServers": {
@@ -65,6 +78,7 @@ npm run mcp:http     # HTTP server
 ```
 
 ### 2. Remote Server (via mcp-remote)
+
 ```json
 {
   "mcpServers": {
@@ -89,6 +103,7 @@ npm run mcp:http     # HTTP server
 ⚠️ No spaces around `:` (Windows Claude Desktop bug)
 
 ### 3. Local Node (development)
+
 ```json
 {
   "mcpServers": {
@@ -105,6 +120,7 @@ npm run mcp:http     # HTTP server
 ```
 
 **Config Location:**
+
 - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
 - Or: Settings → Developer → Edit Config
@@ -112,15 +128,18 @@ npm run mcp:http     # HTTP server
 ## 🛠️ Available Tools
 
 ### Connection (2)
+
 - `Auth` - Get JWT token
 - `TokenDetails` - Token permissions
 
 ### Accounts (3)
+
 - `GetAccount` - Account info
 - `Trades` - Account trades
 - `Transactions` - Transactions history
 
 ### Instruments (5)
+
 - `Assets` - List assets
 - `Clock` - Server time
 - `GetAssetDetails` - Trading parameters
@@ -128,12 +147,14 @@ npm run mcp:http     # HTTP server
 - `Schedule` - Trading schedule
 
 ### Orders (4)
+
 - `PlaceOrder` - Create order
 - `GetOrder` - Order details
 - `GetOrders` - List orders
 - `CancelOrder` - Cancel order
 
 ### Market Data (4)
+
 - `Bars` - Historical candles
 - `LastQuote` - Current quote
 - `LatestTrades` - Recent trades
@@ -142,6 +163,7 @@ npm run mcp:http     # HTTP server
 ## 📚 Available Resources
 
 ### Enums (13)
+
 - `enum://OrderType` - Order types
 - `enum://TimeInForce` - Time in force values
 - `enum://OrderStatus` - Order statuses
@@ -157,8 +179,8 @@ npm run mcp:http     # HTTP server
 - `enum://OrderBookAction` - Order book actions
 
 ### Data (1)
-- `exchange://list` - List of exchanges with mic codes (cached, updates every 2 hours)
 
+- `exchange://list` - List of exchanges with mic codes (cached, updates every 2 hours)
 
 ## 🔗 Links
 
@@ -167,6 +189,10 @@ npm run mcp:http     # HTTP server
 - [GitHub Repository](https://github.com/mishgancheg/mcp-finam-trade-api)
 - [npm Package](https://www.npmjs.com/package/mcp-finam-trade-api)
 
+
+
 ## ⚠️ Disclaimer
 
-### <font color="red">This software is provided "as is" for educational purposes. Trading involves risk. Use at your own risk.</font>
+<font color="red" size="5">
+This software is provided "as is" for educational purposes. Trading involves risk. Use at your own risk.
+</font>

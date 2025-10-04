@@ -2,11 +2,29 @@ import React, { useState, useEffect } from 'react';
 import ChatWindow from './components/ChatWindow';
 import { useSession } from './hooks/useSession';
 
+const LS_KEYS = {
+  secretKey: 'demoAgent.secretKey',
+  accountId: 'demoAgent.accountId',
+};
+
 const App: React.FC = () => {
   const { sessionId, createSession, clearSession } = useSession();
   const [isLoading, setIsLoading] = useState(true);
   const [accountId, setAccountId] = useState('1982834');
   const [secretKey, setSecretKey] = useState('');
+
+  // Restore saved values from localStorage on mount
+  useEffect(() => {
+    try {
+      const savedAccountId = typeof window !== 'undefined' ? window.localStorage.getItem(LS_KEYS.accountId) : null;
+      const savedSecretKey = typeof window !== 'undefined' ? window.localStorage.getItem(LS_KEYS.secretKey) : null;
+      if (savedAccountId !== null) setAccountId(savedAccountId);
+      if (savedSecretKey !== null) setSecretKey(savedSecretKey);
+    } catch (e) {
+      // ignore localStorage errors (e.g., disabled storage)
+      console.warn('localStorage is not available:', e);
+    }
+  }, []);
 
   useEffect(() => {
     const init = async () => {
@@ -26,6 +44,26 @@ const App: React.FC = () => {
 
   const handleSecretKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSecretKey(e.target.value);
+  };
+
+  const handleAccountIdBlur = () => {
+    try {
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(LS_KEYS.accountId, accountId);
+      }
+    } catch (e) {
+      console.warn('Failed to save accountId to localStorage:', e);
+    }
+  };
+
+  const handleSecretKeyBlur = () => {
+    try {
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem(LS_KEYS.secretKey, secretKey);
+      }
+    } catch (e) {
+      console.warn('Failed to save secretKey to localStorage:', e);
+    }
   };
 
   if (isLoading) {
@@ -49,6 +87,7 @@ const App: React.FC = () => {
               type="password"
               value={secretKey}
               onChange={handleSecretKeyChange}
+              onBlur={handleSecretKeyBlur}
               placeholder="Secret Key"
             />
           </div>
@@ -59,6 +98,7 @@ const App: React.FC = () => {
               type="text"
               value={accountId}
               onChange={handleAccountIdChange}
+              onBlur={handleAccountIdBlur}
               placeholder="Account ID"
             />
           </div>

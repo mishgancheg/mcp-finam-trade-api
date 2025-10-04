@@ -36,13 +36,11 @@ import { getInstrumentSearch } from '../services/instrument-search.js';
 import { createTools } from './tools.js';
 import { createResources, handleReadResource } from './resources.js';
 import { createPrompts, handleGetPrompt } from './prompts.js';
-import { getToolEndpoints } from './tool-endpoints.js';
 
 // Environment configuration
 const RETURN_AS = (process.env.RETURN_AS || 'json') as 'json' | 'string';
-const SHOW_MCP_ENDPOINTS = process.env.SHOW_MCP_ENDPOINTS === 'true';
 const HTTP_PORT = parseInt(process.env.MCP_HTTP_PORT || '3001', 10);
-const SKIP_CALL_MCP = process.env.SKIP_CALL_MCP === 'true';
+const TEST_SKIP_CALL_MCP = process.env.TEST_SKIP_CALL_MCP === 'true';
 
 // Server credentials (for stdio transport)
 const API_SECRET_TOKEN: string | undefined = process.env.API_SECRET_TOKEN;
@@ -126,7 +124,7 @@ async function handleToolCall (request: CallToolRequest, headers?: Record<string
           `Tool ${name} not found`,
         );
       }
-      result = SKIP_CALL_MCP ? { skippedByEnv: true } : await apiFn(params);
+      result = TEST_SKIP_CALL_MCP ? { skippedByEnv: true } : await apiFn(params);
     }
 
     // Format response based on RETURN_AS setting
@@ -134,11 +132,6 @@ async function handleToolCall (request: CallToolRequest, headers?: Record<string
 
     // Build response content
     const content: any = { type: 'text', text: formatted };
-
-    // Add endpoints if SHOW_MCP_ENDPOINTS is enabled
-    if (SHOW_MCP_ENDPOINTS) {
-      content.endpoints = getToolEndpoints(name);
-    }
 
     return {
       content: [content],

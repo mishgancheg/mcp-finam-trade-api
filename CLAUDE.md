@@ -50,7 +50,6 @@ Copy `.env.example` to `.env` and configure:
 - `ACCOUNT_ID`: Your account ID without КлФ prefix
 - `EMULATOR_PORT`: Port for the API emulator (default: 3000)
 - `RETURN_AS`: MCP response format - `json` (structured data) or `string` (formatted text for LLM)
-- `SHOW_MCP_ENDPOINTS`: Show API endpoints in MCP responses - `true` or `false` (default: false)
 - `MCP_HTTP_PORT`: HTTP transport port (default: 3001)
 
 ## Project Architecture
@@ -115,9 +114,6 @@ Provides MCP tools wrapping all API endpoints with:
 - **Response Formatting**: Controlled by `RETURN_AS` environment variable
   - `json`: Structured data (default)
   - `string`: Formatted text optimized for LLM consumption
-- **Endpoint Visibility**: Controlled by `SHOW_MCP_ENDPOINTS` environment variable
-  - `true`: Include `endpoints` array in response showing called API paths
-  - `false`: Standard response without endpoint information (default)
 - **Special Handling**:
   - Assets (3-1): Removes `mic` property, limits to 1000 items (json) or 2000 (string as CSV)
   - LatestTrades (5-3): Limits to 100 records in both modes
@@ -159,8 +155,7 @@ curl http://localhost:3001/sse \
       "env": {
         "API_SECRET_TOKEN": "YOUR_SECRET_TOKEN",
         "ACCOUNT_ID": "YOUR_ACCOUNT_ID",
-        "RETURN_AS": "string",
-        "SHOW_MCP_ENDPOINTS": "false"
+        "RETURN_AS": "string"
       }
     }
   }
@@ -322,24 +317,6 @@ npm start
 - SPA fallback for client-side routing
 - Binds to `0.0.0.0` for network access
 
-### Testing on train.csv
-
-```bash
-# 1. Start MCP server with endpoints enabled
-SHOW_MCP_ENDPOINTS=true npm run mcp:http
-
-# 2. Start demo-agent (dev or prod)
-cd demo-agent && npm run dev
-
-# 3. Run test
-node demo-agent/test/test-train-csv.js
-```
-
-Results:
-- Console: accuracy metric and statistics
-- `demo-agent/test/wrong_requests.json`: error details
-
-More info: `demo-agent/test/README.md`
 
 ## FAQ
 
