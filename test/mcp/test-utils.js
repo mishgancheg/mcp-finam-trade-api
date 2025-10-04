@@ -196,6 +196,11 @@ export const commonTestCases = {
     { name: 'OptionsChain', args: { symbol: 'YDEX@MISX' } },
   ],
 
+  // Tools that require query parameter
+  withQuery: [
+    { name: 'SearchInstruments', args: { query: 'YDEX' } },
+  ],
+
   // Tools that require account_id
   withAccount: [
     { name: 'GetAccount', args: {} },
@@ -309,6 +314,7 @@ export function getAllTestCases () {
   return [
     ...commonTestCases.simple,
     ...commonTestCases.withSymbol,
+    ...commonTestCases.withQuery,
     ...commonTestCases.withAccount,
     ...commonTestCases.withTimeRange,
   ];
