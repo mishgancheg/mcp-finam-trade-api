@@ -10,8 +10,19 @@ export const useChat = (sessionId: string, accountId: string, secretKey: string)
   const sendMessage = useCallback(async (message: string) => {
     if (!message.trim()) return;
 
-    // Validate secretKey and accountId
-    if (!secretKey && !accountId) {
+    // Add user message immediately (should always appear in the dialog)
+    const userMessage: Message = {
+      role: 'user',
+      content: message,
+      timestamp: new Date(),
+    };
+    setMessages(prev => [...prev, userMessage]);
+
+    // Compute effective secret: input value or API_SECRET_TOKEN from env
+    const effectiveSecret = String(secretKey ?? '').trim() || (typeof process !== 'undefined' ? (process.env?.API_SECRET_TOKEN as unknown as string | undefined) : undefined);
+
+    // Validate secretKey and accountId (show errors after user's message)
+    if (!effectiveSecret && !accountId) {
       console.error('Секретный ключ и номер счета не заданы');
       const errorMessage: Message = {
         role: 'assistant',
@@ -22,7 +33,7 @@ export const useChat = (sessionId: string, accountId: string, secretKey: string)
       return;
     }
 
-    if (!secretKey) {
+    if (!effectiveSecret) {
       console.error('Секретный ключ не задан');
       const errorMessage: Message = {
         role: 'assistant',
@@ -47,16 +58,8 @@ export const useChat = (sessionId: string, accountId: string, secretKey: string)
     setIsLoading(true);
     setToolCalls([]);
 
-    // Add user message immediately
-    const userMessage: Message = {
-      role: 'user',
-      content: message,
-      timestamp: new Date(),
-    };
-    setMessages(prev => [...prev, userMessage]);
-
     try {
-      const response = await apiSendMessage(sessionId, message, accountId, secretKey);
+      const response = await apiSendMessage(sessionId, message, accountId, effectiveSecret);
 
       // Add assistant response
       const assistantMessage: Message = {
@@ -86,8 +89,19 @@ export const useChat = (sessionId: string, accountId: string, secretKey: string)
   const sendMessageStream = useCallback(async (message: string) => {
     if (!message.trim()) return;
 
-    // Validate secretKey and accountId
-    if (!secretKey && !accountId) {
+    // Add user message immediately (should always appear in the dialog)
+    const userMessage: Message = {
+      role: 'user',
+      content: message,
+      timestamp: new Date(),
+    };
+    setMessages(prev => [...prev, userMessage]);
+
+    // Compute effective secret: input value or API_SECRET_TOKEN from env
+    const effectiveSecret = String(secretKey ?? '').trim() || (typeof process !== 'undefined' ? (process.env?.API_SECRET_TOKEN as unknown as string | undefined) : undefined);
+
+    // Validate secretKey and accountId (show errors after user's message)
+    if (!effectiveSecret && !accountId) {
       console.error('Секретный ключ и номер счета не заданы');
       const errorMessage: Message = {
         role: 'assistant',
@@ -98,7 +112,7 @@ export const useChat = (sessionId: string, accountId: string, secretKey: string)
       return;
     }
 
-    if (!secretKey) {
+    if (!effectiveSecret) {
       console.error('Секретный ключ не задан');
       const errorMessage: Message = {
         role: 'assistant',
@@ -123,14 +137,6 @@ export const useChat = (sessionId: string, accountId: string, secretKey: string)
     setIsLoading(true);
     setToolCalls([]);
 
-    // Add user message immediately
-    const userMessage: Message = {
-      role: 'user',
-      content: message,
-      timestamp: new Date(),
-    };
-    setMessages(prev => [...prev, userMessage]);
-
     let assistantMessageContent = '';
 
     try {
@@ -138,7 +144,7 @@ export const useChat = (sessionId: string, accountId: string, secretKey: string)
         sessionId,
         message,
         accountId,
-        secretKey,
+        effectiveSecret,
         (chunk) => {
           if (chunk.type === 'text') {
             assistantMessageContent += chunk.content;

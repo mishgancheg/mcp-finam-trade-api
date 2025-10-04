@@ -197,7 +197,10 @@ app.post('/api/chat', async (req: Request, res: Response) => {
       ? `[Account ID: ${accountId}]\n${message}`
       : message;
 
-    const response = await agentManager.processMessage(sessionId, contextualMessage, accountId, secretKey);
+    // Берём секретный ключ из тела запроса или из переменной окружения
+    const effectiveSecretKey = String(secretKey ?? '').trim() || process.env.API_SECRET_TOKEN;
+
+    const response = await agentManager.processMessage(sessionId, contextualMessage, accountId, effectiveSecretKey);
 
     res.json({
       sessionId,
@@ -247,8 +250,11 @@ app.get('/api/chat/stream', async (req: Request, res: Response) => {
       ? `[Account ID: ${accountId}]\n${message}`
       : message;
 
+    // Берём секретный ключ из query или из переменной окружения
+    const effectiveSecretKey = String(secretKey ?? '').trim() || process.env.API_SECRET_TOKEN;
+
     // Process message with streaming
-    for await (const chunk of agentManager.processMessageStream(sessionId, contextualMessage, accountId, secretKey)) {
+    for await (const chunk of agentManager.processMessageStream(sessionId, contextualMessage, accountId, effectiveSecretKey)) {
       const data = JSON.stringify(chunk);
       res.write(`data: ${data}\n\n`);
 
