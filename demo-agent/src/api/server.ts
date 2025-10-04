@@ -2,10 +2,15 @@ import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import winston from 'winston';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { AgentManager } from '../agent/AgentManager.js';
 import { OrdersService } from '../agent/services/orders.service.js';
 
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const logger = winston.createLogger({
   level: 'info',
@@ -332,6 +337,15 @@ app.post('/api/orders/confirm', async (req: Request, res: Response) => {
       error: error instanceof Error ? error.message : 'Unknown error',
     });
   }
+});
+
+// Serve static files in production
+const uiDistPath = path.join(__dirname, '../../ui');
+app.use(express.static(uiDistPath));
+
+// Serve index.html for all non-API routes (SPA fallback)
+app.get('*', (req: Request, res: Response) => {
+  res.sendFile(path.join(uiDistPath, 'index.html'));
 });
 
 // Error handler
