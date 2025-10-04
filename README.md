@@ -1,6 +1,5 @@
 # FINAM Trade API MCP Server
 
------
 
 <font size="5">
 Выполнено в рамках хакатона `Finam AI Trade Hack`. 04.10.2025   
@@ -125,7 +124,7 @@ npm run mcp:http     # HTTP server
 - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
 - Or: Settings → Developer → Edit Config
 
-## 🛠️ Available Tools
+## 🛠️ Available Tools (19 total)
 
 ### Connection (2)
 
@@ -160,6 +159,10 @@ npm run mcp:http     # HTTP server
 - `LatestTrades` - Recent trades
 - `OrderBook` - Order book depth
 
+### Search (1)
+
+- `SearchInstruments` - Exact instrument lookup by symbol, isin, or ticker
+
 ## 📚 Available Resources
 
 ### Enums (13)
@@ -178,9 +181,25 @@ npm run mcp:http     # HTTP server
 - `enum://TransactionCategory` - Transaction categories
 - `enum://OrderBookAction` - Order book actions
 
+### Schemas (2)
+
+- `schema://asset` - Complete asset/instrument field descriptions
+- `schema://order` - Complete order information field descriptions
+
 ### Data (1)
 
 - `exchange://list` - List of exchanges with mic codes (cached, updates every 2 hours)
+
+## 💬 Available Prompts
+
+### trading-agent
+
+Introduces Claude as a trading agent for brokerage account operations.
+
+**Parameters:**
+- `account_id` (optional if default is configured) - Account ID to work with
+
+**Usage:** Provides context for Claude to act as a trading assistant, helping with account operations, order management, and market analysis.
 
 ## 🔗 Links
 
@@ -193,6 +212,6 @@ npm run mcp:http     # HTTP server
 
 ## ⚠️ Disclaimer
 
-<font color="red" size="5">
+<div style="color:#d00; font-size:1.25em; font-weight:600;">
 This software is provided "as is" for educational purposes. Trading involves risk. Use at your own risk.
-</font>
+</div>
