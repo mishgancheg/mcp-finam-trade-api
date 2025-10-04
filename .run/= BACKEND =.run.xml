@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="= BACKEND =" type="js.build_tools.npm" folderName="WEB-UI">
+  <configuration default="false" name="= BACKEND =" type="js.build_tools.npm">
     <package-json value="$PROJECT_DIR$/demo-agent/package.json" />
     <command value="run" />
     <scripts>

@@ -156,6 +156,9 @@ export class AgentManager {
       turn++;
       logger.info(`Processing turn ${turn} for session ${sessionId}`);
 
+      logger.info(`🤖 Calling LLM (${this.model})...`);
+      const startTime = Date.now();
+
       const response = await this.anthropic.messages.create({
         model: this.model,
         max_tokens: 4096,
@@ -163,6 +166,9 @@ export class AgentManager {
         messages,
         tools: claudeTools,
       });
+
+      const duration = Date.now() - startTime;
+      logger.info(`✅ LLM response received (${duration}ms, ${response.usage?.input_tokens || 0} input tokens, ${response.usage?.output_tokens || 0} output tokens, stop_reason: ${response.stop_reason})`);
 
       // Check stop reason
       if (response.stop_reason === 'end_turn') {
@@ -302,6 +308,7 @@ export class AgentManager {
 
     while (continueLoop && turn < this.maxTurns) {
       turn++;
+      logger.info(`🤖 Calling LLM stream (${this.model}, turn ${turn})...`);
 
       const stream = await this.anthropic.messages.stream({
         model: this.model,
@@ -333,6 +340,7 @@ export class AgentManager {
       }
 
       const finalMessage = await stream.finalMessage();
+      logger.info(`✅ LLM stream completed (${finalMessage.usage?.input_tokens || 0} input tokens, ${finalMessage.usage?.output_tokens || 0} output tokens, stop_reason: ${finalMessage.stop_reason})`);
 
       if (finalMessage.stop_reason === 'end_turn') {
         if (currentText) {

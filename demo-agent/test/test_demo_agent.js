@@ -123,19 +123,26 @@ function extractEndpoints(toolCalls) {
  * @param {Array<{uid: string, question: string}>} questions
  * @param {string} sessionId
  * @param {number} batchIndex
+ * @param {number} startIndex - Starting index in the full question list
  * @returns {Promise<Array<{uid: string, type: string, endpoints: Array<string>}>>}
  */
-async function processBatch(questions, sessionId, batchIndex) {
+async function processBatch(questions, sessionId, batchIndex, startIndex) {
   const results = [];
 
   console.log(`\n📦 Processing batch ${batchIndex + 1} (${questions.length} questions)...`);
 
   for (let i = 0; i < questions.length; i++) {
     const { uid, question } = questions[i];
+    const questionNumber = startIndex + i + 1;
 
     try {
       // Send message to API
+      console.log(`\n  📤 [${questionNumber}] Sending: "${question.substring(0, 60)}${question.length > 60 ? '...' : ''}" (${uid})`);
+      const requestTime = Date.now();
+
       const response = await sendMessage(sessionId, question);
+
+      const responseTime = Date.now() - requestTime;
 
       // Extract endpoints from response
       const endpoints = extractEndpoints(response.toolCalls);
@@ -151,14 +158,14 @@ async function processBatch(questions, sessionId, batchIndex) {
         endpoints
       });
 
-      console.log(`  ✓ ${uid}: ${question.substring(0, 50)}... → ${endpoints.length} endpoints`);
+      console.log(`  📥 [${questionNumber}] Response received (${responseTime}ms): ${endpoints.length} endpoint${endpoints.length !== 1 ? 's' : ''} - ${endpoints.join(', ')}`);
 
       // Delay between requests in the same batch
       if (i < questions.length - 1) {
         await new Promise(resolve => setTimeout(resolve, BATCH_DELAY_MS));
       }
     } catch (error) {
-      console.error(`  ✗ ${uid}: Error - ${error.message}`);
+      console.error(`  ❌ [${questionNumber}] Error (${uid}): ${error.message}`);
       results.push({
         uid,
         type: 'ERROR',
@@ -248,10 +255,11 @@ async function runTest() {
     batches.push(questions.slice(i, i + BATCH_SIZE));
   }
 
-  console.log(`\n📊 Processing ${questions.length} questions in ${batches.length} batches...`);
+  console.log(`\n📊 Processing ${questions.length} questions in ${batches.length} batch${batches.length !== 1 ? 'es' : ''}...`);
 
   for (let i = 0; i < batches.length; i++) {
-    const batchResults = await processBatch(batches[i], session.sessionId, i);
+    const startIndex = i * BATCH_SIZE;
+    const batchResults = await processBatch(batches[i], session.sessionId, i, startIndex);
     allResults.push(...batchResults);
 
     // Delay between batches
