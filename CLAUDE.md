@@ -293,6 +293,27 @@ Optional future enhancements:
 8. Web UI chat interface
 
 
+## Demo-Agent Testing
+
+Для тестирования demo-agent на данных `train.csv` с расчётом метрики accuracy:
+
+```bash
+# 1. Запустить MCP server с SHOW_MCP_ENDPOINTS=true
+npm run mcp:http
+
+# 2. Запустить demo-agent (в другом терминале)
+cd demo-agent && npm run dev
+
+# 3. Запустить тест (в третьем терминале)
+node demo-agent/test/test-train-csv.js
+```
+
+Результаты:
+- Консоль: метрика accuracy и статистика
+- `demo-agent/test/wrong_requests.json`: детали по ошибкам
+
+Подробнее: `demo-agent/test/README.md`
+
 ## FAQ
 
 - Для генерации JWT-токена, с которым происходит обращение к методам API, необходим токен `secret_token`.

@@ -8,6 +8,7 @@ export interface ToolCall {
   name: string;
   params: any;
   result?: any;
+  endpoints?: string[]; // API endpoints called by this tool (from SHOW_MCP_ENDPOINTS)
   timestamp: Date;
 }
 
