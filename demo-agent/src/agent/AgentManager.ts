@@ -4,20 +4,22 @@ import { MCPConnector } from './MCPConnector.js';
 import type { AgentResponse, StreamChunk, Tool, ToolCall } from '../types/index.js';
 import winston from 'winston';
 
-// Configure logger
 const logger = winston.createLogger({
   level: 'info',
   format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json(),
+    // winston.format.timestamp(),
+    // winston.format.json(),
+    // Единый человекочитаемый формат без поля timestamp в JSON
+    winston.format.colorize(),
+    winston.format.simple(),
   ),
   transports: [
     new winston.transports.Console({
-      format: winston.format.simple(),
+      // format: winston.format.simple(),
+      // Транспорт берёт формат из корневого логгера
     }),
   ],
 });
-
 export class AgentManager {
   private anthropic: Anthropic;
   private mcpConnector: MCPConnector;

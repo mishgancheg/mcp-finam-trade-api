@@ -10,12 +10,14 @@ dotenv.config();
 const logger = winston.createLogger({
   level: 'info',
   format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json(),
+    // Единый человекочитаемый формат без поля timestamp в JSON
+    winston.format.colorize(),
+    winston.format.simple(),
   ),
   transports: [
     new winston.transports.Console({
-      format: winston.format.simple(),
+      // format: winston.format.simple(),
+      // Транспорт берёт формат из корневого логгера
     }),
   ],
 });
@@ -61,7 +63,7 @@ async function initializeAgent () {
       logger.info(`Connecting to MCP server via stdio: ${mcpServerUrl}`);
     } else {
       throw new Error(
-        `MCP_SERVER_URL must start with 'http://', 'https://', or 'stdio://'. Got: ${mcpServerUrl}`
+        `MCP_SERVER_URL must start with 'http://', 'https://', or 'stdio://'. Got: ${mcpServerUrl}`,
       );
     }
 
