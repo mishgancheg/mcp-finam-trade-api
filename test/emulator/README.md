@@ -10,7 +10,7 @@ npm run emulator:oms
 npm run emulator:check
 
 # Остановить эмулятор
-scripts\kill-emulator.bat
+node scripts kill-emulator.js
 ```
 
 ## Основные возможности
@@ -180,10 +180,9 @@ npm run emulator:check
 
 ## Troubleshooting
 
-### Порт 3000 занят
+### Порт 3000 и 3006 занят
 ```bash
-# Windows
-scripts\kill-emulator.bat
+node scripts kill-emulator.js
 
 # Или вручную
 netstat -ano | findstr :3000

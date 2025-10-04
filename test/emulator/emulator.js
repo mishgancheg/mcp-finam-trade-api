@@ -33,7 +33,7 @@ const __dirname = path.dirname(__filename);
 
 // Configuration
 const PORT = process.env.EMULATOR_PORT || 3000;
-const WS_PORT = process.env.WS_PORT || 3001;
+const WS_PORT = process.env.WS_PORT || 3006;
 const JWT_SECRET = process.env.JWT_SECRET || 'test-jwt-secret-key';
 const DEFAULT_ACCOUNT_ID = process.env.TEST_ACCOUNT_ID;
 const STATE_FILE = path.join(__dirname, '_state', 'emulator-state.json');
@@ -813,7 +813,7 @@ checkPort(PORT)
   .then((isAvailable) => {
     if (!isAvailable) {
       console.error(`\n❌ Error: Port ${PORT} is already in use`);
-      console.error(`\n💡 To free the port, run: scripts\\kill-port.bat ${PORT}`);
+      console.error(`\n💡 To free the port, run: node scripts\\kill-port.js ${PORT}`);
       console.error(`   or: scripts\\kill-emulator.bat\n`);
       process.exit(1);
     }
@@ -833,7 +833,7 @@ checkPort(PORT)
     setInterval(() => {
       updateMarketPrices();
     }, 5000);
-    console.log('⏰ Background price ticker started (every 5s)');
+    console.log('⏰  Background price ticker started (every 5s)');
 
     // Start WebSocket server
     const wss = new WebSocketServer({ port: WS_PORT });
@@ -865,7 +865,7 @@ checkPort(PORT)
 
     // Start HTTP server
     app.listen(PORT, () => {
-      console.log(`\n✅ FINAM Trade API Emulator (Enhanced OMS) started`);
+      console.log(`\n✅  FINAM Trade API Emulator (Enhanced OMS) started`);
       console.log('\n📍 Available endpoints:');
       console.log('  POST   /admin/reset                                     - Reset state');
       console.log('  POST   /admin/save                                      - Save state');
@@ -896,14 +896,14 @@ checkPort(PORT)
       console.log(`📝 Default Account ID: ${DEFAULT_ACCOUNT_ID}`);
       console.log(`💾 State File: ${STATE_FILE}`);
       console.log('\n⚡ Ready with enhanced features:');
-      console.log('   ✅ Persistent state (auto-save on changes)');
-      console.log('   ✅ Admin endpoints (/admin/reset, /admin/save, /admin/status)');
-      console.log('   ✅ Background price ticker (every 5s)');
-      console.log('   ✅ Auto-execute LIMIT/STOP orders');
-      console.log('   ✅ WebSocket streaming\n');
+      console.log('   ✅  Persistent state (auto-save on changes)');
+      console.log('   ✅  Admin endpoints (/admin/reset, /admin/save, /admin/status)');
+      console.log('   ✅  Background price ticker (every 5s)');
+      console.log('   ✅  Auto-execute LIMIT/STOP orders');
+      console.log('   ✅  WebSocket streaming\n');
     });
   })
   .catch((err) => {
-    console.error(`\n❌ Error checking port ${PORT}:`, err.message);
+    console.error(`\n❌  Error checking port ${PORT}:`, err.message);
     process.exit(1);
   });

@@ -73,14 +73,34 @@ if (isHttpMode) {
   const portArg = portIndex >= 0 ? args[portIndex + 1] : undefined;
   const port = portArg ? parseInt(portArg, 10) : undefined;
 
-  startHttpServer(port).catch((error) => {
-    console.error('Failed to start HTTP server:', error);
-    process.exit(1);
-  });
+  console.log('Starting MCP HTTP server...');
+  startHttpServer(port)
+    .then(() => {
+      console.log('✅  MCP HTTP server started successfully');
+    })
+    .catch((error) => {
+      console.error('\n❌  Failed to start HTTP server');
+      console.error('Error:', error.message);
+      if (error.stack) {
+        console.error('\nStack trace:');
+        console.error(error.stack);
+      }
+      process.exit(1);
+    });
 } else {
   // stdio transport mode (default)
-  startStdioServer().catch((error) => {
-    console.error('Failed to start stdio server:', error);
-    process.exit(1);
-  });
+  console.log('Starting MCP stdio server...');
+  startStdioServer()
+    .then(() => {
+      console.log('✅  MCP stdio server started successfully');
+    })
+    .catch((error) => {
+      console.error('\n❌  Failed to start stdio server');
+      console.error('Error:', error.message);
+      if (error.stack) {
+        console.error('\nStack trace:');
+        console.error(error.stack);
+      }
+      process.exit(1);
+    });
 }

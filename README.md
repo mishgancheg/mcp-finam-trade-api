@@ -39,9 +39,7 @@ npm install
 npm run build
 
 # Create .env
-API_SECRET_TOKEN=your_token
-ACCOUNT_ID=your_account_id
-RETURN_AS=string
+RETURN_AS=json
 
 # Run
 npm run mcp          # STDIO
@@ -80,8 +78,8 @@ npm run mcp:http     # HTTP server
         "--header", "X-Finam-Account-Id:${FINAM_ID}"
       ],
       "env": {
-        "FINAM_AUTH": "Bearer token",
-        "FINAM_ID": "123456"
+        "FINAM_AUTH": "Bearer <secret_token>",
+        "FINAM_ID": "<account_id>"
       }
     }
   }
@@ -98,8 +96,8 @@ npm run mcp:http     # HTTP server
       "command": "node",
       "args": ["/path/to/dist/src/mcp/index.js"],
       "env": {
-        "API_SECRET_TOKEN": "token",
-        "ACCOUNT_ID": "123456"
+        "API_SECRET_TOKEN": "<secret_token>",
+        "ACCOUNT_ID": "<account_id>"
       }
     }
   }
@@ -161,21 +159,6 @@ npm run mcp:http     # HTTP server
 ### Data (1)
 - `exchange://list` - List of exchanges with mic codes (cached, updates every 2 hours)
 
-## 🐛 Troubleshooting
-
-**"secret_token is required"**
-- Check env variables in config
-
-**npx not installing**
-- Add `-y` flag: `"args": ["-y", "mcp-remote", ...]`
-
-**Spaces bug (Windows)**
-- Use `Authorization:${VAR}` not `Authorization: Bearer ${VAR}`
-
-**Clear OAuth tokens**
-```bash
-rm -rf ~/.mcp-auth
-```
 
 ## 🔗 Links
 
@@ -186,4 +169,4 @@ rm -rf ~/.mcp-auth
 
 ## ⚠️ Disclaimer
 
-This software is provided "as is" for educational purposes. Trading involves risk. Use at your own risk.
+### <font color="red">This software is provided "as is" for educational purposes. Trading involves risk. Use at your own risk.</font>

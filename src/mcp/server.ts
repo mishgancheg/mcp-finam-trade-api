@@ -202,17 +202,36 @@ export function createMcpServer (defaultAccountId?: string) {
 
 // Start stdio transport
 export async function startStdioServer () {
-  // Set transport type for instrument search (stdio = exact search only)
-  const instrumentSearch = getInstrumentSearch();
-  instrumentSearch.setTransport('stdio');
+  try {
+    // Set transport type for instrument search (stdio = exact search only)
+    const instrumentSearch = getInstrumentSearch();
+    instrumentSearch.setTransport('stdio');
 
-  const server = createMcpServer(ACCOUNT_ID);
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
+    const server = createMcpServer(ACCOUNT_ID);
+    const transport = new StdioServerTransport();
+    await server.connect(transport);
 
-  console.error('MCP Server running on stdio transport');
-  console.error(`Credentials: secret_token=${API_SECRET_TOKEN ? '***' : 'not set'}, account_id=${ACCOUNT_ID || 'not set'}`);
-  console.error(`Response format: ${RETURN_AS}`);
+    console.error('MCP Server running on stdio transport');
+    console.error(`Credentials: secret_token=${API_SECRET_TOKEN ? '***' : 'not set'}, account_id=${ACCOUNT_ID || 'not set'}`);
+    console.error(`Response format: ${RETURN_AS}`);
+
+    // Handle uncaught exceptions in async handlers
+    process.on('uncaughtException', (error) => {
+      console.error('\n❌ UNCAUGHT EXCEPTION:', error);
+      process.exit(1);
+    });
+
+    process.on('unhandledRejection', (reason, promise) => {
+      console.error('\n❌ UNHANDLED REJECTION at:', promise);
+      console.error('Reason:', reason);
+      process.exit(1);
+    });
+
+  } catch (error) {
+    console.error('\n❌ ERROR: Failed to start stdio server');
+    console.error(error);
+    throw error;
+  }
 }
 
 // Start HTTP transport
@@ -224,6 +243,16 @@ export async function startHttpServer (port: number = HTTP_PORT) {
 
   // Security middleware
   app.use(helmet());
+
+  // Alias /mcp to /mcp/v1 for compatibility with clients using /mcp
+  app.use((req, _res, next) => {
+    if (req.path === '/mcp') {
+      // Rewrite the URL path to /mcp/v1 while preserving query string
+      req.url = '/mcp/v1' + (req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : '');
+    }
+    next();
+  });
+
   // Skip body parsing for /mcp/v1 and /message - we'll read it manually
   app.use((req, res, next) => {
     if (req.path === '/mcp/v1' || req.path === '/message') {
@@ -425,16 +454,68 @@ export async function startHttpServer (port: number = HTTP_PORT) {
     }
   });
 
-  app.listen(port, async () => {
-    console.error(`\n🚀 MCP Server running on port ${port}`);
-    console.error(`\n🚀 FINAM Trade API: ${process.env.API_BASE_URL}`);
+  // Global error handler for Express
+  app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    console.error('[Express Error]:', err);
+    if (!res.headersSent) {
+      res.status(500).json({
+        error: 'Internal server error',
+        message: err.message,
+      });
+    }
+  });
 
-    console.error(`\nAvailable endpoints:`);
-    console.error(`  - SSE:              http://localhost:${port}/sse`);
-    console.error(`  - SSE Messages:     http://localhost:${port}/message`);
-    console.error(`  - Streamable HTTP:  http://localhost:${port}/mcp/v1`);
-    console.error(`  - Health:           http://localhost:${port}/health`);
-    console.error(`\nActive transports: stdio, SSE, Streamable HTTP`);
-    console.error(`Response format: ${RETURN_AS}`);
+  // Return Promise to properly handle startup errors
+  return new Promise<void>((resolve, reject) => {
+    let errorOccurred = false;
+
+    // Handle server startup errors BEFORE starting to listen
+    const server = app.listen(port);
+
+    server.on('error', (error: NodeJS.ErrnoException) => {
+      errorOccurred = true;
+
+      if (error.code === 'EADDRINUSE') {
+        console.error(`\n❌ ERROR: Port ${port} is already in use`);
+        console.error(`   Please stop the process using port ${port} or use a different port with --port <number>`);
+        console.error(`   To kill the process on Windows: scripts\\kill-port.bat ${port}`);
+      } else if (error.code === 'EACCES') {
+        console.error(`\n❌ ERROR: Permission denied to bind to port ${port}`);
+        console.error(`   Try using a port number > 1024 or run with administrator privileges`);
+      } else {
+        console.error(`\n❌ ERROR: Failed to start HTTP server:`, error.message);
+        console.error(error);
+      }
+      reject(error);
+    });
+
+    server.on('listening', () => {
+      if (!errorOccurred) {
+        console.error(`\n🚀 MCP Server running on port ${port}`);
+        console.error(`\n🚀 FINAM Trade API: ${process.env.API_BASE_URL}`);
+
+        console.error(`\nAvailable endpoints:`);
+        console.error(`  - SSE:              http://localhost:${port}/sse`);
+        console.error(`  - SSE Messages:     http://localhost:${port}/message`);
+        console.error(`  - Streamable HTTP:  http://localhost:${port}/mcp/v1`);
+        console.error(`  - Health:           http://localhost:${port}/health`);
+        console.error(`\nActive transports: stdio, SSE, Streamable HTTP`);
+        console.error(`Response format: ${RETURN_AS}`);
+
+        resolve();
+      }
+    });
+
+    // Handle uncaught exceptions in async handlers
+    process.on('uncaughtException', (error) => {
+      console.error('\n❌ UNCAUGHT EXCEPTION:', error);
+      process.exit(1);
+    });
+
+    process.on('unhandledRejection', (reason, promise) => {
+      console.error('\n❌ UNHANDLED REJECTION at:', promise);
+      console.error('Reason:', reason);
+      process.exit(1);
+    });
   });
 }
