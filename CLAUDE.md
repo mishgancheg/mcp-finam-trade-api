@@ -293,26 +293,53 @@ Optional future enhancements:
 8. Web UI chat interface
 
 
-## Demo-Agent Testing
+## Demo-Agent Usage
 
-Для тестирования demo-agent на данных `train.csv` с расчётом метрики accuracy:
-
+### Development Mode
 ```bash
-# 1. Запустить MCP server с SHOW_MCP_ENDPOINTS=true
+# Terminal 1: Start MCP server
 npm run mcp:http
 
-# 2. Запустить demo-agent (в другом терминале)
+# Terminal 2: Start demo-agent in dev mode (hot reload)
+cd demo-agent && npm run dev
+# Access at: http://localhost:5173 (Vite dev server)
+```
+
+### Production Mode
+```bash
+# 1. Build the project
+cd demo-agent && npm run build
+
+# 2. Start production server
+npm start
+# Access at: http://localhost:3002 (single server for both UI and API)
+```
+
+**Production Features:**
+- Single server on port 3002 serves both UI and API
+- Static files served from `dist/ui/`
+- API endpoints at `/api/*`
+- SPA fallback for client-side routing
+- Binds to `0.0.0.0` for network access
+
+### Testing on train.csv
+
+```bash
+# 1. Start MCP server with endpoints enabled
+SHOW_MCP_ENDPOINTS=true npm run mcp:http
+
+# 2. Start demo-agent (dev or prod)
 cd demo-agent && npm run dev
 
-# 3. Запустить тест (в третьем терминале)
+# 3. Run test
 node demo-agent/test/test-train-csv.js
 ```
 
-Результаты:
-- Консоль: метрика accuracy и статистика
-- `demo-agent/test/wrong_requests.json`: детали по ошибкам
+Results:
+- Console: accuracy metric and statistics
+- `demo-agent/test/wrong_requests.json`: error details
 
-Подробнее: `demo-agent/test/README.md`
+More info: `demo-agent/test/README.md`
 
 ## FAQ
 

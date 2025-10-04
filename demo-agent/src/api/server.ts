@@ -29,7 +29,7 @@ const logger = winston.createLogger({
 
 const app = express();
 const port = parseInt(process.env.WEB_API_PORT || '3002');
-const host = process.env.WEB_API_HOST || 'localhost';
+const host = process.env.WEB_API_HOST || '0.0.0.0';
 
 // Middleware
 app.use(cors());
@@ -340,12 +340,16 @@ app.post('/api/orders/confirm', async (req: Request, res: Response) => {
 });
 
 // Serve static files in production
-const uiDistPath = path.join(__dirname, '../../ui');
+const uiDistPath = path.join(__dirname, '../ui');
 app.use(express.static(uiDistPath));
 
-// Serve index.html for all non-API routes (SPA fallback)
-app.get('*', (req: Request, res: Response) => {
-  res.sendFile(path.join(uiDistPath, 'index.html'));
+// SPA fallback - serve index.html for all non-API GET requests
+app.use((req: Request, res: Response, next: NextFunction) => {
+  if (req.method === 'GET' && !req.path.startsWith('/api')) {
+    res.sendFile(path.join(uiDistPath, 'index.html'));
+  } else {
+    next();
+  }
 });
 
 // Error handler
