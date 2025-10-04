@@ -235,15 +235,15 @@ Validates all MCP server tools and resources across all three transport protocol
    **Important Notes:**
    - Tests require valid credentials in `.env`
    - Test results saved to `_test-data/mcp/{transport}/`
-   - **IMPORTANT**: Always stop emulator after testing: `scripts\kill-emulator.bat`
+   - **IMPORTANT**: Always stop emulator after testing: `node scripts kill-emulator.js`
 
 ## Utility Scripts
 
 ### Port Management
-- `scripts\kill-port.bat [port]` - Kill process on specified port
-- `scripts\kill-emulator.bat` - Stop emulator on port 3000
+- `node scripts kill-port.js [port]` - Kill process on specified port
+- `node scripts kill-emulator.js` - Stop emulator on port 3000 & 3006
 
-**IMPORTANT FOR AI ASSISTANT**: When testing with the emulator, always stop it after completion using `scripts\kill-emulator.bat` or `scripts\kill-port.bat 3000`.
+**IMPORTANT FOR AI ASSISTANT**: When testing with the emulator, always stop it after completion using `node scripts kill-emulator.js`.
 
 ## TypeScript Configuration
 

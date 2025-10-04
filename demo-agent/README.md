@@ -207,9 +207,7 @@ Emulator запустится на `http://localhost:3000`
 
 **ВАЖНО**: После тестирования остановите emulator:
 ```bash
-npm run emulator:kill
-# или
-scripts\kill-emulator.bat
+node scripts kill-emulator.js
 ```
 
 ---

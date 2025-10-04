@@ -478,7 +478,7 @@ export async function startHttpServer (port: number = HTTP_PORT) {
       if (error.code === 'EADDRINUSE') {
         console.error(`\n❌ ERROR: Port ${port} is already in use`);
         console.error(`   Please stop the process using port ${port} or use a different port with --port <number>`);
-        console.error(`   To kill the process on Windows: scripts\\kill-port.bat ${port}`);
+        console.error(`   To kill the process on Windows: node scripts\\kill-port.js ${port}`);
       } else if (error.code === 'EACCES') {
         console.error(`\n❌ ERROR: Permission denied to bind to port ${port}`);
         console.error(`   Try using a port number > 1024 or run with administrator privileges`);

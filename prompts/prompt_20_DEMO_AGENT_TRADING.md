@@ -1454,7 +1454,7 @@ npm run emulator:oms
 
 Останавливай после тестирования:
 ```bash
-scripts\kill-emulator.bat
+node scripts kill-emulator.js
 ```
 
 ### 7.3. Используй существующие MCP tools
