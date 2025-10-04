@@ -4,7 +4,7 @@
 
 ```bash
 # Запустить OMS эмулятор
-npm run emulator:oms
+npm run emulator
 
 # Проверить работоспособность (в другом терминале)
 npm run emulator:check

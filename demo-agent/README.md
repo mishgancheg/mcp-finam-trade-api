@@ -160,57 +160,8 @@ AGENT_MODE=streaming
 
 ---
 
-## Запуск
+## Запуск: [START.md](START.md)
 
-### Development (одновременно API + UI)
-
-```bash
-npm run dev
-```
-
-Запустит:
-- **API сервер**: `http://localhost:3002`
-- **Vite dev сервер**: `http://localhost:5173`
-
-### Только API сервер
-
-```bash
-npm run dev:api
-```
-
-### Только UI
-
-```bash
-npm run dev:ui
-```
-
-### Production build
-
-```bash
-# Сборка
-npm run build
-
-# Запуск
-npm start
-```
-
-### Запуск OMS Emulator
-
-Для тестирования без реального API:
-
-```bash
-# Из корня проекта
-npm run emulator:oms
-```
-
-Emulator запустится на `http://localhost:3000`
-
-**ВАЖНО**: После тестирования остановите emulator:
-```bash
-node scripts kill-emulator.js
-```
-
----
 
 ## API Endpoints
 

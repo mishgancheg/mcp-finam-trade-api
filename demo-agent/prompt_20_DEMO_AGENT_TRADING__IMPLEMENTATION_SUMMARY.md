@@ -186,7 +186,7 @@ The implementation is ready for the 4 test cases specified in the requirements:
 ### Prerequisites
 1. OMS Emulator must be running on port 3000:
    ```bash
-   npm run emulator:oms
+   npm run emulator
    ```
 
 2. Environment configured in `demo-agent/.env`:

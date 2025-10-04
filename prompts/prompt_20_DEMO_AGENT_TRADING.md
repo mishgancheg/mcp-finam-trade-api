@@ -31,7 +31,7 @@
 **Что работает:**
 ```bash
 # Терминал 1: Запустить эмулятор
-npm run emulator:oms
+npm run emulator
 
 # Терминал 2: Запустить demo-agent
 cd demo-agent
@@ -1016,7 +1016,7 @@ const renderSpec = {
     specGen.generateRebalanceBlock(account.positions, {
       'SBER@MISX': 12.5,
       'GAZP@MISX': 12.5,
-      'YNDX@MISX': 12.5,
+      'YDEX@MISX': 12.5,
       // ... остальные 12.5%
     })
   ]
@@ -1257,7 +1257,7 @@ const handleOrderConfirm = async (token: string) => {
 **Задачи:**
 
 1. **E2E тест Кейса 1: Базовый портфель** (30 мин)
-   - [ ] Запустить эмулятор: `npm run emulator:oms`
+   - [ ] Запустить эмулятор: `npm run emulator`
    - [ ] Запустить demo-agent: `cd demo-agent && npm run dev`
    - [ ] Отправить "Покажи мой портфель"
    - [ ] Проверить: Summary + таблица позиций с сортировкой
@@ -1449,7 +1449,7 @@ demo-agent/
 
 Всегда запускай эмулятор перед тестированием:
 ```bash
-npm run emulator:oms
+npm run emulator
 ```
 
 Останавливай после тестирования:
@@ -1483,7 +1483,7 @@ console.log('Generated RenderSpec:', JSON.stringify(renderSpec, null, 2));
 
 **После завершения:**
 
-1. Запустить эмулятор: `npm run emulator:oms`
+1. Запустить эмулятор: `npm run emulator`
 2. Запустить demo-agent: `cd demo-agent && npm run dev`
 3. Открыть http://localhost:5173
 4. Отправить: "Покажи портфель" → получить таблицу с позициями

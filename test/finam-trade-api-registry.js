@@ -1344,6 +1344,14 @@ const RAW_ENDPOINTS = [
   },
 ];
 
+const xxx = RAW_ENDPOINTS.map((e) => {
+  return {
+    mcpTool: e.name,
+    endpoint: e.endpoint,
+  };
+})
+
+console.log(xxx);
 /**
  * Transformed endpoint registry with getters for computed properties
  */

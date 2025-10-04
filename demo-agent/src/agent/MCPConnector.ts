@@ -1,17 +1,40 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
+import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
 import type { Tool } from '../types/index.js';
 
 export class MCPConnector {
   private client: Client | null = null;
-  private transport: StdioClientTransport | null = null;
+  private transport: StdioClientTransport | SSEClientTransport | null = null;
 
   /**
-   * Connect to MCP server using stdio transport
+   * Connect to MCP server using stdio or HTTP(SSE) transport
    * @param serverUrl - URL or command path for the MCP server
    */
   async connect (serverUrl: string): Promise<void> {
-    // Parse stdio:// URL format
+    // Trim and validate serverUrl
+    serverUrl = serverUrl.trim();
+
+    // If HTTP(S) URL provided, use SSE transport
+    if (/^https?:\/\//i.test(serverUrl)) {
+      // Allow URLs like http://host:port, http://host:port/mcp or /mcp/v1
+      const url = new URL(serverUrl);
+      const baseOrigin = `${url.protocol}//${url.host}`;
+      // If path already points to /sse, use as-is; otherwise, connect to /sse on same origin
+      const sseUrl = new URL(url.pathname === '/sse' ? url.href : `${baseOrigin}/sse`);
+
+      this.transport = new SSEClientTransport(sseUrl);
+
+      this.client = new Client({
+        name: 'finam-demo-agent',
+        version: '1.0.0',
+      });
+
+      await this.client.connect(this.transport);
+      return;
+    }
+
+    // Default: stdio transport (stdio://path/to/server)
     const command = serverUrl.replace('stdio://', '');
 
     this.transport = new StdioClientTransport({

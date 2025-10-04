@@ -1,3 +1,5 @@
+// noinspection UnnecessaryLocalVariableJS
+
 /**
  * OMS Engine - Order Management System logic for FINAM API Emulator
  * Handles order execution, position management, market data generation
@@ -9,7 +11,7 @@
  * @param {number} stdev - Standard deviation (default 1)
  * @returns {number} Random number from normal distribution
  */
-export function gaussianRandom(mean = 0, stdev = 1) {
+export function gaussianRandom (mean = 0, stdev = 1) {
   const u = 1 - Math.random();
   const v = Math.random();
   const z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
@@ -23,7 +25,7 @@ export function gaussianRandom(mean = 0, stdev = 1) {
  * @param {Object} params - Generation parameters
  * @returns {Array} Array of bar objects
  */
-export function generateHistoricalBars(symbol, numDays = 365, params = {}) {
+export function generateHistoricalBars (symbol, numDays = 365, params = {}) {
   const {
     startPrice = 250,
     volatility = 0.015,
@@ -78,7 +80,7 @@ export function generateHistoricalBars(symbol, numDays = 365, params = {}) {
  * @param {number} levels - Number of levels per side
  * @returns {Object} Order book with bids and asks
  */
-export function generateOrderBook(symbol, bidPrice, askPrice, levels = 10) {
+export function generateOrderBook (symbol, bidPrice, askPrice, levels = 10) {
   const bids = [];
   const asks = [];
 
@@ -120,7 +122,7 @@ export function generateOrderBook(symbol, bidPrice, askPrice, levels = 10) {
  * @param {number} count - Number of trades
  * @returns {Array} Array of trade objects
  */
-export function generateRecentTrades(symbol, lastPrice, count = 20) {
+export function generateRecentTrades (symbol, lastPrice, count = 20) {
   const trades = [];
   const now = Date.now();
   const priceFloat = parseFloat(lastPrice);
@@ -152,7 +154,7 @@ export function generateRecentTrades(symbol, lastPrice, count = 20) {
  * @param {Date} date - Target date
  * @returns {number} Price at that date
  */
-export function getPriceAtDate(historicalBars, symbol, date) {
+export function getPriceAtDate (historicalBars, symbol, date) {
   const bars = historicalBars.get(symbol) || [];
 
   // Find the closest bar to the target date
@@ -178,7 +180,7 @@ export function getPriceAtDate(historicalBars, symbol, date) {
  * @param {Object} counters - ID counters
  * @returns {Object} Created transaction
  */
-export function createTransaction(params, transactions, counters) {
+export function createTransaction (params, transactions, counters) {
   const {
     account_id,
     category,
@@ -213,7 +215,7 @@ export function createTransaction(params, transactions, counters) {
 /**
  * Get human-readable name for transaction category
  */
-function getCategoryName(category) {
+function getCategoryName (category) {
   const names = {
     TRADE: 'Сделка',
     COMMISSION: 'Брокерская комиссия',
@@ -233,7 +235,7 @@ function getCategoryName(category) {
  * @param {Object} counters - ID counters
  * @returns {Object} Created trade
  */
-export function createTrade(order, fillPrice, fillQuantity, timestamp, counters) {
+export function createTrade (order, fillPrice, fillQuantity, timestamp, counters) {
   const commission = fillPrice * fillQuantity * 0.0005; // 0.05% commission
 
   return {
@@ -260,7 +262,7 @@ export function createTrade(order, fillPrice, fillQuantity, timestamp, counters)
  * @param {Map} positions - Positions store
  * @param {Map} marketData - Market data store
  */
-export function updatePosition(params, positions, marketData) {
+export function updatePosition (params, positions, marketData) {
   const { accountId, symbol, side, quantity, price } = params;
   const positionKey = `${accountId}:${symbol}`;
   let position = positions.get(positionKey);
@@ -324,9 +326,11 @@ export function updatePosition(params, positions, marketData) {
  * @param {string} currency - Currency code
  * @param {number} change - Amount to add/subtract
  */
-export function updateCashBalance(accounts, accountId, currency, change) {
+export function updateCashBalance (accounts, accountId, currency, change) {
   const account = accounts.get(accountId);
-  if (!account) return;
+  if (!account) {
+    return;
+  }
 
   const cashEntry = account.cash.find(c => c.currency_code === currency);
   if (cashEntry) {
@@ -345,13 +349,13 @@ export function updateCashBalance(accounts, accountId, currency, change) {
  * @param {Object} params - Fill parameters
  * @returns {Object} Fill result
  */
-export function fillOrder(params) {
+export function fillOrder (params) {
   const {
     order,
     fillPrice,
     fillQuantity,
     timestamp = new Date(),
-    dataStore
+    dataStore,
   } = params;
 
   // 1. Create trade record
@@ -451,7 +455,7 @@ export function fillOrder(params) {
  * @param {Object} dataStore - Data store
  * @returns {Object} Execution result
  */
-export function executeOrder(order, currentMarketPrice, dataStore) {
+export function executeOrder (order, currentMarketPrice, dataStore) {
   // Check execution conditions
   if (order.type === 'ORDER_TYPE_MARKET') {
     return fillOrder({
@@ -517,9 +521,11 @@ export function executeOrder(order, currentMarketPrice, dataStore) {
  * @param {string} accountId - Account ID
  * @param {Object} dataStore - Data store
  */
-export function recalculateAccountMetrics(accountId, dataStore) {
+export function recalculateAccountMetrics (accountId, dataStore) {
   const account = dataStore.accounts.get(accountId);
-  if (!account) return;
+  if (!account) {
+    return;
+  }
 
   // Get all positions for this account
   const accountPositions = Array.from(dataStore.positions.values())

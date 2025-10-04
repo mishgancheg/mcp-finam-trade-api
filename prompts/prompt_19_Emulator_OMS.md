@@ -417,7 +417,7 @@ const INSTRUMENTS = [
     sector: 'Энергетика',
   },
   {
-    symbol: 'YNDX@MISX',
+    symbol: 'YDEX@MISX',
     name: 'Яндекс',
     startPrice: 3500,
     volatility: 0.025,

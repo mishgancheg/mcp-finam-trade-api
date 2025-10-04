@@ -55,7 +55,7 @@ export const INSTRUMENTS = [
     baseVolume: 800000,
   },
   {
-    symbol: 'YNDX@MISX',
+    symbol: 'YDEX@MISX',
     name: 'Яндекс',
     id: 'YNDX',
     ticker: 'YNDX',

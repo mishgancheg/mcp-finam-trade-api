@@ -701,7 +701,7 @@ app.get('/v1/instruments/:symbol/quotes/latest', authMiddleware, (req, res) => {
   if (!quote) {
     return res.status(404).json({
       code: 5,
-      message: 'Symbol not found',
+      message: `Symbol ${symbol} not found`,
     });
   }
 
@@ -722,7 +722,7 @@ app.get('/v1/instruments/:symbol/trades/latest', authMiddleware, (req, res) => {
   if (!quote) {
     return res.status(404).json({
       code: 5,
-      message: 'Symbol not found',
+      message: `Symbol ${symbol} not found`,
     });
   }
 
@@ -738,7 +738,7 @@ app.get('/v1/instruments/:symbol/orderbook', authMiddleware, (req, res) => {
   if (!quote) {
     return res.status(404).json({
       code: 5,
-      message: 'Symbol not found',
+      message: `Symbol ${symbol} not found`,
     });
   }
 

@@ -40,9 +40,29 @@ const ordersService = new OrdersService();
 
 async function initializeAgent () {
   try {
-    const mcpServerUrl = process.env.MCP_SERVER_URL;
+    let mcpServerUrl = process.env.MCP_SERVER_URL;
+
     if (!mcpServerUrl) {
       throw new Error('MCP_SERVER_URL environment variable is required');
+    }
+
+    // Trim whitespace and normalize URL
+    mcpServerUrl = mcpServerUrl.trim();
+
+    // Validate URL format
+    if (mcpServerUrl.startsWith('http://') || mcpServerUrl.startsWith('https://')) {
+      try {
+        new URL(mcpServerUrl); // Validate URL is parseable
+        logger.info(`Connecting to MCP server via HTTP: ${mcpServerUrl}`);
+      } catch (error) {
+        throw new Error(`Invalid MCP_SERVER_URL format: ${mcpServerUrl}`);
+      }
+    } else if (mcpServerUrl.startsWith('stdio://')) {
+      logger.info(`Connecting to MCP server via stdio: ${mcpServerUrl}`);
+    } else {
+      throw new Error(
+        `MCP_SERVER_URL must start with 'http://', 'https://', or 'stdio://'. Got: ${mcpServerUrl}`
+      );
     }
 
     agentManager = new AgentManager();
@@ -50,6 +70,17 @@ async function initializeAgent () {
     logger.info('Agent manager initialized successfully');
   } catch (error) {
     logger.error('Failed to initialize agent manager:', error);
+
+    // Provide helpful error messages
+    if (error instanceof Error) {
+      if (error.message.includes('ECONNREFUSED')) {
+        logger.error('\n💡 Tip: Make sure the MCP server is running.');
+        logger.error('   Start it with: npm run mcp:http (from project root)');
+        logger.error('   Default MCP server port: 3001');
+        logger.error('   Check your MCP_SERVER_URL in .env file');
+      }
+    }
+
     process.exit(1);
   }
 }
