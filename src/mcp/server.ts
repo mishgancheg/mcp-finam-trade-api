@@ -53,6 +53,13 @@ interface IHeaderCreds {
   account_id: string
 }
 
+const DEBUG_HTTP_HEADERS = process.env.DEBUG_HTTP_HEADERS === 'true';
+const debugHttpHeaders = (req: any) =>{
+  if (DEBUG_HTTP_HEADERS) {
+    console.log('HTTP Headers:', JSON.stringify(req?.headers, null, 2));
+  }
+}
+
 // Extract credentials from request (for HTTP transport)
 function extractCredentials (headers?: Record<string, string>): IHeaderCreds | null {
   if (!headers) {
@@ -259,6 +266,7 @@ export async function startHttpServer (port: number = HTTP_PORT) {
 
   // Alias /mcp to /mcp/v1 for compatibility with clients using /mcp
   app.use((req, _res, next) => {
+    debugHttpHeaders(req)
     if (req.path === '/mcp') {
       // Rewrite the URL path to /mcp/v1 while preserving query string
       req.url = '/mcp/v1' + (req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : '');

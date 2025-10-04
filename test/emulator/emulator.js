@@ -27,6 +27,7 @@ import {
   gaussianRandom,
 } from './oms-engine.js';
 import { INSTRUMENTS, initializeDemoAccount } from './seed-data.js';
+import chalk from 'chalk';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -62,7 +63,7 @@ let dataStore = {
 const wsClients = new Set();
 
 // Broadcast to all WebSocket clients
-function broadcast(message) {
+function broadcast (message) {
   const data = JSON.stringify(message);
   wsClients.forEach(client => {
     if (client.readyState === 1) { // OPEN
@@ -74,7 +75,7 @@ function broadcast(message) {
 /**
  * Save state to JSON file
  */
-function saveState() {
+function saveState () {
   try {
     const stateDir = path.dirname(STATE_FILE);
     if (!fs.existsSync(stateDir)) {
@@ -110,7 +111,7 @@ function saveState() {
 /**
  * Load state from JSON file
  */
-function loadState() {
+function loadState () {
   try {
     if (!fs.existsSync(STATE_FILE)) {
       console.log('📂 No saved state found, will initialize fresh data');
@@ -146,7 +147,7 @@ function loadState() {
 /**
  * Reset state to initial
  */
-function resetState() {
+function resetState () {
   console.log('\n🔄 Resetting state...');
 
   // Clear all data
@@ -183,10 +184,10 @@ function resetState() {
 /**
  * Update market prices (background ticker)
  */
-function updateMarketPrices() {
+function updateMarketPrices () {
   let pricesUpdated = false;
 
-  dataStore.marketData.forEach((quote, symbol) => {
+  dataStore.marketData.forEach((quote) => {
     // Random price change: ±0.5% from current price
     const currentPrice = parseFloat(quote.last.value);
     const change = gaussianRandom(0, 0.005); // 0.5% volatility
@@ -224,7 +225,7 @@ function updateMarketPrices() {
 /**
  * Auto-execute LIMIT and STOP orders when price conditions are met
  */
-function autoExecuteOrders() {
+function autoExecuteOrders () {
   const activeOrders = Array.from(dataStore.orders.values())
     .filter(o => o.status === 'ORDER_STATUS_NEW' || o.status === 'ORDER_STATUS_PARTIALLY_FILLED');
 
@@ -261,7 +262,7 @@ function autoExecuteOrders() {
 /**
  * Generate JWT token
  */
-function generateJwtToken() {
+function generateJwtToken () {
   const payload = {
     area: 'tt',
     created: Date.now().toString(),
@@ -276,7 +277,7 @@ function generateJwtToken() {
 /**
  * Verify authorization header
  */
-function verifyAuthHeader(authHeader) {
+function verifyAuthHeader (authHeader) {
   if (!authHeader || typeof authHeader !== 'string') {
     return false;
   }
@@ -289,7 +290,7 @@ function verifyAuthHeader(authHeader) {
 /**
  * Auth middleware
  */
-function authMiddleware(req, res, next) {
+function authMiddleware (req, res, next) {
   const authHeader = req.headers.authorization;
   if (!verifyAuthHeader(authHeader)) {
     return res.status(401).json({
@@ -304,10 +305,17 @@ function authMiddleware(req, res, next) {
 /**
  * Get current market price for symbol
  */
-function getCurrentMarketPrice(symbol) {
+function getCurrentMarketPrice (symbol) {
   const quote = dataStore.marketData.get(symbol);
   return quote ? parseFloat(quote.last.value) : 250;
 }
+
+const { LOG_ACCOUNT } = process.env;
+const logAccountId = (account_id) => {
+  if (LOG_ACCOUNT) {
+    console.log(chalk[account_id ? 'bgGreen' : 'bgRed'](`EMULATOR2: account_id ${account_id}`));
+  }
+};
 
 /**
  * Create Express application
@@ -423,6 +431,7 @@ app.post('/v1/sessions/details', (req, res) => {
 
 app.get('/v1/accounts/:account_id', authMiddleware, (req, res) => {
   const { account_id } = req.params;
+  logAccountId(req.params.account_id);
 
   recalculateAccountMetrics(account_id, dataStore);
 
@@ -440,6 +449,8 @@ app.get('/v1/accounts/:account_id', authMiddleware, (req, res) => {
 
 app.get('/v1/accounts/:account_id/trades', authMiddleware, (req, res) => {
   const { account_id } = req.params;
+  logAccountId(req.params.account_id);
+
   const { 'interval.start_time': startTime, 'interval.end_time': endTime } = req.query;
 
   let trades = Array.from(dataStore.trades.values())
@@ -459,6 +470,8 @@ app.get('/v1/accounts/:account_id/trades', authMiddleware, (req, res) => {
 
 app.get('/v1/accounts/:account_id/transactions', authMiddleware, (req, res) => {
   const { account_id } = req.params;
+  logAccountId(req.params.account_id);
+
   const { 'interval.start_time': startTime, 'interval.end_time': endTime } = req.query;
 
   let transactions = Array.from(dataStore.transactions.values())
@@ -480,6 +493,7 @@ app.get('/v1/accounts/:account_id/transactions', authMiddleware, (req, res) => {
 
 app.get('/v1/assets', authMiddleware, (req, res) => {
   const assets = INSTRUMENTS.map(inst => {
+    // eslint-disable-next-line no-unused-vars
     const { mic, startPrice, volatility, trend, sector, baseVolume, ...asset } = inst;
     return asset;
   }).slice(0, 1000);
@@ -517,12 +531,14 @@ app.get('/v1/assets/:symbol', authMiddleware, (req, res) => {
     });
   }
 
+  // eslint-disable-next-line no-unused-vars
   const { startPrice, volatility, trend, sector, baseVolume, ...asset } = instrument;
   res.json(asset);
 });
 
 app.get('/v1/assets/:symbol/params', authMiddleware, (req, res) => {
   const { account_id } = req.query;
+  logAccountId(req.query.account_id);
 
   res.json({
     account_id: account_id || DEFAULT_ACCOUNT_ID,
@@ -561,6 +577,7 @@ app.get('/v1/assets/:symbol/schedule', authMiddleware, (req, res) => {
 
 app.delete('/v1/accounts/:account_id/orders/:order_id', authMiddleware, (req, res) => {
   const { order_id } = req.params;
+  logAccountId(req.params.account_id);
 
   const order = dataStore.orders.get(order_id);
   if (!order) {
@@ -597,6 +614,7 @@ app.delete('/v1/accounts/:account_id/orders/:order_id', authMiddleware, (req, re
 
 app.get('/v1/accounts/:account_id/orders/:order_id', authMiddleware, (req, res) => {
   const { order_id } = req.params;
+  logAccountId(req.params.account_id);
 
   const order = dataStore.orders.get(order_id);
   if (!order) {
@@ -612,6 +630,7 @@ app.get('/v1/accounts/:account_id/orders/:order_id', authMiddleware, (req, res) 
 
 app.get('/v1/accounts/:account_id/orders', authMiddleware, (req, res) => {
   const { account_id } = req.params;
+  logAccountId(req.params.account_id);
   const { status } = req.query;
 
   let orders = Array.from(dataStore.orders.values())
@@ -628,6 +647,7 @@ app.get('/v1/accounts/:account_id/orders', authMiddleware, (req, res) => {
 
 app.post('/v1/accounts/:account_id/orders', authMiddleware, (req, res) => {
   const { account_id } = req.params;
+  logAccountId(req.params.account_id);
   const orderData = req.body;
 
   const orderId = `${dataStore.orderIdCounter++}`;
@@ -777,7 +797,7 @@ app.use((req, res) => {
 });
 
 // Error handler
-app.use((err, req, res, next) => {
+app.use((err, req, res, _next) => {
   console.error('Error:', err);
   res.status(500).json({
     code: 13,
@@ -789,7 +809,7 @@ app.use((err, req, res, next) => {
 /**
  * Check if port is available
  */
-function checkPort(port) {
+function checkPort (port) {
   return new Promise((resolve, reject) => {
     const tester = net.createServer()
       .once('error', (err) => {
