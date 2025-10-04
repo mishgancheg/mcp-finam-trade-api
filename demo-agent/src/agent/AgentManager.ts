@@ -209,16 +209,6 @@ export class AgentManager {
             const result = await this.mcpConnector.callTool(toolUse.name, toolUse.input);
             toolCall.result = result;
 
-            // Extract endpoints from MCP response if SHOW_MCP_ENDPOINTS is enabled
-            if (result && result.content && Array.isArray(result.content)) {
-              for (const contentItem of result.content) {
-                if (contentItem.endpoints && Array.isArray(contentItem.endpoints)) {
-                  toolCall.endpoints = contentItem.endpoints;
-                  break;
-                }
-              }
-            }
-
             logger.info(`Tool ${toolUse.name} completed successfully`);
 
             // Add tool result to messages

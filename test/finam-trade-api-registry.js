@@ -1344,14 +1344,6 @@ const RAW_ENDPOINTS = [
   },
 ];
 
-const xxx = RAW_ENDPOINTS.map((e) => {
-  return {
-    mcpTool: e.name,
-    endpoint: e.endpoint,
-  };
-})
-
-console.log(xxx);
 /**
  * Transformed endpoint registry with getters for computed properties
  */
@@ -1410,3 +1402,16 @@ export function findEndpointById (fullId) {
 export function findEndpointsByGroup (groupName) {
   return FINAM_API_REGISTRY.filter(endpoint => endpoint.group === groupName);
 }
+
+// VVR
+const xxx = RAW_ENDPOINTS.map((e) => {
+  return {
+    mcpTool: e.name,
+    method: e.method,
+    endpoint: e.endpoint,
+    description: e.description,
+    pathParams: e.pathParams,
+    queryParams: e.queryParams,
+  };
+})
+// console.log(xxx);

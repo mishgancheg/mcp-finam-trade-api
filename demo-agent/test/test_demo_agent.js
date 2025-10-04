@@ -1,3 +1,5 @@
+// noinspection UnnecessaryLocalVariableJS
+
 /**
  * Test demo-agent with data from test.csv
  *
@@ -10,11 +12,13 @@
  * 6. Saves results to _test-data/<timestamp>_result.json and _test-data/<timestamp>_submission.csv
  */
 
+import '../dist/init-config.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { parse } from 'csv-parse/sync';
 import { stringify } from 'csv-stringify/sync';
+import { getToolEndpoints } from './tool-endpoints.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -24,6 +28,10 @@ const BATCH_SIZE = 50;
 const BATCH_DELAY_MS = 500;
 const CSV_PATH = path.join(__dirname, 'data', 'test.csv');
 const OUTPUT_DIR = path.join(__dirname, '..', '_test-data');
+
+// Test credentials from environment variables
+const TEST_ACCOUNT_ID = process.env.TEST_ACCOUNT_ID || '';
+const TEST_API_SECRET_TOKEN = process.env.TEST_API_SECRET_TOKEN || '';
 
 /**
  * Load questions from CSV file
@@ -64,13 +72,20 @@ async function createSession(userId) {
  * Send message to demo-agent
  * @param {string} sessionId
  * @param {string} message
+ * @param {string} accountId - Account ID for MCP credentials
+ * @param {string} secretKey - Secret token for MCP credentials
  * @returns {Promise<{sessionId: string, message: string, toolCalls: Array}>}
  */
-async function sendMessage(sessionId, message) {
+async function sendMessage(sessionId, message, accountId, secretKey) {
   const response = await fetch(`${API_BASE}/api/chat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ sessionId, message })
+    body: JSON.stringify({
+      sessionId,
+      message,
+      accountId,
+      secretKey
+    })
   });
 
   if (!response.ok) {
@@ -81,41 +96,60 @@ async function sendMessage(sessionId, message) {
 }
 
 /**
- * Extract endpoints from MCP response
- * Expected format in toolCalls result:
- * {
- *   "jsonrpc": "2.0",
- *   "id": "tool-GetOrders",
- *   "result": {
- *     "content": [
- *       {
- *         "endpoints": ["GET;/v1/sessions", "POST;/v1/accounts/4566789/orders"],
- *         "type": "text",
- *         "text": "📝"
- *       }
- *     ]
- *   }
- * }
- *
- * @param {Array} toolCalls
+ * Replace placeholders in endpoint with actual values from params
+ * @param {string} endpoint - Endpoint like "GET;/v1/accounts/{account_id}/orders"
+ * @param {Object} params - Parameters object
+ * @param {string} accountId - Account ID from environment
+ * @returns {string} - Endpoint with replaced placeholders
+ */
+function replaceEndpointPlaceholders(endpoint, params, accountId) {
+  let result = endpoint;
+
+  // Replace {account_id} with accountId from environment
+  if (accountId) {
+    result = result.replace(/{account_id}/g, accountId);
+  }
+
+  // Replace {symbol} with symbol from params
+  if (params && params.symbol) {
+    result = result.replace(/{symbol}/g, params.symbol);
+  }
+
+  // Replace {order_id} with orderId from params
+  if (params && params.orderId) {
+    result = result.replace(/{order_id}/g, params.orderId);
+  }
+
+  return result;
+}
+
+/**
+ * Extract endpoints from toolCalls array
+ * @param {Array} toolCalls - Array of tool call objects from response
+ * @param {string} accountId - Account ID from environment
  * @returns {Array<string>} - Array of endpoint strings like "GET;/v1/sessions"
  */
-function extractEndpoints(toolCalls) {
+function extractEndpoints(toolCalls, accountId) {
   if (!toolCalls || !Array.isArray(toolCalls)) {
     return [];
   }
 
+  const allEndpoints = [];
+
   for (const toolCall of toolCalls) {
-    if (toolCall.result && toolCall.result.content) {
-      for (const contentItem of toolCall.result.content) {
-        if (contentItem.endpoints && Array.isArray(contentItem.endpoints)) {
-          return contentItem.endpoints;
-        }
-      }
+    const toolName = toolCall.name;
+    const params = toolCall.params || {};
+
+    const endpoints = getToolEndpoints(toolName);
+
+    // Replace placeholders in each endpoint
+    for (const endpoint of endpoints) {
+      const resolvedEndpoint = replaceEndpointPlaceholders(endpoint, params, accountId);
+      allEndpoints.push([toolName, resolvedEndpoint]);
     }
   }
 
-  return [];
+  return allEndpoints;
 }
 
 /**
@@ -124,7 +158,7 @@ function extractEndpoints(toolCalls) {
  * @param {string} sessionId
  * @param {number} batchIndex
  * @param {number} startIndex - Starting index in the full question list
- * @returns {Promise<Array<{uid: string, type: string, endpoints: Array<string>}>>}
+ * @returns {Promise<Array<{uid: string, type: string, endpointsAndNames: Array<string>}>>}
  */
 async function processBatch(questions, sessionId, batchIndex, startIndex) {
   const results = [];
@@ -140,25 +174,30 @@ async function processBatch(questions, sessionId, batchIndex, startIndex) {
       console.log(`\n  📤 [${questionNumber}] Sending: "${question.substring(0, 60)}${question.length > 60 ? '...' : ''}" (${uid})`);
       const requestTime = Date.now();
 
-      const response = await sendMessage(sessionId, question);
+      const response = await sendMessage(sessionId, question, TEST_ACCOUNT_ID, TEST_API_SECRET_TOKEN);
 
       const responseTime = Date.now() - requestTime;
 
-      // Extract endpoints from response
-      const endpoints = extractEndpoints(response.toolCalls);
+      const endpointsAndNames = extractEndpoints(response.toolCalls, TEST_ACCOUNT_ID);
 
       // Determine type (for now, we'll extract it from the first endpoint's method)
-      const type = endpoints.length > 0
-        ? endpoints[0].split(';')[0]
+      const type = endpointsAndNames.length > 0
+        ? endpointsAndNames[0][1].split(';')[0]
         : 'UNKNOWN';
 
       results.push({
         uid,
         type,
-        endpoints
+        question,
+        endpointsAndNames
       });
 
-      console.log(`  📥 [${questionNumber}] Response received (${responseTime}ms): ${endpoints.length} endpoint${endpoints.length !== 1 ? 's' : ''} - ${endpoints.join(', ')}`);
+      console.log(`  📥 [${questionNumber}] Response received (${responseTime}ms): ${
+        endpointsAndNames.length} endpoint${endpointsAndNames.length !== 1 ? 's' : ''} - ${
+        endpointsAndNames.map(([n, e]) => {
+          return `${n}: ${e}`
+        }).join(', ')
+      }`);
 
       // Delay between requests in the same batch
       if (i < questions.length - 1) {
@@ -169,7 +208,7 @@ async function processBatch(questions, sessionId, batchIndex, startIndex) {
       results.push({
         uid,
         type: 'ERROR',
-        endpoints: []
+        endpointsAndNames: []
       });
     }
   }
@@ -198,8 +237,8 @@ function saveResultsJSON(results, timestamp) {
 function saveSubmissionCSV(results, timestamp) {
   const csvRecords = results.map(item => {
     // Take first endpoint or empty string
-    const firstEndpoint = item.endpoints && item.endpoints.length > 0
-      ? item.endpoints[0]
+    const firstEndpoint = item.endpointsAndNames?.length
+      ? item.endpointsAndNames[0][1]
       : ';';
 
     // Split into method and path
@@ -228,6 +267,11 @@ function saveSubmissionCSV(results, timestamp) {
  */
 async function runTest() {
   console.log('🧪 Starting demo-agent test...\n');
+
+  // Log credentials
+  console.log('🔐 Credentials:');
+  console.log(`   TEST_ACCOUNT_ID: ${TEST_ACCOUNT_ID ? '***' + TEST_ACCOUNT_ID.slice(-4) : 'NOT SET'}`);
+  console.log(`   TEST_API_SECRET_TOKEN: ${TEST_API_SECRET_TOKEN ? '***' + TEST_API_SECRET_TOKEN.slice(-4) : 'NOT SET'}`);
 
   // Ensure output directory exists
   if (!fs.existsSync(OUTPUT_DIR)) {

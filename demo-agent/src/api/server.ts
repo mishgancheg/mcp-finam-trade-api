@@ -6,8 +6,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { AgentManager } from '../agent/AgentManager.js';
 import { OrdersService } from '../agent/services/orders.service.js';
-
-dotenv.config();
+import '../init-config.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

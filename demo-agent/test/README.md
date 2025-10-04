@@ -32,8 +32,8 @@ SHOW_MCP_ENDPOINTS=true npm run mcp:http
 # Terminal 2: Start demo-agent
 cd demo-agent && npm start
 
-# Terminal 3: Run test
-node demo-agent/test/test_demo_agent.js
+# Terminal 3: Run test with credentials
+TEST_ACCOUNT_ID=your_account_id TEST_API_SECRET_TOKEN=your_token node demo-agent/test/test_demo_agent.js
 ```
 
 **Пример результата:**
@@ -83,7 +83,8 @@ node demo-agent/test/test-concurrent.js
 | **Данные** | Из CSV файла (реальные вопросы) | Хардкод ("Покажи мой аккаунт") |
 | **Сессии** | Одна сессия | 3 сессии для разных пользователей |
 | **Запросы** | Последовательные батчи с задержкой | Параллельные (Promise.all) |
-| **accountId** | Не используется (опционально) | Обязательно (111111, 222222, 333333) |
+| **accountId** | Из переменной окружения TEST_ACCOUNT_ID | Обязательно (111111, 222222, 333333) |
+| **secretKey** | Из переменной окружения TEST_API_SECRET_TOKEN | Не передается |
 | **Результат** | JSON + CSV с endpoints | Консольный вывод с предупреждениями |
 | **Что тестирует** | Извлечение endpoints из MCP | Race conditions и изоляцию сессий |
 
@@ -148,9 +149,15 @@ uid;type;request
 # Base URL для demo-agent API (опционально)
 DEMO_API_BASE=http://localhost:3002
 
+# Credentials для test_demo_agent.js (обязательно для вызова MCP tools)
+TEST_ACCOUNT_ID=your_account_id
+TEST_API_SECRET_TOKEN=your_secret_token
+
 # MCP Server должен быть запущен с включенными endpoints
 SHOW_MCP_ENDPOINTS=true
 ```
+
+**Примечание:** `TEST_ACCOUNT_ID` и `TEST_API_SECRET_TOKEN` передаются в каждый запрос к `/api/chat` для аутентификации в MCP сервере.
 
 ---
 

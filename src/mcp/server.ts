@@ -70,13 +70,13 @@ function extractCredentials (headers?: Record<string, string>): IHeaderCreds | n
   const authHeader = headers.authorization || headers.Authorization;
   const accountIdHeader = headers['x-finam-account-id'] || headers['X-Finam-Account-Id'];
 
-  if (!authHeader || !accountIdHeader) {
+  if (!authHeader) {
     return null;
   }
-
+  const secret_token = authHeader.replace(/^Bearer\s+/i, '');
   return {
-    secret_token: authHeader.replace(/^Bearer\s+/i, ''),
-    account_id: accountIdHeader
+    secret_token,
+    account_id: accountIdHeader || ''
   };
 }
 
