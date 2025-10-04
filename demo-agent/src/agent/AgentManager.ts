@@ -9,13 +9,13 @@ const logger = winston.createLogger({
   level: 'info',
   format: winston.format.combine(
     winston.format.timestamp(),
-    winston.format.json()
+    winston.format.json(),
   ),
   transports: [
     new winston.transports.Console({
-      format: winston.format.simple()
-    })
-  ]
+      format: winston.format.simple(),
+    }),
+  ],
 });
 
 export class AgentManager {
@@ -28,7 +28,7 @@ export class AgentManager {
   private timeout: number;
   private model: string;
 
-  constructor() {
+  constructor () {
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
       throw new Error('ANTHROPIC_API_KEY environment variable is required');
@@ -42,18 +42,38 @@ export class AgentManager {
     this.timeout = parseInt(process.env.AGENT_TIMEOUT || '30000');
     this.model = process.env.CLAUDE_MODEL || 'claude-sonnet-4-5-20250929';
 
-    this.systemPrompt = `Вы - AI-ассистент для работы с торговой платформой FINAM через TRADE API.
+    this.systemPrompt = `Вы - AI-ассистент для биржевой торговли через FINAM Trade API.
 
-Ваши возможности:
-- Получение информации о портфеле и позициях
-- Анализ рынка и инструментов
-- Размещение торговых заказов
-- Получение исторических данных
-- Расчет показателей
+Доступные интенты (типы запросов):
+- portfolio.view - текущий портфель (таблица позиций)
+- portfolio.analyze - глубокий анализ с графиками (equity curve + бенчмарк, Sunburst)
+- portfolio.rebalance - симуляция ребалансировки портфеля
+- market.instrument_info - детальная информация об инструменте (графики, стакан)
+- market.scan - поиск инструментов по критериям (таблица с sparklines)
+- backtest.run - бэктест стратегии (equity curve с markers сделок, метрики)
+- order.place - размещение заявки (ТРЕБУЕТ ПОДТВЕРЖДЕНИЯ!)
+
+Для запросов с визуализацией возвращайте RenderSpec JSON:
+{
+  "intent": "portfolio.analyze",
+  "renderSpec": {
+    "blocks": [
+      { "type": "summary", "bullets": [...] },
+      { "type": "chart", "engine": "echarts", "spec": {...} }
+    ]
+  }
+}
+
+Для критических операций (order.place) обязательно:
+{
+  "intent": "order.place",
+  "params": {...},
+  "requiresConfirm": true
+}
 
 При работе:
 1. Всегда используйте доступные инструменты для получения актуальных данных
-2. Перед размещением торговых заказов уточняйте детали у пользователя
+2. Перед размещением торговых заказов ОБЯЗАТЕЛЬНО запрашивайте подтверждение
 3. Объясняйте свои действия понятным языком
 4. Если информации недостаточно - задавайте уточняющие вопросы
 
@@ -63,7 +83,7 @@ export class AgentManager {
   /**
    * Initialize agent and connect to MCP server
    */
-  async initialize(mcpServerUrl: string): Promise<void> {
+  async initialize (mcpServerUrl: string): Promise<void> {
     await this.mcpConnector.connect(mcpServerUrl);
     this.tools = await this.mcpConnector.listTools();
     logger.info(`Connected to MCP server, loaded ${this.tools.length} tools`);
@@ -72,7 +92,7 @@ export class AgentManager {
   /**
    * Create a new session
    */
-  createSession(userId: string): Session {
+  createSession (userId: string): Session {
     const session = new Session(userId);
     this.sessions.set(session.id, session);
     logger.info(`Created session ${session.id} for user ${userId}`);
@@ -82,14 +102,14 @@ export class AgentManager {
   /**
    * Get existing session
    */
-  getSession(sessionId: string): Session | null {
+  getSession (sessionId: string): Session | null {
     return this.sessions.get(sessionId) || null;
   }
 
   /**
    * Delete session
    */
-  deleteSession(sessionId: string): boolean {
+  deleteSession (sessionId: string): boolean {
     const deleted = this.sessions.delete(sessionId);
     if (deleted) {
       logger.info(`Deleted session ${sessionId}`);
@@ -100,7 +120,7 @@ export class AgentManager {
   /**
    * Process user message with agent loop
    */
-  async processMessage(sessionId: string, message: string): Promise<AgentResponse> {
+  async processMessage (sessionId: string, message: string): Promise<AgentResponse> {
     const session = this.getSession(sessionId);
     if (!session) {
       throw new Error(`Session ${sessionId} not found`);
@@ -111,14 +131,14 @@ export class AgentManager {
     // Build messages for Claude
     const messages: Anthropic.MessageParam[] = session.getHistory().map(msg => ({
       role: msg.role,
-      content: msg.content
+      content: msg.content,
     }));
 
     // Convert MCP tools to Claude tool format
     const claudeTools: Anthropic.Tool[] = this.tools.map(tool => ({
       name: tool.name,
       description: tool.description || '',
-      input_schema: tool.inputSchema
+      input_schema: tool.inputSchema,
     }));
 
     let turn = 0;
@@ -134,7 +154,7 @@ export class AgentManager {
         max_tokens: 4096,
         system: this.systemPrompt,
         messages,
-        tools: claudeTools
+        tools: claudeTools,
       });
 
       // Check stop reason
@@ -150,14 +170,14 @@ export class AgentManager {
 
         return {
           message: textContent,
-          toolCalls: toolCallsInSession
+          toolCalls: toolCallsInSession,
         };
       }
 
       if (response.stop_reason === 'tool_use') {
         // Process tool calls
         const toolUseBlocks = response.content.filter(
-          (block): block is Anthropic.ToolUseBlock => block.type === 'tool_use'
+          (block): block is Anthropic.ToolUseBlock => block.type === 'tool_use',
         );
 
         // Execute all tool calls
@@ -169,7 +189,7 @@ export class AgentManager {
           const toolCall: ToolCall = {
             name: toolUse.name,
             params: toolUse.input,
-            timestamp: new Date()
+            timestamp: new Date(),
           };
 
           try {
@@ -184,9 +204,9 @@ export class AgentManager {
                 {
                   type: 'tool_result',
                   tool_use_id: toolUse.id,
-                  content: JSON.stringify(result)
-                }
-              ]
+                  content: JSON.stringify(result),
+                },
+              ],
             });
           } catch (error) {
             const errorMsg = error instanceof Error ? error.message : String(error);
@@ -201,9 +221,9 @@ export class AgentManager {
                   type: 'tool_result',
                   tool_use_id: toolUse.id,
                   content: JSON.stringify({ error: errorMsg }),
-                  is_error: true
-                }
-              ]
+                  is_error: true,
+                },
+              ],
             });
           }
 
@@ -214,7 +234,7 @@ export class AgentManager {
         // Add assistant message with tool uses
         messages.push({
           role: 'assistant',
-          content: response.content
+          content: response.content,
         });
 
         // Add tool results
@@ -228,14 +248,14 @@ export class AgentManager {
 
     return {
       message: finalMessage,
-      toolCalls: toolCallsInSession
+      toolCalls: toolCallsInSession,
     };
   }
 
   /**
    * Process message with streaming
    */
-  async *processMessageStream(sessionId: string, message: string): AsyncGenerator<StreamChunk> {
+  async* processMessageStream (sessionId: string, message: string): AsyncGenerator<StreamChunk> {
     const session = this.getSession(sessionId);
     if (!session) {
       throw new Error(`Session ${sessionId} not found`);
@@ -245,13 +265,13 @@ export class AgentManager {
 
     const messages: Anthropic.MessageParam[] = session.getHistory().map(msg => ({
       role: msg.role,
-      content: msg.content
+      content: msg.content,
     }));
 
     const claudeTools: Anthropic.Tool[] = this.tools.map(tool => ({
       name: tool.name,
       description: tool.description || '',
-      input_schema: tool.inputSchema
+      input_schema: tool.inputSchema,
     }));
 
     let turn = 0;
@@ -265,7 +285,7 @@ export class AgentManager {
         max_tokens: 4096,
         system: this.systemPrompt,
         messages,
-        tools: claudeTools
+        tools: claudeTools,
       });
 
       let currentText = '';
@@ -277,7 +297,7 @@ export class AgentManager {
             currentText += event.delta.text;
             yield {
               type: 'text',
-              content: event.delta.text
+              content: event.delta.text,
             };
           }
         }
@@ -299,14 +319,14 @@ export class AgentManager {
 
         yield {
           type: 'done',
-          content: ''
+          content: '',
         };
         break;
       }
 
       if (finalMessage.stop_reason === 'tool_use') {
         const toolUseBlocks = finalMessage.content.filter(
-          (block): block is Anthropic.ToolUseBlock => block.type === 'tool_use'
+          (block): block is Anthropic.ToolUseBlock => block.type === 'tool_use',
         );
 
         const toolResults: Anthropic.MessageParam[] = [];
@@ -315,12 +335,12 @@ export class AgentManager {
           const toolCall: ToolCall = {
             name: toolUse.name,
             params: toolUse.input,
-            timestamp: new Date()
+            timestamp: new Date(),
           };
 
           yield {
             type: 'tool_call',
-            content: toolCall
+            content: toolCall,
           };
 
           try {
@@ -333,9 +353,9 @@ export class AgentManager {
                 {
                   type: 'tool_result',
                   tool_use_id: toolUse.id,
-                  content: JSON.stringify(result)
-                }
-              ]
+                  content: JSON.stringify(result),
+                },
+              ],
             });
           } catch (error) {
             const errorMsg = error instanceof Error ? error.message : String(error);
@@ -348,9 +368,9 @@ export class AgentManager {
                   type: 'tool_result',
                   tool_use_id: toolUse.id,
                   content: JSON.stringify({ error: errorMsg }),
-                  is_error: true
-                }
-              ]
+                  is_error: true,
+                },
+              ],
             });
           }
 
@@ -359,7 +379,7 @@ export class AgentManager {
 
         messages.push({
           role: 'assistant',
-          content: finalMessage.content
+          content: finalMessage.content,
         });
 
         messages.push(...toolResults);
@@ -370,7 +390,7 @@ export class AgentManager {
   /**
    * Disconnect from MCP server
    */
-  async shutdown(): Promise<void> {
+  async shutdown (): Promise<void> {
     await this.mcpConnector.disconnect();
     logger.info('Agent manager shut down');
   }

@@ -10,18 +10,18 @@ export class MCPConnector {
    * Connect to MCP server using stdio transport
    * @param serverUrl - URL or command path for the MCP server
    */
-  async connect(serverUrl: string): Promise<void> {
+  async connect (serverUrl: string): Promise<void> {
     // Parse stdio:// URL format
     const command = serverUrl.replace('stdio://', '');
 
     this.transport = new StdioClientTransport({
       command: 'node',
-      args: [command]
+      args: [command],
     });
 
     this.client = new Client({
       name: 'finam-demo-agent',
-      version: '1.0.0'
+      version: '1.0.0',
     });
 
     await this.client.connect(this.transport);
@@ -30,7 +30,7 @@ export class MCPConnector {
   /**
    * Get list of available tools from MCP server
    */
-  async listTools(): Promise<Tool[]> {
+  async listTools (): Promise<Tool[]> {
     if (!this.client) {
       throw new Error('MCP client not connected');
     }
@@ -40,7 +40,7 @@ export class MCPConnector {
     return response.tools.map(tool => ({
       name: tool.name,
       description: tool.description,
-      inputSchema: tool.inputSchema
+      inputSchema: tool.inputSchema,
     }));
   }
 
@@ -49,14 +49,14 @@ export class MCPConnector {
    * @param name - Tool name
    * @param params - Tool parameters
    */
-  async callTool(name: string, params: any): Promise<any> {
+  async callTool (name: string, params: any): Promise<any> {
     if (!this.client) {
       throw new Error('MCP client not connected');
     }
 
     const result = await this.client.callTool({
       name,
-      arguments: params
+      arguments: params,
     });
 
     return result;
@@ -65,7 +65,7 @@ export class MCPConnector {
   /**
    * Disconnect from MCP server
    */
-  async disconnect(): Promise<void> {
+  async disconnect (): Promise<void> {
     if (this.client) {
       await this.client.close();
       this.client = null;

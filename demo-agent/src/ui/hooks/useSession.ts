@@ -24,6 +24,6 @@ export const useSession = () => {
     sessionId,
     userId,
     createSession,
-    clearSession
+    clearSession,
   };
 };

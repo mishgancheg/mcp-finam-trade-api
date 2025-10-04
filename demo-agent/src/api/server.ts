@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import winston from 'winston';
 import { AgentManager } from '../agent/AgentManager.js';
+import { OrdersService } from '../agent/services/orders.service.js';
 
 dotenv.config();
 
@@ -10,13 +11,13 @@ const logger = winston.createLogger({
   level: 'info',
   format: winston.format.combine(
     winston.format.timestamp(),
-    winston.format.json()
+    winston.format.json(),
   ),
   transports: [
     new winston.transports.Console({
-      format: winston.format.simple()
-    })
-  ]
+      format: winston.format.simple(),
+    }),
+  ],
 });
 
 const app = express();
@@ -33,10 +34,11 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
-// Initialize agent manager
+// Initialize agent manager and services
 let agentManager: AgentManager | null = null;
+const ordersService = new OrdersService();
 
-async function initializeAgent() {
+async function initializeAgent () {
   try {
     const mcpServerUrl = process.env.MCP_SERVER_URL;
     if (!mcpServerUrl) {
@@ -57,7 +59,7 @@ app.get('/api/health', (req: Request, res: Response) => {
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
-    agentReady: agentManager !== null
+    agentReady: agentManager !== null,
   });
 });
 
@@ -74,12 +76,12 @@ app.post('/api/sessions', (req: Request, res: Response) => {
     res.json({
       sessionId: session.id,
       userId: session.userId,
-      createdAt: session.createdAt
+      createdAt: session.createdAt,
     });
   } catch (error) {
     logger.error('Error creating session:', error);
     res.status(500).json({
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : 'Unknown error',
     });
   }
 });
@@ -101,12 +103,12 @@ app.get('/api/sessions/:sessionId/history', (req: Request, res: Response) => {
     res.json({
       sessionId: session.id,
       messages: session.getHistory(),
-      toolCalls: session.getToolCallHistory()
+      toolCalls: session.getToolCallHistory(),
     });
   } catch (error) {
     logger.error('Error getting session history:', error);
     res.status(500).json({
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : 'Unknown error',
     });
   }
 });
@@ -129,7 +131,7 @@ app.delete('/api/sessions/:sessionId', (req: Request, res: Response) => {
   } catch (error) {
     logger.error('Error deleting session:', error);
     res.status(500).json({
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : 'Unknown error',
     });
   }
 });
@@ -158,12 +160,12 @@ app.post('/api/chat', async (req: Request, res: Response) => {
       sessionId,
       message: response.message,
       toolCalls: response.toolCalls,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
     logger.error('Error processing message:', error);
     res.status(500).json({
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : 'Unknown error',
     });
   }
 });
@@ -210,7 +212,7 @@ app.get('/api/chat/stream', async (req: Request, res: Response) => {
     logger.error('Error processing streaming message:', error);
     const errorData = JSON.stringify({
       type: 'error',
-      content: error instanceof Error ? error.message : 'Unknown error'
+      content: error instanceof Error ? error.message : 'Unknown error',
     });
     res.write(`data: ${errorData}\n\n`);
     res.end();
@@ -226,8 +228,65 @@ app.get('/api/tools', (req: Request, res: Response) => {
   // Access tools through a public method (we'll need to add this)
   res.json({
     message: 'Tools are loaded in agent manager',
-    note: 'Tool list available after agent initialization'
+    note: 'Tool list available after agent initialization',
   });
+});
+
+// Order preview endpoint
+app.post('/api/orders/preview', async (req: Request, res: Response) => {
+  try {
+    const { symbol, side, quantity, type, price, currentPrice } = req.body;
+
+    if (!symbol || !side || !quantity || !type) {
+      return res.status(400).json({
+        error: 'Missing required fields: symbol, side, quantity, type',
+      });
+    }
+
+    const preview = await ordersService.generatePreview(
+      { symbol, side, quantity, type, price },
+      currentPrice,
+    );
+
+    res.json(preview);
+  } catch (error) {
+    logger.error('Error generating order preview:', error);
+    res.status(500).json({
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
+});
+
+// Order confirmation endpoint
+app.post('/api/orders/confirm', async (req: Request, res: Response) => {
+  try {
+    const { confirmToken } = req.body;
+
+    if (!confirmToken) {
+      return res.status(400).json({ error: 'confirmToken is required' });
+    }
+
+    const orderParams = ordersService.validateConfirmToken(confirmToken);
+
+    if (!orderParams) {
+      return res.status(400).json({
+        error: 'Invalid or expired confirmation token',
+      });
+    }
+
+    // Here you would call the actual MCP tool to place the order
+    // For now, just return success with the validated params
+    res.json({
+      success: true,
+      order: orderParams,
+      message: 'Order confirmed and will be placed',
+    });
+  } catch (error) {
+    logger.error('Error confirming order:', error);
+    res.status(500).json({
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
 });
 
 // Error handler
@@ -235,12 +294,12 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   logger.error('Unhandled error:', err);
   res.status(500).json({
     error: 'Internal server error',
-    message: err.message
+    message: err.message,
   });
 });
 
 // Start server
-async function start() {
+async function start () {
   await initializeAgent();
 
   app.listen(port, host, () => {

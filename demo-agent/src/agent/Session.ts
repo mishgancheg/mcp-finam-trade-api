@@ -8,7 +8,7 @@ export class Session {
   public createdAt: Date;
   public updatedAt: Date;
 
-  constructor(userId: string, sessionId?: string) {
+  constructor (userId: string, sessionId?: string) {
     this.id = sessionId || this.generateSessionId();
     this.userId = userId;
     this.messages = [];
@@ -20,11 +20,11 @@ export class Session {
   /**
    * Add a message to the session
    */
-  addMessage(role: 'user' | 'assistant', content: string): void {
+  addMessage (role: 'user' | 'assistant', content: string): void {
     this.messages.push({
       role,
       content,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
     this.updatedAt = new Date();
   }
@@ -32,7 +32,7 @@ export class Session {
   /**
    * Add a tool call to the session
    */
-  addToolCall(toolCall: ToolCall): void {
+  addToolCall (toolCall: ToolCall): void {
     this.toolCalls.push(toolCall);
     this.updatedAt = new Date();
   }
@@ -40,21 +40,21 @@ export class Session {
   /**
    * Get conversation history
    */
-  getHistory(): Message[] {
+  getHistory (): Message[] {
     return [...this.messages];
   }
 
   /**
    * Get tool call history
    */
-  getToolCallHistory(): ToolCall[] {
+  getToolCallHistory (): ToolCall[] {
     return [...this.toolCalls];
   }
 
   /**
    * Clear session history
    */
-  clear(): void {
+  clear (): void {
     this.messages = [];
     this.toolCalls = [];
     this.updatedAt = new Date();
@@ -63,28 +63,28 @@ export class Session {
   /**
    * Export session data
    */
-  toJSON(): SessionData {
+  toJSON (): SessionData {
     return {
       id: this.id,
       userId: this.userId,
       messages: this.messages,
       toolCalls: this.toolCalls,
       createdAt: this.createdAt,
-      updatedAt: this.updatedAt
+      updatedAt: this.updatedAt,
     };
   }
 
   /**
    * Generate unique session ID
    */
-  private generateSessionId(): string {
+  private generateSessionId (): string {
     return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
   /**
    * Restore session from data
    */
-  static fromJSON(data: SessionData): Session {
+  static fromJSON (data: SessionData): Session {
     const session = new Session(data.userId, data.id);
     session.messages = data.messages;
     session.toolCalls = data.toolCalls;

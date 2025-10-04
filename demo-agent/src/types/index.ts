@@ -35,3 +35,6 @@ export interface Tool {
   description?: string;
   inputSchema: any;
 }
+
+// Re-export RenderSpec types
+export * from './renderspec.js';

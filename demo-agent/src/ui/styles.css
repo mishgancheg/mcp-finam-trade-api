@@ -287,3 +287,316 @@ body {
 .message-bubble ul, .message-bubble ol {
   margin-left: 1.5rem;
 }
+
+/* RenderSpec Blocks */
+.render-spec {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 0.5rem 0;
+}
+
+/* Summary Block */
+.summary-block {
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #0088cc;
+}
+
+.summary-block h3 {
+  margin: 0 0 0.75rem 0;
+  color: #333;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.summary-bullets {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.summary-bullets li {
+  padding: 0.4rem 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.highlights {
+  margin-top: 0.75rem;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.highlights span {
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.highlights.positive span {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.highlights.negative span {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+/* Chart Block */
+.chart-block {
+  padding: 1rem;
+  background-color: white;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.chart-block h3 {
+  margin: 0 0 1rem 0;
+  color: #333;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+/* Table Block */
+.table-block {
+  padding: 1rem;
+  background-color: white;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  overflow-x: auto;
+}
+
+.table-block h3 {
+  margin: 0 0 1rem 0;
+  color: #333;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.table-block table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.table-block th {
+  background-color: #f8f9fa;
+  padding: 0.75rem;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #dee2e6;
+  cursor: pointer;
+  user-select: none;
+}
+
+.table-block th:hover {
+  background-color: #e9ecef;
+}
+
+.table-block td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.table-block tr:last-child td {
+  border-bottom: none;
+}
+
+.table-block tr:hover {
+  background-color: #f8f9fa;
+}
+
+/* Rebalance Block */
+.rebalance-block {
+  padding: 1rem;
+  background-color: white;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.rebalance-block h3 {
+  margin: 0 0 1rem 0;
+  color: #333;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.rebalance-block h4 {
+  margin: 1rem 0 0.5rem 0;
+  color: #555;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.allocations {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .allocations {
+    grid-template-columns: 1fr;
+  }
+}
+
+.allocation-section table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.allocation-section th {
+  background-color: #f8f9fa;
+  padding: 0.5rem;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.allocation-section td {
+  padding: 0.5rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.trades-section {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid #dee2e6;
+}
+
+.trades-section table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.trades-section th {
+  background-color: #f8f9fa;
+  padding: 0.5rem;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.trades-section td {
+  padding: 0.5rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+/* Order Preview Block */
+.order-preview-block {
+  padding: 1.5rem;
+  background-color: #fff3cd;
+  border-radius: 8px;
+  border: 2px solid #ffc107;
+}
+
+.order-preview-block h3 {
+  margin: 0 0 1rem 0;
+  color: #856404;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.order-details {
+  background-color: white;
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}
+
+.order-details div {
+  padding: 0.4rem 0;
+  font-size: 0.95rem;
+}
+
+.order-details strong {
+  display: inline-block;
+  min-width: 120px;
+  color: #555;
+}
+
+.warnings {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 6px;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.warnings div {
+  padding: 0.3rem 0;
+  color: #721c24;
+  font-size: 0.9rem;
+}
+
+.risk-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1rem 0;
+  font-size: 0.95rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.risk-checkbox input {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.confirm-button {
+  flex: 1;
+  padding: 0.75rem 1.5rem;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.confirm-button:hover:not(:disabled) {
+  background-color: #218838;
+}
+
+.confirm-button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.cancel-button {
+  padding: 0.75rem 1.5rem;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.cancel-button:hover {
+  background-color: #c82333;
+}

@@ -17,7 +17,7 @@ export const useChat = (sessionId: string) => {
     const userMessage: Message = {
       role: 'user',
       content: message,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
     setMessages(prev => [...prev, userMessage]);
 
@@ -28,7 +28,7 @@ export const useChat = (sessionId: string) => {
       const assistantMessage: Message = {
         role: 'assistant',
         content: response.message,
-        timestamp: new Date(response.timestamp)
+        timestamp: new Date(response.timestamp),
       };
       setMessages(prev => [...prev, assistantMessage]);
 
@@ -41,7 +41,7 @@ export const useChat = (sessionId: string) => {
       const errorMessage: Message = {
         role: 'assistant',
         content: 'Ошибка при обработке сообщения: ' + (error instanceof Error ? error.message : 'Неизвестная ошибка'),
-        timestamp: new Date()
+        timestamp: new Date(),
       };
       setMessages(prev => [...prev, errorMessage]);
     } finally {
@@ -59,7 +59,7 @@ export const useChat = (sessionId: string) => {
     const userMessage: Message = {
       role: 'user',
       content: message,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
     setMessages(prev => [...prev, userMessage]);
 
@@ -83,7 +83,7 @@ export const useChat = (sessionId: string) => {
                 newMessages.push({
                   role: 'assistant',
                   content: assistantMessageContent,
-                  timestamp: new Date()
+                  timestamp: new Date(),
                 });
               }
 
@@ -92,14 +92,14 @@ export const useChat = (sessionId: string) => {
           } else if (chunk.type === 'tool_call') {
             setToolCalls(prev => [...prev, chunk.content as ToolCall]);
           }
-        }
+        },
       );
     } catch (error) {
       console.error('Failed to send streaming message:', error);
       const errorMessage: Message = {
         role: 'assistant',
         content: 'Ошибка при обработке сообщения: ' + (error instanceof Error ? error.message : 'Неизвестная ошибка'),
-        timestamp: new Date()
+        timestamp: new Date(),
       };
       setMessages(prev => [...prev, errorMessage]);
     } finally {
@@ -112,6 +112,6 @@ export const useChat = (sessionId: string) => {
     toolCalls,
     isLoading,
     sendMessage,
-    sendMessageStream
+    sendMessageStream,
   };
 };

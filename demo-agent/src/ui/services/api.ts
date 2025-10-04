@@ -33,11 +33,11 @@ export const deleteSession = async (sessionId: string) => {
 
 export const sendMessage = async (
   sessionId: string,
-  message: string
+  message: string,
 ): Promise<SendMessageResponse> => {
   const response = await axios.post(`${API_BASE}/chat`, {
     sessionId,
-    message
+    message,
   });
   return response.data;
 };
@@ -45,7 +45,7 @@ export const sendMessage = async (
 export const sendMessageStream = async (
   sessionId: string,
   message: string,
-  onChunk: (chunk: StreamChunk) => void
+  onChunk: (chunk: StreamChunk) => void,
 ): Promise<void> => {
   const url = `${API_BASE}/chat/stream?sessionId=${encodeURIComponent(sessionId)}&message=${encodeURIComponent(message)}`;
 

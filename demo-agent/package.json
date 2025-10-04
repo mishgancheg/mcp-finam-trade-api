@@ -4,13 +4,15 @@
   "description": "Demo agent for FINAM TRADE API using Claude Agent SDK",
   "type": "module",
   "scripts": {
+    "start": "node dist/api/server.js",
+    "clean": "rimraf dist",
     "dev": "concurrently \"npm run dev:api\" \"npm run dev:ui\"",
     "dev:api": "tsx watch src/api/server.ts",
     "dev:ui": "vite",
     "build": "npm run build:api && npm run build:ui",
+    "cb": "npm run clean && npm run build",
     "build:api": "tsc -p tsconfig.api.json",
     "build:ui": "vite build",
-    "start": "node dist/api/server.js",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "lint:fix": "eslint --fix ."
@@ -18,25 +20,28 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.65.0",
     "@modelcontextprotocol/sdk": "^1.19.1",
-    "express": "^5.1.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
+    "echarts": "^6.0.0",
+    "express": "^5.1.0",
+    "lightweight-charts": "^5.0.9",
     "winston": "^3.18.3"
   },
   "devDependencies": {
-    "@types/node": "^24.6.2",
-    "@types/express": "^5.0.3",
     "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.6.2",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
-    "typescript": "^5.9.3",
-    "tsx": "^4.20.6",
-    "vite": "^7.1.8",
     "@vitejs/plugin-react": "^5.0.4",
+    "axios": "^1.12.2",
     "concurrently": "^9.2.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-markdown": "^10.1.0",
-    "axios": "^1.12.2"
+    "rimraf": "^6.0.1",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.8"
   }
 }
