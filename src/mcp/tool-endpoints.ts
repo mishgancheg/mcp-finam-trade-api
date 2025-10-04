@@ -7,35 +7,35 @@
 
 export const TOOL_ENDPOINTS: Record<string, string[]> = {
   // Group 1: Authentication
-  Auth: ['/v1/sessions'],
-  TokenDetails: ['/v1/sessions/details'],
+  Auth: ['POST;/v1/sessions'],
+  TokenDetails: ['POST;/v1/sessions/details'],
 
   // Group 2: Account
-  GetAccount: ['/v1/accounts/{account_id}'],
-  Trades: ['/v1/accounts/{account_id}/trades'],
-  Transactions: ['/v1/accounts/{account_id}/transactions'],
+  GetAccount: ['GET;/v1/accounts/{account_id}'],
+  Trades: ['GET;/v1/accounts/{account_id}/trades'],
+  Transactions: ['GET;/v1/accounts/{account_id}/transactions'],
 
   // Group 3: Assets
-  Assets: ['/v1/assets'],
-  Clock: ['/v1/assets/clock'],
-  Exchanges: ['/v1/exchanges'],
-  GetAsset: ['/v1/assets/{symbol}'],
-  GetAssetParams: ['/v1/assets/{symbol}/params'],
-  GetAssetDetails: ['/v1/assets/{symbol}', '/v1/assets/{symbol}/params'],
-  OptionsChain: ['/v1/assets/{symbol}/options'],
-  Schedule: ['/v1/assets/{symbol}/schedule'],
+  Assets: ['GET;/v1/assets'],
+  Clock: ['GET;/v1/assets/clock'],
+  Exchanges: ['GET;/v1/exchanges'],
+  GetAsset: ['GET;/v1/assets/{symbol}'],
+  GetAssetParams: ['GET;/v1/assets/{symbol}/params'],
+  GetAssetDetails: ['GET;/v1/assets/{symbol}', 'GET;/v1/assets/{symbol}/params'],
+  OptionsChain: ['GET;/v1/assets/{symbol}/options'],
+  Schedule: ['GET;/v1/assets/{symbol}/schedule'],
 
   // Group 4: Orders
-  GetOrders: ['/v1/accounts/{account_id}/orders'],
-  PlaceOrder: ['/v1/accounts/{account_id}/orders'],
-  GetOrder: ['/v1/accounts/{account_id}/orders/{order_id}'],
-  CancelOrder: ['/v1/accounts/{account_id}/orders/{order_id}'],
+  GetOrders: ['GET;/v1/accounts/{account_id}/orders'],
+  PlaceOrder: ['POST;/v1/accounts/{account_id}/orders'],
+  GetOrder: ['GET;/v1/accounts/{account_id}/orders/{order_id}'],
+  CancelOrder: ['DELETE;/v1/accounts/{account_id}/orders/{order_id}'],
 
   // Group 5: Market Data
-  Bars: ['/v1/instruments/{symbol}/bars'],
-  LastQuote: ['/v1/instruments/{symbol}/quotes/latest'],
-  LatestTrades: ['/v1/instruments/{symbol}/trades/latest'],
-  OrderBook: ['/v1/instruments/{symbol}/orderbook'],
+  Bars: ['GET;/v1/instruments/{symbol}/bars'],
+  LastQuote: ['GET;/v1/instruments/{symbol}/quotes/latest'],
+  LatestTrades: ['GET;/v1/instruments/{symbol}/trades/latest'],
+  OrderBook: ['GET;/v1/instruments/{symbol}/orderbook'],
 
   // Special: Instrument Search (client-side, no API endpoint)
   SearchInstruments: [],

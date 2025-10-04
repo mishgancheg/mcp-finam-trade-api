@@ -86,16 +86,12 @@ export class MCPConnector {
     const command = serverUrl.replace('stdio://', '');
 
     // Pass environment variables to MCP server subprocess
-    const env = {
-      ...process.env,
-      // Pass SHOW_MCP_ENDPOINTS from demo-agent env to MCP server
-      SHOW_MCP_ENDPOINTS: process.env.SHOW_MCP_ENDPOINTS || 'false'
-    };
+    const env = { ...process.env } as Record<string, string>;
 
     this.transport = new StdioClientTransport({
       command: 'node',
       args: [command],
-      env
+      env,
     });
 
     this.client = new Client({

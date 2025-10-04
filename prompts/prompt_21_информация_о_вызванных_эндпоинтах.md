@@ -33,3 +33,10 @@
 ```
 
 Прежде чем выполнять, напиши что будешь делать
+--------------------------------------------------------------------------------
+
+Посмотри в test/finam-trade-api-registry.js и добавь в src/mcp/tool-endpoints.ts
+в строки с эндпоинтами соответствующие методы.
+Например:
+Auth: ['/v1/sessions'] -> Auth: ['POST;/v1/sessions']
+TokenDetails: ['/v1/sessions/details'] -> TokenDetails: ['POST;/v1/sessions/details']

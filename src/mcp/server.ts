@@ -42,6 +42,7 @@ import { getToolEndpoints } from './tool-endpoints.js';
 const RETURN_AS = (process.env.RETURN_AS || 'json') as 'json' | 'string';
 const SHOW_MCP_ENDPOINTS = process.env.SHOW_MCP_ENDPOINTS === 'true';
 const HTTP_PORT = parseInt(process.env.MCP_HTTP_PORT || '3001', 10);
+const SKIP_CALL_MCP = process.env.SKIP_CALL_MCP === 'true';
 
 // Server credentials (for stdio transport)
 const API_SECRET_TOKEN: string | undefined = process.env.API_SECRET_TOKEN;
@@ -125,7 +126,7 @@ async function handleToolCall (request: CallToolRequest, headers?: Record<string
           `Tool ${name} not found`,
         );
       }
-      result = await apiFn(params);
+      result = SKIP_CALL_MCP ? { skippedByEnv: true } : await apiFn(params);
     }
 
     // Format response based on RETURN_AS setting
@@ -136,10 +137,7 @@ async function handleToolCall (request: CallToolRequest, headers?: Record<string
 
     // Add endpoints if SHOW_MCP_ENDPOINTS is enabled
     if (SHOW_MCP_ENDPOINTS) {
-      const endpoints = getToolEndpoints(name);
-      if (endpoints.length > 0) {
-        content.endpoints = endpoints;
-      }
+      content.endpoints = getToolEndpoints(name);
     }
 
     return {
