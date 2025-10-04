@@ -199,6 +199,12 @@ app.post('/api/chat', async (req: Request, res: Response) => {
     // Берём секретный ключ из тела запроса или из переменной окружения
     const effectiveSecretKey = String(secretKey ?? '').trim() || process.env.API_SECRET_TOKEN;
 
+    if (!effectiveSecretKey) {
+      return res.status(400).json({
+        error: 'Секретный ключ не задан ни в запросе, ни в переменных окружения (API_SECRET_TOKEN)',
+      });
+    }
+
     const response = await agentManager.processMessage(sessionId, contextualMessage, accountId, effectiveSecretKey);
 
     res.json({
@@ -251,6 +257,16 @@ app.get('/api/chat/stream', async (req: Request, res: Response) => {
 
     // Берём секретный ключ из query или из переменной окружения
     const effectiveSecretKey = String(secretKey ?? '').trim() || process.env.API_SECRET_TOKEN;
+
+    if (!effectiveSecretKey) {
+      const errorData = JSON.stringify({
+        type: 'error',
+        content: 'Секретный ключ не задан ни в запросе, ни в переменных окружения (API_SECRET_TOKEN)',
+      });
+      res.write(`data: ${errorData}\n\n`);
+      res.end();
+      return;
+    }
 
     // Process message with streaming
     for await (const chunk of agentManager.processMessageStream(sessionId, contextualMessage, accountId, effectiveSecretKey)) {
@@ -372,6 +388,14 @@ async function start () {
 
   app.listen(port, host, () => {
     logger.info(`API server running at http://${host}:${port}`);
+
+    // Log API_SECRET_TOKEN status
+    const hasSecretToken = !!process.env.API_SECRET_TOKEN;
+    if (hasSecretToken) {
+      logger.info('✅ API_SECRET_TOKEN: задан в переменных окружения');
+    } else {
+      logger.warn('⚠️  API_SECRET_TOKEN: не задан (потребуется указать в UI)');
+    }
   });
 }
 

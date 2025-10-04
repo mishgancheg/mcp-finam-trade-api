@@ -18,32 +18,10 @@ export const useChat = (sessionId: string, accountId: string, secretKey: string)
     };
     setMessages(prev => [...prev, userMessage]);
 
-    // Compute effective secret: input value or API_SECRET_TOKEN from env
-    const effectiveSecret = String(secretKey ?? '').trim() || (typeof process !== 'undefined' ? (process.env?.API_SECRET_TOKEN as unknown as string | undefined) : undefined);
+    // secretKey может быть пустым - сервер использует API_SECRET_TOKEN из env как резервный вариант
+    const effectiveSecret = String(secretKey ?? '').trim();
 
-    // Validate secretKey and accountId (show errors after user's message)
-    if (!effectiveSecret && !accountId) {
-      console.error('Секретный ключ и номер счета не заданы');
-      const errorMessage: Message = {
-        role: 'assistant',
-        content: 'Ошибка: не задан секретный ключ и номер счета',
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, errorMessage]);
-      return;
-    }
-
-    if (!effectiveSecret) {
-      console.error('Секретный ключ не задан');
-      const errorMessage: Message = {
-        role: 'assistant',
-        content: 'Ошибка: не задан секретный ключ',
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, errorMessage]);
-      return;
-    }
-
+    // Validate only accountId (secretKey will be validated on server side)
     if (!accountId) {
       console.error('Номер счета не задан');
       const errorMessage: Message = {
@@ -97,32 +75,10 @@ export const useChat = (sessionId: string, accountId: string, secretKey: string)
     };
     setMessages(prev => [...prev, userMessage]);
 
-    // Compute effective secret: input value or API_SECRET_TOKEN from env
-    const effectiveSecret = String(secretKey ?? '').trim() || (typeof process !== 'undefined' ? (process.env?.API_SECRET_TOKEN as unknown as string | undefined) : undefined);
+    // secretKey может быть пустым - сервер использует API_SECRET_TOKEN из env как резервный вариант
+    const effectiveSecret = String(secretKey ?? '').trim();
 
-    // Validate secretKey and accountId (show errors after user's message)
-    if (!effectiveSecret && !accountId) {
-      console.error('Секретный ключ и номер счета не заданы');
-      const errorMessage: Message = {
-        role: 'assistant',
-        content: 'Ошибка: не задан секретный ключ и номер счета',
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, errorMessage]);
-      return;
-    }
-
-    if (!effectiveSecret) {
-      console.error('Секретный ключ не задан');
-      const errorMessage: Message = {
-        role: 'assistant',
-        content: 'Ошибка: не задан секретный ключ',
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, errorMessage]);
-      return;
-    }
-
+    // Validate only accountId (secretKey will be validated on server side)
     if (!accountId) {
       console.error('Номер счета не задан');
       const errorMessage: Message = {
