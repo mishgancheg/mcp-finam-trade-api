@@ -15,6 +15,7 @@ yarn-error.log*
 .env
 _tmp
 /test/data/
+/test/emulator/_state/
 /dist/
 *.private.*
 *.local.*

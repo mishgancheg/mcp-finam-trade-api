@@ -1,6 +1,6 @@
 {
   "name": "mcp-finam-trade-api",
-  "version": "1.0.8",
+  "version": "1.0.11",
   "description": "Model Context Protocol (MCP) server for FINAM Trade API - provides trading tools for Claude AI and other MCP clients",
   "main": "dist/src/mcp/index.js",
   "type": "module",
@@ -24,7 +24,8 @@
     "typecheck": "tsc --noEmit",
     "test:api": "node test/tester-api.js",
     "test:endpoints": "node test/tester-endpoints.js",
-    "emulator": "node test/emulator/emulator.js",
+    "emulator:oms": "node test/emulator/emulator-oms.js",
+    "emulator:check": "node test/emulator/check-oms.js",
     "test:mcp:http": "node test/mcp/http.js",
     "test:mcp:sse": "node test/mcp/sse.js",
     "test:mcp:stdio": "node test/mcp/stdio.js",
@@ -66,7 +67,8 @@
     "got": "^14.4.9",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "ws": "^8.18.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
