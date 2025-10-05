@@ -1,12 +1,14 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="= MCP HTTP =" type="js.build_tools.npm">
+  <configuration default="false" name="= MCP HTTP: EMUL =" type="js.build_tools.npm">
     <package-json value="$PROJECT_DIR$/package.json" />
     <command value="run" />
     <scripts>
       <script value="mcp:http" />
     </scripts>
     <node-interpreter value="project" />
-    <envs />
+    <envs>
+      <env name="API_BASE_URL" value="http://localhost:3000" />
+    </envs>
     <method v="2" />
   </configuration>
 </component>
