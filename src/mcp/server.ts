@@ -282,18 +282,72 @@ export async function startHttpServer (port: number = HTTP_PORT) {
     });
   });
 
-  // Root endpoint with information
+  // Root endpoint with information (nicely centered)
   app.get('/', (_req, res) => {
-    res.send(`
-      <h1>FINAM Trade API MCP Server</h1>
-      <p>Server is running and supports multiple transports:</p>
+    res.type('html').send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FINAM Trade API MCP Server</title>
+  <style>
+    :root{
+      --bg:#0b1020;--card:#111936;--card2:#0f1730;--text:#e8ecff;--muted:#b7c0e6;--accent:#5b8cff;--accent2:#21c7a8;--border:#223055;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Inter, Arial, 'Noto Sans', 'Helvetica Neue', sans-serif;
+      background: radial-gradient(1200px 800px at 80% -10%, #1b2a66 0%, transparent 60%),
+                  radial-gradient(1000px 700px at -10% 120%, #0f604a 0%, transparent 60%),
+                  var(--bg);
+      color:var(--text);
+      display:grid; place-items:center;
+    }
+    .wrap{ max-width:900px; padding:32px;}
+    .card{
+      backdrop-filter:saturate(140%) blur(6px);
+      background:linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:16px; padding:32px; box-shadow:0 10px 30px rgba(0,0,0,0.35);
+    }
+    h1{font-size:28px; margin:0 0 12px; letter-spacing:0.4px}
+    p.subtitle{color:var(--muted); margin:0 0 20px}
+    ul{margin:18px 0; padding-left:22px}
+    li{margin:6px 0}
+    code{background:rgba(255,255,255,0.08); padding:2px 6px; border-radius:6px}
+    .grid{display:grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin-top:14px}
+    a.btn{display:inline-block; text-decoration:none; color:var(--text); background:linear-gradient(135deg, var(--accent), #7aa6ff); padding:10px 14px; border-radius:10px; font-weight:600; text-align:center}
+    a.btn.secondary{background:linear-gradient(135deg, var(--accent2), #2ee5c3)}
+    .footer{margin-top:22px; color:var(--muted); font-size:13px}
+    .links{margin-top:18px}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="card">
+      <h1><a style="color: var(--accent)" href="https://tradeapi.finam.ru/" target="_blank" rel="noopener">FINAM Trade API</a> MCP Server</h1>
+      <p class="subtitle">Server is running and supports multiple transports:</p>
       <ul>
         <li><strong>STDIO:</strong> Start with <code>node dist/mcp/index.js</code></li>
         <li><strong>SSE:</strong> Connect to <code>GET /sse</code> and send messages to <code>POST /message</code></li>
         <li><strong>Streamable HTTP:</strong> Connect to <code>POST /mcp/v1</code></li>
       </ul>
-      <p><a href="/health">Health Check</a></p>
-    `);
+      <div class="grid links">
+        <a class="btn" href="/health">Health Check</a>
+        <a class="btn" href="https://www.npmjs.com/package/mcp-finam-trade-api" target="_blank" rel="noopener">npm package</a>
+      </div>
+      <div class="footer">
+        Tip: Use headers to pass credentials for tools/resources.
+        <br/>
+        Headers:
+        <code>Authorization: Bearer &lt;secret_token&gt;</code>,
+        <code>X-Finam-Account-Id: &lt;account_id&gt;</code>
+      </div>
+    </section>
+  </main>
+</body>
+</html>`);
   });
 
   // SSE endpoint for MCP
