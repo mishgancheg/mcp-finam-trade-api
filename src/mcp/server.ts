@@ -343,6 +343,7 @@ export async function startHttpServer (port: number = HTTP_PORT) {
         Headers:
         <code>Authorization: Bearer &lt;secret_token&gt;</code>,
         <code>X-Finam-Account-Id: &lt;account_id&gt;</code>
+        <div style="margin-top:8px">API_BASE_URL: <code>${process.env.API_BASE_URL || ''}</code></div>
       </div>
     </section>
   </main>
