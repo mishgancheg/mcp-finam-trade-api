@@ -103,7 +103,16 @@ export const useChat = (sessionId: string, accountId: string, secretKey: string)
         effectiveSecret,
         (chunk) => {
           if (chunk.type === 'text') {
-            assistantMessageContent += chunk.content;
+            const textContent = typeof chunk.content === 'string' ? chunk.content : '';
+
+            // Check for clear marker (RenderSpec replacement)
+            if (textContent.startsWith('\x00CLEAR\x00')) {
+              // Clear previous content and use only RenderSpec
+              assistantMessageContent = textContent.replace('\x00CLEAR\x00', '');
+            } else {
+              assistantMessageContent += textContent;
+            }
+
             // Update the last message (assistant's response) in real-time
             setMessages(prev => {
               const newMessages = [...prev];

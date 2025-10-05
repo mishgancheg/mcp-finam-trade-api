@@ -1,7 +1,8 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { Session } from './Session.js';
 import { MCPConnector } from './MCPConnector.js';
-import type { AgentResponse, StreamChunk, Tool, ToolCall } from '../types/index.js';
+import { PortfolioService } from './services/portfolio.service.js';
+import type { AgentResponse, StreamChunk, Tool, ToolCall, RenderSpec } from '../types/index.js';
 import winston from 'winston';
 
 const logger = winston.createLogger({
@@ -23,6 +24,7 @@ const logger = winston.createLogger({
 export class AgentManager {
   private anthropic: Anthropic;
   private mcpConnector: MCPConnector;
+  private portfolioService: PortfolioService;
   private sessions: Map<string, Session>;
   private tools: Tool[];
   private systemPrompt: string;
@@ -38,6 +40,7 @@ export class AgentManager {
 
     this.anthropic = new Anthropic({ apiKey });
     this.mcpConnector = new MCPConnector();
+    this.portfolioService = new PortfolioService();
     this.sessions = new Map();
     this.tools = [];
     this.maxTurns = parseInt(process.env.AGENT_MAX_TURNS || '10');
@@ -120,6 +123,64 @@ export class AgentManager {
   }
 
   /**
+   * Detect user intent from message
+   */
+  private detectIntent(userMessage: string): string | null {
+    const msg = userMessage.toLowerCase();
+
+    // Portfolio intents
+    if (msg.includes('портфел') || msg.includes('позици')) {
+      if (msg.includes('анализ') || msg.includes('график') || msg.includes('визуализ')) {
+        return 'portfolio.analyze';
+      }
+      return 'portfolio.view';
+    }
+
+    return null;
+  }
+
+  /**
+   * Generate RenderSpec from tool results
+   */
+  private async generateRenderSpec(
+    intent: string,
+    toolCalls: ToolCall[],
+    userMessage: string
+  ): Promise<RenderSpec | null> {
+    try {
+      // Find GetAccount tool call
+      const accountCall = toolCalls.find(tc => tc.name === 'GetAccount');
+      if (!accountCall || !accountCall.result || accountCall.result.error) {
+        return null;
+      }
+
+      const account = accountCall.result;
+
+      if (intent === 'portfolio.view') {
+        // Basic portfolio view
+        return await this.portfolioService.analyze(account);
+      }
+
+      if (intent === 'portfolio.analyze') {
+        // Deep analysis - get trades if available
+        const tradesCall = toolCalls.find(tc => tc.name === 'Trades');
+        const trades = tradesCall?.result?.trades || [];
+
+        // Get benchmark bars if available
+        const barsCall = toolCalls.find(tc => tc.name === 'Bars');
+        const benchmarkBars = barsCall?.result?.bars || [];
+
+        return await this.portfolioService.analyzeDeep(account, trades, benchmarkBars);
+      }
+
+      return null;
+    } catch (error) {
+      logger.error('Error generating RenderSpec:', error);
+      return null;
+    }
+  }
+
+  /**
    * Process user message with agent loop
    */
   async processMessage (sessionId: string, message: string, accountId?: string, secretKey?: string): Promise<AgentResponse> {
@@ -180,6 +241,22 @@ export class AgentManager {
 
         session.addMessage('assistant', textContent);
         continueLoop = false;
+
+        // Try to generate RenderSpec if we have tool results
+        const intent = this.detectIntent(message);
+        if (intent && toolCallsInSession.length > 0) {
+          const renderSpec = await this.generateRenderSpec(intent, toolCallsInSession, message);
+          if (renderSpec) {
+            // Return RenderSpec as JSON
+            const renderSpecJson = JSON.stringify({ renderSpec }, null, 2);
+            logger.info(`Generated RenderSpec for intent: ${intent}`);
+
+            return {
+              message: renderSpecJson,
+              toolCalls: toolCallsInSession,
+            };
+          }
+        }
 
         return {
           message: textContent,
@@ -295,6 +372,7 @@ export class AgentManager {
 
     let turn = 0;
     let continueLoop = true;
+    const toolCallsInSession: ToolCall[] = [];
 
     while (continueLoop && turn < this.maxTurns) {
       turn++;
@@ -333,10 +411,33 @@ export class AgentManager {
       logger.info(`✅ LLM stream completed (${finalMessage.usage?.input_tokens || 0} input tokens, ${finalMessage.usage?.output_tokens || 0} output tokens, stop_reason: ${finalMessage.stop_reason})`);
 
       if (finalMessage.stop_reason === 'end_turn') {
-        if (currentText) {
-          session.addMessage('assistant', currentText);
-        }
         continueLoop = false;
+
+        // Try to generate RenderSpec if we have tool results
+        const intent = this.detectIntent(message);
+        let finalContent = currentText;
+
+        if (intent && toolCallsInSession.length > 0) {
+          const renderSpec = await this.generateRenderSpec(intent, toolCallsInSession, message);
+          if (renderSpec) {
+            // Replace text with RenderSpec JSON
+            const renderSpecJson = JSON.stringify({ renderSpec }, null, 2);
+            logger.info(`Generated RenderSpec for intent: ${intent}`);
+
+            // Clear current text and send only RenderSpec
+            finalContent = renderSpecJson;
+
+            // Send a special marker to clear previous text
+            yield {
+              type: 'text',
+              content: '\x00CLEAR\x00' + renderSpecJson,
+            };
+          }
+        }
+
+        if (finalContent) {
+          session.addMessage('assistant', finalContent);
+        }
 
         yield {
           type: 'done',
@@ -396,6 +497,7 @@ export class AgentManager {
           }
 
           session.addToolCall(toolCall);
+          toolCallsInSession.push(toolCall);
         }
 
         messages.push({
