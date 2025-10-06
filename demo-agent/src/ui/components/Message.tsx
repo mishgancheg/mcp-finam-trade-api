@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
-import { RenderSpecRenderer } from './RenderSpecRenderer.js';
-import type { Message as MessageType, RenderSpec } from '../../types/index.js';
+import { TextWithVisualization } from './TextWithVisualization.js';
+import type { Message as MessageType } from '../../types/index.js';
 
 interface MessageProps {
   message: MessageType;
@@ -17,27 +17,19 @@ const Message: React.FC<MessageProps> = ({ message, onOrderConfirm, onOrderCance
     });
   };
 
-  // Try to parse RenderSpec JSON from assistant messages
-  const tryParseRenderSpec = (content: string): RenderSpec | null => {
-    if (message.role !== 'assistant') return null;
-
-    try {
-      const json = JSON.parse(content);
-      if (json.renderSpec) return json.renderSpec;
-    } catch {
-      return null;
-    }
-    return null;
+  // Check if content has visualization ref tags
+  const hasVisualizationTags = (content: string): boolean => {
+    return /<(chart|table|rebalance)-ref\s+id="[^"]+"\s*\/>/.test(content);
   };
 
-  const renderSpec = tryParseRenderSpec(message.content);
+  const needsVisualization = message.role === 'assistant' && hasVisualizationTags(message.content);
 
   return (
     <div className={`message ${message.role}`}>
       <div className="message-bubble">
-        {renderSpec ? (
-          <RenderSpecRenderer
-            spec={renderSpec}
+        {needsVisualization ? (
+          <TextWithVisualization
+            content={message.content}
             onOrderConfirm={onOrderConfirm}
             onOrderCancel={onOrderCancel}
           />

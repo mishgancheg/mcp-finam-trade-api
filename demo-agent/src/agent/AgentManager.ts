@@ -1,8 +1,8 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { Session } from './Session.js';
 import { MCPConnector } from './MCPConnector.js';
-import { PortfolioService } from './services/portfolio.service.js';
-import type { AgentResponse, StreamChunk, Tool, ToolCall, RenderSpec } from '../types/index.js';
+import { TagProcessor } from './services/tag-processor.js';
+import type { AgentResponse, StreamChunk, Tool, ToolCall } from '../types/index.js';
 import winston from 'winston';
 
 const logger = winston.createLogger({
@@ -24,7 +24,7 @@ const logger = winston.createLogger({
 export class AgentManager {
   private anthropic: Anthropic;
   private mcpConnector: MCPConnector;
-  private portfolioService: PortfolioService;
+  private tagProcessor: TagProcessor;
   private sessions: Map<string, Session>;
   private tools: Tool[];
   private systemPrompt: string;
@@ -40,7 +40,7 @@ export class AgentManager {
 
     this.anthropic = new Anthropic({ apiKey });
     this.mcpConnector = new MCPConnector();
-    this.portfolioService = new PortfolioService();
+    this.tagProcessor = new TagProcessor();
     this.sessions = new Map();
     this.tools = [];
     this.maxTurns = parseInt(process.env.AGENT_MAX_TURNS || '10');
@@ -49,38 +49,40 @@ export class AgentManager {
 
     this.systemPrompt = `Вы - AI-ассистент для биржевой торговли через FINAM Trade API.
 
-Доступные интенты (типы запросов):
-- portfolio.view - текущий портфель (таблица позиций)
-- portfolio.analyze - глубокий анализ с графиками (equity curve + бенчмарк, Sunburst)
-- portfolio.rebalance - симуляция ребалансировки портфеля
-- market.instrument_info - детальная информация об инструменте (графики, стакан)
-- market.scan - поиск инструментов по критериям (таблица с sparklines)
-- backtest.run - бэктест стратегии (equity curve с markers сделок, метрики)
-- order.place - размещение заявки (ТРЕБУЕТ ПОДТВЕРЖДЕНИЯ!)
+Для визуализации данных используйте специальные теги в тексте ответа:
 
-Для запросов с визуализацией возвращайте RenderSpec JSON:
-{
-  "intent": "portfolio.analyze",
-  "renderSpec": {
-    "blocks": [
-      { "type": "summary", "bullets": [...] },
-      { "type": "chart", "engine": "echarts", "spec": {...} }
-    ]
-  }
-}
+**Графики:**
+- <chart type="portfolio-sunburst"/> - структура портфеля (Sunburst диаграмма)
+- <chart type="equity-curve"/> - кривая капитала
+- <chart type="equity-curve-benchmark"/> - кривая капитала с бенчмарком IMOEX
+- <chart type="trades-chart" symbol="SBER@MISX"/> - график сделок по инструменту
 
-Для критических операций (order.place) обязательно:
-{
-  "intent": "order.place",
-  "params": {...},
-  "requiresConfirm": true
-}
+**Таблицы:**
+- <table type="positions"/> - таблица позиций портфеля
+- <table type="trades"/> - таблица сделок
+- <table type="scanner" criteria="..."/> - результаты сканирования рынка
+
+**Блоки:**
+- <rebalance target="equal"/> - симулятор ребалансировки (equal/custom)
+
+Пример использования:
+"Ваш портфель содержит 7 позиций общей стоимостью 150,000 ₽:
+
+<table type="positions"/>
+
+Структура распределения активов:
+
+<chart type="portfolio-sunburst"/>
+
+Динамика за последние 3 месяца:
+
+<chart type="equity-curve-benchmark"/>"
 
 При работе:
-1. Всегда используйте доступные инструменты для получения актуальных данных
-2. Перед размещением торговых заказов ОБЯЗАТЕЛЬНО запрашивайте подтверждение
-3. Объясняйте свои действия понятным языком
-4. Если информации недостаточно - задавайте уточняющие вопросы
+1. Используйте инструменты для получения актуальных данных
+2. Вставляйте теги визуализации в текст естественным образом
+3. Объясняйте данные человеческим языком, графики - для наглядности
+4. Перед критическими операциями запрашивайте подтверждение
 
 Отвечайте на русском языке, четко и структурированно.`;
   }
@@ -123,60 +125,14 @@ export class AgentManager {
   }
 
   /**
-   * Detect user intent from message
+   * Process text with tags
    */
-  private detectIntent(userMessage: string): string | null {
-    const msg = userMessage.toLowerCase();
-
-    // Portfolio intents
-    if (msg.includes('портфел') || msg.includes('позици')) {
-      if (msg.includes('анализ') || msg.includes('график') || msg.includes('визуализ')) {
-        return 'portfolio.analyze';
-      }
-      return 'portfolio.view';
-    }
-
-    return null;
-  }
-
-  /**
-   * Generate RenderSpec from tool results
-   */
-  private async generateRenderSpec(
-    intent: string,
-    toolCalls: ToolCall[],
-    userMessage: string
-  ): Promise<RenderSpec | null> {
+  private async processTagsInText(text: string, toolCalls: ToolCall[]): Promise<string> {
     try {
-      // Find GetAccount tool call
-      const accountCall = toolCalls.find(tc => tc.name === 'GetAccount');
-      if (!accountCall || !accountCall.result || accountCall.result.error) {
-        return null;
-      }
-
-      const account = accountCall.result;
-
-      if (intent === 'portfolio.view') {
-        // Basic portfolio view
-        return await this.portfolioService.analyze(account);
-      }
-
-      if (intent === 'portfolio.analyze') {
-        // Deep analysis - get trades if available
-        const tradesCall = toolCalls.find(tc => tc.name === 'Trades');
-        const trades = tradesCall?.result?.trades || [];
-
-        // Get benchmark bars if available
-        const barsCall = toolCalls.find(tc => tc.name === 'Bars');
-        const benchmarkBars = barsCall?.result?.bars || [];
-
-        return await this.portfolioService.analyzeDeep(account, trades, benchmarkBars);
-      }
-
-      return null;
+      return await this.tagProcessor.processText(text, toolCalls);
     } catch (error) {
-      logger.error('Error generating RenderSpec:', error);
-      return null;
+      logger.error('Error processing tags:', error);
+      return text;
     }
   }
 
@@ -234,29 +190,18 @@ export class AgentManager {
       // Check stop reason
       if (response.stop_reason === 'end_turn') {
         // Extract text response
-        const textContent = response.content
+        let textContent = response.content
           .filter((block): block is Anthropic.TextBlock => block.type === 'text')
           .map(block => block.text)
           .join('\n');
 
+        // Process tags if we have tool calls
+        if (toolCallsInSession.length > 0) {
+          textContent = await this.processTagsInText(textContent, toolCallsInSession);
+        }
+
         session.addMessage('assistant', textContent);
         continueLoop = false;
-
-        // Try to generate RenderSpec if we have tool results
-        const intent = this.detectIntent(message);
-        if (intent && toolCallsInSession.length > 0) {
-          const renderSpec = await this.generateRenderSpec(intent, toolCallsInSession, message);
-          if (renderSpec) {
-            // Return RenderSpec as JSON
-            const renderSpecJson = JSON.stringify({ renderSpec }, null, 2);
-            logger.info(`Generated RenderSpec for intent: ${intent}`);
-
-            return {
-              message: renderSpecJson,
-              toolCalls: toolCallsInSession,
-            };
-          }
-        }
 
         return {
           message: textContent,
@@ -413,24 +358,19 @@ export class AgentManager {
       if (finalMessage.stop_reason === 'end_turn') {
         continueLoop = false;
 
-        // Try to generate RenderSpec if we have tool results
-        const intent = this.detectIntent(message);
+        // Process tags if we have tool calls
         let finalContent = currentText;
+        if (toolCallsInSession.length > 0 && currentText) {
+          const processedText = await this.processTagsInText(currentText, toolCallsInSession);
 
-        if (intent && toolCallsInSession.length > 0) {
-          const renderSpec = await this.generateRenderSpec(intent, toolCallsInSession, message);
-          if (renderSpec) {
-            // Replace text with RenderSpec JSON
-            const renderSpecJson = JSON.stringify({ renderSpec }, null, 2);
-            logger.info(`Generated RenderSpec for intent: ${intent}`);
+          // If text changed (tags were processed), send update
+          if (processedText !== currentText) {
+            finalContent = processedText;
 
-            // Clear current text and send only RenderSpec
-            finalContent = renderSpecJson;
-
-            // Send a special marker to clear previous text
+            // Send clear marker + processed text
             yield {
               type: 'text',
-              content: '\x00CLEAR\x00' + renderSpecJson,
+              content: '\x00CLEAR\x00' + processedText,
             };
           }
         }

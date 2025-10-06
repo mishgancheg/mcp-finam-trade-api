@@ -6,6 +6,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { AgentManager } from '../agent/AgentManager.js';
 import { OrdersService } from '../agent/services/orders.service.js';
+import { specCache } from '../agent/services/tag-processor.js';
 import '../init-config.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -354,6 +355,27 @@ app.post('/api/orders/confirm', async (req: Request, res: Response) => {
     });
   } catch (error) {
     logger.error('Error confirming order:', error);
+    res.status(500).json({
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
+});
+
+// Get visualization spec by ID
+app.get('/api/specs/:id', (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const spec = specCache.get(id);
+
+    if (!spec) {
+      return res.status(404).json({
+        error: 'Visualization spec not found or expired',
+      });
+    }
+
+    res.json(spec);
+  } catch (error) {
+    logger.error('Error getting spec:', error);
     res.status(500).json({
       error: error instanceof Error ? error.message : 'Unknown error',
     });

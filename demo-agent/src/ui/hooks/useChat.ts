@@ -105,9 +105,9 @@ export const useChat = (sessionId: string, accountId: string, secretKey: string)
           if (chunk.type === 'text') {
             const textContent = typeof chunk.content === 'string' ? chunk.content : '';
 
-            // Check for clear marker (RenderSpec replacement)
+            // Check for clear marker (tag replacement)
             if (textContent.startsWith('\x00CLEAR\x00')) {
-              // Clear previous content and use only RenderSpec
+              // Replace content with processed text (original tags → ref tags)
               assistantMessageContent = textContent.replace('\x00CLEAR\x00', '');
             } else {
               assistantMessageContent += textContent;
