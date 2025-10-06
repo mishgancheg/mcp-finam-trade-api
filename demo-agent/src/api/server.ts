@@ -414,7 +414,7 @@ async function start () {
     // Log API_SECRET_TOKEN status
     const hasSecretToken = !!process.env.API_SECRET_TOKEN;
     if (hasSecretToken) {
-      logger.info('✅ API_SECRET_TOKEN: задан в переменных окружения');
+      logger.info('⚠️  API_SECRET_TOKEN: задан в переменных окружения');
     } else {
       logger.warn('⚠️  API_SECRET_TOKEN: не задан (потребуется указать в UI)');
     }
